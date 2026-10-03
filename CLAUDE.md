@@ -91,10 +91,13 @@ N'utilise **jamais** « passage » seul (dis `PassageCoranique` ou `Prestation`)
 À compléter au fur et à mesure (Claude : mets à jour cette section quand une commande est créée).
 
 ```powershell
-# .venv\Scripts\Activate.ps1                       # activer l'environnement Python
-# python manage.py runserver                         # lancer le serveur de développement (ASGI via daphne)
-# pytest                                             # lancer les tests
-# python manage.py import_corpus data\corpus\quran-uthmani.xml
+.venv\Scripts\Activate.ps1                         # activer l'environnement Python
+pip install -r requirements\dev.txt                # installer les dépendances de développement
+python manage.py check                             # vérifier la configuration
+python manage.py migrate                           # appliquer les migrations (PostgreSQL)
+python manage.py runserver                         # lancer le serveur de développement (ASGI via daphne)
+pytest                                             # lancer les tests
+# python manage.py import_corpus data\corpus\quran-uthmani.xml   # (à créer, itération corpus)
 ```
 
 ## Définition de « terminé » pour une étape
