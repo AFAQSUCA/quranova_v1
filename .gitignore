@@ -10,3 +10,6 @@ staticfiles/
 db.sqlite3
 media/
 static/frontend/
+sauvegardes/
+*.dump
+*.dump.sha256

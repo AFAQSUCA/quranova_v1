@@ -103,6 +103,9 @@ python manage.py migrate                           # appliquer les migrations (P
 python manage.py runserver                         # lancer le serveur de développement (ASGI via daphne)
 python manage.py createsuperuser                  # créer l'administrateur ; puis http://127.0.0.1:8000/admin/
 python manage.py verifier_audit                    # contrôle les empreintes chaînées du journal d'audit
+python manage.py sauvegarder --dossier E:\sauvegardes     # sauvegarde PostgreSQL horodatée (à planifier toutes les 15 min)
+python manage.py restaurer E:\sauvegardes\quranova-....dump --vers-base quranova_restaure   # restaure et vérifie
+python manage.py corriger_classement <uuid-epreuve> --utilisateur <responsable> --motif "..."   # nouvelle version du classement
 python manage.py creer_demo --valider-corpus-pour-test   # données de démonstration (DEBUG seulement)
 cd frontend; npm install                           # installer les dépendances du front (Node.js 22+)
 npm run build                                      # compiler le front vers static\frontend\ (servi par Django)
