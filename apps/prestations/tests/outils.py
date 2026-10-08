@@ -26,13 +26,13 @@ from apps.utilisateurs.models import Utilisateur
 _rangs = itertools.count(1)
 
 
-def creer_epreuve_ouverte(series=4, p=1, **champs):
+def creer_epreuve_ouverte(series=4, p=1, version=None, **champs):
     """Une épreuve OUVERTE d'un concours EN COURS, avec un lot de ``series`` séries de ``p`` questions."""
     responsable = creer_utilisateur(Utilisateur.Role.RESPONSABLE_CLIENT)
     concours = creer_concours(
         creer_mission(responsable.organisation),
         etat=Concours.Etat.EN_COURS,
-        version_corpus=creer_version_validee(),
+        version_corpus=version or creer_version_validee(),
         configuration_validee_par=responsable,
         configuration_validee_le=timezone.now(),
         configuration_empreinte="a" * 64,

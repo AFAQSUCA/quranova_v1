@@ -92,6 +92,8 @@ de l'étape 1.2 (« Modèles, application par application »).
 | D33 | L'écran de tirage n'affiche pas les références de début des questions (option du §8.5, repoussée). | |
 | D34 | La tablette affiche le **numéro et le prénom** du candidat appelé, jamais son nom de famille (écran visible de la salle, parfois pour des mineurs, §16), et jamais le texte d'un verset (RM-14). Le client n'envoie que `id_demande` : la prestation est celle appelée par l'opérateur (REC-25). | |
 | D35 | **Dépendances du front** (validées par l'utilisateur) : `vue`, `pinia` (imposés par §13) ; en développement `vite`, `@vitejs/plugin-vue`, `typescript`, `vue-tsc`, `vitest`, `@vue/test-utils`, `jsdom`. **TypeScript est volontairement fixé en 5.9** (`~5.9`) : la version 7, plus récente, n'est pas encore compatible avec `vue-tsc`. Le build écrit dans `static/frontend/` avec des noms fixes (`tirage.js`, `tirage.css`) ; ce dossier n'est pas versionné. Node.js 22 ou plus est requis. | |
+| D36 à D41 | Voir `docs/conception/protocole-temps-reel.md` (§8) : `pytest-asyncio`, `Terminal` généralisé (tirage / scène), jeton de la scène par premier message, plan de diapositives figé à « Préparer l'affichage », jury à l'itération 4, une présentation active par session. | |
+| D42 | La taille d'une diapositive (nombre maximal de caractères d'un segment de verset) est pour l'instant une **constante** (`TAILLE_SEGMENT_PAR_DEFAUT` = 180). Elle deviendra un réglage de l'épreuve (§9.2 : « taille de texte configurée »), ce qui fera partie de la configuration validée par le client (empreinte, D14). | |
 
 ### Ce qui reste hors de ce lot
 
