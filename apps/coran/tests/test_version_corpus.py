@@ -1,24 +1,9 @@
 """Tests du modèle VersionCorpus (cf. §12.3 : versionnement du corpus)."""
-import itertools
-
 import pytest
 from django.db import IntegrityError, transaction
 
 from apps.coran.models import VersionCorpus
-
-_compteur = itertools.count(1)
-
-
-def creer_version(**champs):
-    """Crée une version de test avec une empreinte SHA-256 unique et valide."""
-    n = next(_compteur)
-    valeurs = {
-        "version_source": "1.0",
-        "nom_fichier": "quran-uthmani.xml",
-        "empreinte_sha256": f"{n:064x}",
-    }
-    valeurs.update(champs)
-    return VersionCorpus.objects.create(**valeurs)
+from apps.coran.tests.outils import creer_version
 
 
 @pytest.mark.django_db
