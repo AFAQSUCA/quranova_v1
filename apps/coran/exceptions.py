@@ -11,3 +11,7 @@ class CorpusInvalideError(Exception):
 
 class CorpusDejaImporteError(Exception):
     """Un fichier de même empreinte SHA-256 a déjà été importé."""
+
+
+class ReferenceInvalideError(Exception):
+    """Une référence de verset ou un passage coranique est invalide (§8.4, REC-31)."""
