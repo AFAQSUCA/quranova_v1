@@ -52,7 +52,7 @@ class Prestation(ModeleDuClient):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"Prestation n° {self.rang_passage} — {self.participation}"
+        return f"Passage {self.rang_passage} — {self.participation.candidat}"
 
 
 class Tirage(ModeleDuClient):
