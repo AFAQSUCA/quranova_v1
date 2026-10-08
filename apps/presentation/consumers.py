@@ -15,11 +15,14 @@ from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from django.utils import timezone
 
 from apps.concours.models import Session
+from apps.jury import connexion as connexion_jure
+from apps.jury.exceptions import JetonInvalideError as JetonJureInvalideError
+from apps.jury.models import CodeAccesJure, ConnexionJure
 from apps.prestations import terminaux
 from apps.prestations.exceptions import TerminalInvalideError
 from apps.prestations.models import Prestation, Terminal
 from apps.presentation import instantane, services
-from apps.presentation.instantane import OPERATEUR, SCENE
+from apps.presentation.instantane import JURY, OPERATEUR, SCENE
 
 DELAI_AUTHENTIFICATION_S = 5
 SEUIL_PRESENCE = timedelta(seconds=30)
@@ -35,6 +38,7 @@ class PresentationConsumer(AsyncJsonWebsocketConsumer):
     role = None
     session = None
     terminal = None
+    connexion = None  # connexion d'un juré
 
     # --- connexion ----------------------------------------------------------------
 
@@ -76,7 +80,9 @@ class PresentationConsumer(AsyncJsonWebsocketConsumer):
             return
         type_message = contenu["type"]
         if self.role is None:
-            if type_message == "auth":
+            if type_message == "auth" and contenu.get("jeton_jure") is not None:
+                await self._authentifier_jure(contenu.get("jeton_jure"))
+            elif type_message == "auth":
                 await self._authentifier(contenu.get("jeton"))
             else:
                 await self.close(code=CODE_NON_AUTHENTIFIE)  # rien d'autre avant l'authentification
@@ -107,8 +113,21 @@ class PresentationConsumer(AsyncJsonWebsocketConsumer):
             tache.cancel()
         await self._entrer(SCENE)
 
+    async def _authentifier_jure(self, jeton):
+        """Un juré s'authentifie avec le jeton obtenu en échange de son code (D44, D46) : il reçoit le texte."""
+        try:
+            conn = await database_sync_to_async(connexion_jure.authentifier_jeton)(jeton, self.session)
+        except JetonJureInvalideError:
+            await self.close(code=CODE_NON_AUTHENTIFIE)
+            return
+        self.connexion = conn
+        tache = getattr(self, "_attente_auth", None)
+        if tache is not None:
+            tache.cancel()
+        await self._entrer(JURY)
+
     async def _ping(self):
-        if self.terminal is not None:
+        if self.terminal is not None or self.connexion is not None:
             await database_sync_to_async(self._noter_activite)()
         await self.send_json({"type": "pong"})
         if self.role == OPERATEUR:
@@ -155,7 +174,10 @@ class PresentationConsumer(AsyncJsonWebsocketConsumer):
         return services._version_courante(self.session)
 
     def _noter_activite(self):
-        Terminal.objects.filter(pk=self.terminal.pk).update(derniere_activite=timezone.now())
+        if self.terminal is not None:
+            Terminal.objects.filter(pk=self.terminal.pk).update(derniere_activite=timezone.now())
+        if self.connexion is not None:
+            ConnexionJure.objects.filter(pk=self.connexion.pk).update(derniere_activite=timezone.now())
 
     def _ecrans(self):
         limite = timezone.now() - SEUIL_PRESENCE
@@ -163,7 +185,13 @@ class PresentationConsumer(AsyncJsonWebsocketConsumer):
             {"nom": t.nom, "type": t.type, "connecte": t.derniere_activite is not None and t.derniere_activite >= limite}
             for t in Terminal.objects.filter(session=self.session, type=Terminal.Type.SCENE, revoque_le__isnull=True)
         ]
-        return {"type": "ecrans", "ecrans": ecrans}
+        jures = {}
+        for acces in CodeAccesJure.objects.filter(session=self.session, revoque_le__isnull=True).select_related("jure"):
+            actif = acces.connexions.filter(
+                revoque_le__isnull=True, derniere_activite__gte=limite
+            ).exists()
+            jures[acces.jure_id] = {"nom": acces.jure.nom_complet, "connecte": actif}
+        return {"type": "ecrans", "ecrans": ecrans, "jures": list(jures.values())}
 
     def _instantane(self, role, instantane_complet):
         return instantane.construire_instantane(self.session, role, instantane=instantane_complet)
@@ -175,7 +203,7 @@ class PresentationConsumer(AsyncJsonWebsocketConsumer):
 
     async def _diffuser(self):
         """Après une commande appliquée : chaque rôle reçoit SA projection de l'état (RM-14)."""
-        for role in (OPERATEUR, SCENE):
+        for role in (OPERATEUR, SCENE, JURY):
             message = await database_sync_to_async(self._instantane)(role, False)
             await self.channel_layer.group_send(
                 groupe(self.session_id, role), {"type": "diffuser.etat", "message": message}

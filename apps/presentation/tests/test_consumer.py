@@ -17,6 +17,9 @@ from apps.prestations import terminaux
 from apps.prestations.models import Terminal
 from apps.presentation import consumers
 from apps.presentation.routing import websocket_urlpatterns
+from apps.jury import connexion as connexion_jure
+from apps.jury import services as services_jury
+from apps.commun.tests.outils import creer_jure
 from apps.presentation.tests.outils import creer_prestation_tiree, operateur_de, texte_du_verset
 from apps.utilisateurs.models import Utilisateur
 
@@ -371,3 +374,104 @@ async def test_une_page_d_un_autre_site_ne_peut_pas_ouvrir_le_websocket(poste):
     connecte, _ = await local.connect()
     assert connecte is True
     await local.disconnect()
+
+
+# --- Rôle « jury » (D44, D46) ----------------------------------------------------------------------
+
+
+def jeton_de_jure(session):
+    jure = creer_jure(session.organisation)
+    _, code = services_jury.generer_code(jure, session)
+    return connexion_jure.ouvrir_connexion(code, session)[1]
+
+
+async def jure_connecte(session, jeton):
+    comm = communicateur(session)
+    assert (await comm.connect())[0]
+    await comm.send_json_to({"type": "auth", "jeton_jure": jeton})
+    return comm, await comm.receive_json_from()
+
+
+async def test_un_jure_s_authentifie_avec_son_jeton_et_recoit_l_instantane(poste):
+    _, session, _, _ = poste
+    jeton = await asyncio.to_thread(jeton_de_jure, session)
+
+    comm, message = await jure_connecte(session, jeton)
+
+    assert message["type"] == "etat" and message["instantane"] is True
+    await comm.disconnect()
+
+
+async def test_un_jeton_de_jure_invalide_ferme_la_connexion_4401(poste):
+    _, session, _, _ = poste
+    comm = communicateur(session)
+    await comm.connect()
+
+    await comm.send_json_to({"type": "auth", "jeton_jure": "faux"})
+
+    assert (await comm.receive_output())["code"] == consumers.CODE_NON_AUTHENTIFIE
+
+
+async def test_le_jeton_d_un_jure_d_une_autre_session_est_refuse(poste):
+    _, session, _, _ = poste
+    autre = await asyncio.to_thread(lambda: creer_session(session.concours))
+    jeton_autre = await asyncio.to_thread(jeton_de_jure, autre)
+    comm = communicateur(session)
+    await comm.connect()
+
+    await comm.send_json_to({"type": "auth", "jeton_jure": jeton_autre})
+
+    assert (await comm.receive_output())["code"] == consumers.CODE_NON_AUTHENTIFIE
+
+
+async def test_d44_le_jure_recoit_le_texte_meme_quand_la_scene_ne_l_a_pas(poste):
+    prestation, session, operateur, jeton_scene = poste
+    jeton = await asyncio.to_thread(jeton_de_jure, session)
+    op, _ = await operateur_connecte(session, operateur)
+    scene, _ = await scene_connectee(session, jeton_scene)
+    jure, _ = await jure_connecte(session, jeton)
+    await preparer_et_demarrer(op, prestation)
+    for _ in range(2):
+        await op.receive_json_from()
+        await scene.receive_json_from()
+        await jure.receive_json_from()
+    await op.send_json_to(commande("suivante", 2))
+    await op.receive_json_from()
+    await op.receive_json_from()
+
+    vu_jure = await jure.receive_json_from()
+    vu_scene = await scene.receive_json_from()
+
+    assert vu_jure["diapositive"]["texte"] == texte_du_verset(2, 3)
+    assert "texte" not in vu_scene["diapositive"]
+    for comm in (op, scene, jure):
+        await comm.disconnect()
+
+
+async def test_rec14_un_jure_ne_commande_pas_le_diaporama(poste):
+    prestation, session, _, _ = poste
+    jeton = await asyncio.to_thread(jeton_de_jure, session)
+    jure, _ = await jure_connecte(session, jeton)
+
+    await jure.send_json_to(commande("preparer", prestation=str(prestation.pk)))
+    ack = await jure.receive_json_from()
+
+    assert (ack["statut"], ack["raison"]) == ("rejetee", "non_autorise")
+    await jure.disconnect()
+
+
+async def test_l_operateur_voit_les_jures_connectes(poste):
+    _, session, operateur, _ = poste
+    jeton = await asyncio.to_thread(jeton_de_jure, session)
+    jure, _ = await jure_connecte(session, jeton)
+    await jure.send_json_to({"type": "ping"})
+    await jure.receive_json_from()
+    op, _ = await operateur_connecte(session, operateur)
+
+    await op.send_json_to({"type": "ping"})
+    await op.receive_json_from()
+    ecrans = await op.receive_json_from()
+
+    assert [j["connecte"] for j in ecrans["jures"]] == [True]
+    await op.disconnect()
+    await jure.disconnect()

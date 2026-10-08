@@ -5,12 +5,12 @@ La projection est faite ICI, côté serveur, avant tout envoi : un écran non au
 from apps.presentation import diapositives
 from apps.presentation.services import etat_actif
 
-OPERATEUR, SCENE = "operateur", "scene"
+OPERATEUR, SCENE, JURY = "operateur", "scene", "jury"
 
 
 def texte_autorise(role, epreuve):
-    """L'opérateur voit toujours le texte ; la scène seulement si l'épreuve l'a activé (D15)."""
-    return role == OPERATEUR or (role == SCENE and epreuve.affichage_scene)
+    """L'opérateur et les jurés voient toujours le texte (D44, §9.1) ; la scène seulement si l'épreuve l'a activé (D15)."""
+    return role in (OPERATEUR, JURY) or (role == SCENE and epreuve.affichage_scene)
 
 
 def construire_instantane(session, role, *, instantane=True):

@@ -39,3 +39,15 @@ class EvaluationValideeError(Exception):
 
 class CorrectionInvalideError(Exception):
     """Une demande ou un traitement de correction est refusé."""
+
+
+class TropDEssaisError(Exception):
+    """Trop de codes erronés depuis cette adresse : la connexion est bloquée un moment (D5, anti force brute)."""
+
+    def __init__(self, attente_secondes):
+        self.attente_secondes = attente_secondes
+        super().__init__(f"Trop d'essais. Réessayez dans {attente_secondes} secondes.")
+
+
+class JetonInvalideError(Exception):
+    """Jeton de connexion d'un juré inconnu, expiré ou révoqué."""

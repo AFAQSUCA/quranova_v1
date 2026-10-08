@@ -212,3 +212,42 @@ class CorrectionNote(ModeleDuClient):
 
     def __str__(self):
         return f"Correction {self.critere} : {self.ancienne_valeur} → {self.nouvelle_valeur} ({self.get_statut_display()})"
+
+
+class ConnexionJure(ModeleDuClient):
+    """Une tablette de juré connectée : un jeton long (D46), échangé contre le code court, valable autant que lui.
+
+    Seule l'empreinte du jeton est stockée. Le jeton sert à l'API de notation et au WebSocket du diaporama.
+    """
+
+    PARENTS_CLIENT = ("acces",)
+
+    acces = models.ForeignKey(CodeAccesJure, on_delete=models.PROTECT, related_name="connexions")
+    empreinte = models.CharField(max_length=64, unique=True)
+    valide_jusqu_au = models.DateTimeField()
+    revoque_le = models.DateTimeField(null=True, blank=True)
+    derniere_activite = models.DateTimeField(null=True, blank=True)
+    adresse = models.CharField(max_length=64, blank=True)
+
+    class Meta:
+        verbose_name = "connexion de juré"
+        verbose_name_plural = "connexions de jurés"
+        ordering = ["-cree_le"]
+
+    def __str__(self):
+        return f"Connexion de {self.acces.jure}"
+
+
+class TentativeCode(ModeleDuClient):
+    """Un essai de code (réussi ou non), pour limiter les essais d'une même adresse (D5)."""
+
+    PARENTS_CLIENT = ("session",)
+
+    session = models.ForeignKey("concours.Session", on_delete=models.PROTECT, related_name="+")
+    adresse = models.CharField(max_length=64)
+    reussie = models.BooleanField()
+
+    class Meta:
+        verbose_name = "tentative de code"
+        verbose_name_plural = "tentatives de code"
+        indexes = [models.Index(fields=["adresse", "cree_le"])]

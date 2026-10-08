@@ -2,7 +2,7 @@
 
 Ce document fixe **le format des messages** échangés par WebSocket entre le serveur et les écrans de
 **commande** (opérateur) et de **scène**. Il est écrit AVANT le code (consumer, store Vue) : les deux côtés
-le suivent à la lettre. Le jury s'y raccordera à l'itération 4 (D40).
+le suivent à la lettre. Le jury s'y est raccordé à l'itération 4 (D40, D44).
 
 ## 1. Principes
 
@@ -28,6 +28,7 @@ URL : `ws://<serveur>/ws/presentation/<uuid de la session>/`.
 |---|---|---|
 | Commande (opérateur) | cookie de session Django, **contrôle d'origine**, accès à la mission (RM-20) | `operateur` |
 | Scène | **premier message** `{"type":"auth","jeton":"…"}` dans les 5 s (D38) ; jamais dans l'URL | `scene` |
+| Jury (D44, D46) | **premier message** `{"type":"auth","jeton_jure":"…"}` : le jeton obtenu en échange du code de session (`POST /api/jury/<session>/connexion/`) | `jury` |
 
 Codes de fermeture : `4401` non authentifié ou jeton invalide · `4403` interdit (autre session, autre client) ·
 `4408` délai d'authentification dépassé.
@@ -93,7 +94,8 @@ Un refus renvoie toujours la `version` courante : l'écran sait de quoi il est e
 ### 3.3. `ecrans` — présence (envoyé à l'opérateur)
 
 ```json
-{"type": "ecrans", "ecrans": [{"nom": "Scène 1", "type": "scene", "connecte": true}]}
+{"type": "ecrans", "ecrans": [{"nom": "Scène 1", "type": "scene", "connecte": true}],
+ "jures": [{"nom": "Awa Diallo", "connecte": true}]}
 ```
 
 Calculé depuis la dernière activité enregistrée en base (30 s) : correct même avec plusieurs processus.
@@ -190,3 +192,4 @@ serveur → {"type":"etat","instantane":true,"version":20,…}      ← sans ani
 | D39 | Le plan des diapositives est calculé à « Préparer l'affichage » puis figé ; il ne contient que des références. |
 | D40 | Le jury se raccorde à l'itération 4. |
 | D41 | Une seule présentation active par session ; la connexion se fait sur la session. |
+| D44 | Le juré reçoit le texte des versets (comme l'opérateur) ; il ne commande jamais. |

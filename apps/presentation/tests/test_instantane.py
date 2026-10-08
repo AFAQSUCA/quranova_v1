@@ -83,7 +83,7 @@ def test_la_scene_recoit_le_texte_quand_l_epreuve_l_affiche():
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("role", ["candidat", "jury", "tirage", ""])
+@pytest.mark.parametrize("role", ["candidat", "tirage", ""])
 def test_rm14_aucun_autre_role_ne_recoit_de_texte(role):
     prestation, session, operateur, _ = presentation_demarree()
     Epreuve.objects.filter(pk=prestation.epreuve_id).update(affichage_scene=True)
@@ -102,3 +102,14 @@ def test_le_rejeu_et_la_version_sont_dans_l_instantane():
     message = instantane.construire_instantane(session, "operateur", instantane=False)
 
     assert (message["version"], message["rejeu"], message["instantane"]) == (3, 1, False)
+
+
+@pytest.mark.django_db
+def test_d44_le_jure_recoit_le_texte_comme_l_operateur():
+    prestation, session, operateur, _ = presentation_demarree()
+    assert prestation.epreuve.affichage_scene is False
+    commande(session, "suivante", 2, auteur=operateur)
+
+    diapositive = instantane.construire_instantane(session, "jury")["diapositive"]
+
+    assert diapositive["texte"] == texte_du_verset(2, 3)
