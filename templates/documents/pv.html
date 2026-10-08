@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Procès-verbal — {{ concours.nom }}</title>
+<style>
+@page { size: A4; margin: 18mm 15mm; @bottom-right { content: "Page " counter(page) " / " counter(pages); } }
+body { font-family: "Segoe UI", system-ui, sans-serif; font-size: 11pt; color: #111; }
+h1 { font-size: 20pt; margin-bottom: 0; } h2 { font-size: 14pt; border-bottom: 2px solid #333; margin-top: 1.6em; }
+h3 { font-size: 12pt; margin-bottom: .2em; }
+table { border-collapse: collapse; width: 100%; margin: .4em 0 1em; } th, td { border: 1px solid #888; padding: 3px 6px; text-align: left; font-size: 10pt; }
+th { background: #eee; } .droite { text-align: right; } tr { page-break-inside: avoid; }
+.bandeau { padding: .4em .8em; border: 2px solid #333; margin: 1em 0; } .provisoire { border-color: #a12; color: #a12; font-weight: bold; }
+.signatures { display: flex; gap: 3em; margin-top: 3em; page-break-inside: avoid; } .signatures div { flex: 1; border-top: 1px solid #333; padding-top: .3em; }
+.empreinte { font-family: monospace; font-size: 9pt; word-break: break-all; }
+@media screen { body { max-width: 190mm; margin: 1em auto; padding: 0 1em; } }
+</style>
+</head>
+<body>
+<h1>Procès-verbal {% if definitif %}définitif{% else %}provisoire{% endif %}</h1>
+<p>{{ concours.nom }} {{ concours.edition }} — {{ concours.mission.organisation.nom }}<br>
+{{ concours.mission.lieu }}, du {{ concours.date_debut|date:"d/m/Y" }} au {{ concours.date_fin|date:"d/m/Y" }}<br>
+Document généré le {{ genere_le|date:"d/m/Y à H:i" }}{% if auteur %} par {{ auteur }}{% endif %}.</p>
+
+{% if non_valides %}
+<div class="bandeau provisoire">Ce procès-verbal est PROVISOIRE : le classement des épreuves suivantes n'a pas été validé par le responsable
+du client et n'y figure donc pas :
+<ul>{% for e in non_valides %}<li>{{ e }}</li>{% endfor %}</ul></div>
+{% else %}
+<div class="bandeau">Tous les classements ci-dessous ont été validés par le responsable du client.</div>
+{% endif %}
+
+<h2>1. Classements définitifs</h2>
+{% for s in sections %}
+  <h3>{{ s.epreuve.categorie.nom }} — {{ s.epreuve.nom }}</h3>
+  {% if s.classement %}
+  <p>Version {{ s.classement.version }}{% if s.classement.est_correction %} <strong>(corrigée)</strong> — motif : {{ s.classement.motif_correction }}{% endif %},
+  validée le {{ s.classement.valide_le|date:"d/m/Y à H:i" }} par {{ s.classement.valide_par }}. Règle : {{ s.classement.regle_classement }}{% if s.classement.regle_departage %}, départage : {{ s.classement.regle_departage }}{% endif %}.</p>
+  <table><tr><th>Rang</th><th>N°</th><th>Candidat</th><th class="droite">Score</th><th>Évaluations</th></tr>
+  {% for l in s.lignes %}<tr><td>{% if l.rang %}{{ l.rang }}{% if l.ex_aequo %} (ex aequo){% endif %}{% else %}—{% endif %}</td><td>{{ l.numero }}</td><td>{{ l.nom }}</td><td class="droite">{{ l.score|default_if_none:"—" }}</td><td>{{ l.evaluations }}</td></tr>{% endfor %}</table>
+  {% else %}<p><em>Classement non validé : aucun résultat dans ce document.</em></p>{% endif %}
+{% empty %}<p>Aucune épreuve.</p>{% endfor %}
+
+<h2>2. Historique des tirages</h2>
+<table><tr><th>Horodatage</th><th>N°</th><th>Candidat</th><th>Épreuve</th><th>Série</th><th>Terminal</th><th>Statut</th></tr>
+{% for t in historique %}<tr><td>{{ t.horodatage|date:"d/m/Y H:i:s" }}</td><td>{{ t.numero }}</td><td>{{ t.nom }}</td><td>{{ t.epreuve }}</td><td>{{ t.serie }}{% if t.rang > 1 %} (tirage {{ t.rang }}){% endif %}</td><td>{{ t.terminal }}</td><td>{{ t.statut }}</td></tr>{% empty %}<tr><td colspan="7">Aucun tirage.</td></tr>{% endfor %}</table>
+
+<h2>3. Incidents</h2>
+{% if incidents %}<table><tr><th>Horodatage</th><th>N°</th><th>Série</th><th>Tirage annulé : motif et auteur</th></tr>
+{% for t in incidents %}<tr><td>{{ t.horodatage|date:"d/m/Y H:i:s" }}</td><td>{{ t.numero }}</td><td>{{ t.serie }}</td><td>{{ t.annulation }}</td></tr>{% endfor %}</table>
+{% else %}<p>Aucun incident enregistré (aucun tirage annulé).</p>{% endif %}
+
+<h2>4. Journal d'audit</h2>
+<p>{{ audit.entrees }} entrée(s) dans le journal de ce client. Vérification de l'intégrité de la chaîne d'empreintes :
+<strong>{% if audit.intacte %}intacte{% else %}ANOMALIE DÉTECTÉE{% endif %}</strong>.</p>
+{% if not audit.intacte %}<ul>{% for p in audit.problemes %}<li>{{ p }}</li>{% endfor %}</ul>{% endif %}
+<p>Empreinte de fin de chaîne :<br><span class="empreinte">{{ audit.empreinte }}</span></p>
+<table><tr><th>Opération</th><th class="droite">Nombre</th></tr>{% for action, n in audit.actions %}<tr><td>{{ action }}</td><td class="droite">{{ n }}</td></tr>{% endfor %}</table>
+
+<div class="signatures"><div>Le responsable du client<br><br><br></div><div>L'opérateur du prestataire<br><br><br></div></div>
+</body>
+</html>

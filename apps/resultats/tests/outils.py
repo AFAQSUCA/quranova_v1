@@ -1,4 +1,6 @@
 """L'exemple calculé à la main (tests/test_calcul.py), reconstruit avec de vrais modèles."""
+from datetime import date
+
 from apps.candidats.models import Participation
 from apps.commun.tests.outils import creer_candidat, creer_critere, creer_jure, creer_participation
 from apps.jury import evaluations
@@ -32,7 +34,7 @@ def construire_exemple(regle_classement="moyenne", regle_departage="", critere_p
     participations = {}
     for nom, notes_par_jure in NOTES.items():
         participation = creer_participation(
-            categorie, creer_candidat(epreuve.organisation, nom=f"Candidat-{nom}", prenom=nom), statut=Participation.Statut.ADMIS
+            categorie, creer_candidat(epreuve.organisation, nom=f"Candidat-{nom}", prenom=nom, date_naissance=date(1990, 1, 1)), statut=Participation.Statut.ADMIS
         )
         participations[nom] = participation
         prestation = creer_prestation(epreuve, participation=participation, etat=Prestation.Etat.EN_NOTATION)

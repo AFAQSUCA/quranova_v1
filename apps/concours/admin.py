@@ -4,6 +4,7 @@ from django.contrib import admin
 from apps.commun.admin import AdminDuClient, InlineDuClient, appliquer_action, role_admin
 from apps.concours import services
 from apps.concours.models import Categorie, Concours, CritereNotation, Epreuve, Session
+from django.urls import reverse
 from django.utils.html import format_html, format_html_join
 
 from apps.prestations.services import ouvrir_epreuve
@@ -21,10 +22,19 @@ class ConcoursAdmin(AdminDuClient):
 
     def get_readonly_fields(self, request, obj=None):
         # L'état et la validation ne changent que par les services (RM-27, RM-31, D14).
-        lecture = ["etat", "configuration_validee_par", "configuration_validee_le", "configuration_empreinte"]
+        lecture = ["etat", "configuration_validee_par", "configuration_validee_le", "configuration_empreinte", "documents"]
         if obj is not None and obj.etat != Concours.Etat.BROUILLON:
             lecture.append("version_corpus")  # figée à l'ouverture (RM-27)
         return lecture
+
+    @admin.display(description="Documents à remettre")
+    def documents(self, obj):
+        if obj is None or obj.pk is None:
+            return "—"
+        return format_html(
+            '<a href="{}" target="_blank">Procès-verbal (imprimable)</a> · <a href="{}">Export des données (CSV)</a>',
+            reverse("resultats:proces_verbal", args=[obj.pk]), reverse("resultats:export", args=[obj.pk]),
+        )
 
     def get_actions(self, request):
         actions = super().get_actions(request)
