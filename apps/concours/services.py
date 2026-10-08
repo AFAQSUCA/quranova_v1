@@ -158,3 +158,13 @@ def ouvrir_concours(concours):
         )
     concours.etat = Concours.Etat.OUVERT
     concours.save(update_fields=["etat", "modifie_le"])
+
+
+def demarrer_concours(concours):
+    """Passe un concours « ouvert » à « en cours » : les tirages deviennent possibles (D25)."""
+    if concours.etat != Concours.Etat.OUVERT:
+        raise ConfigurationInvalideError(
+            f"Seul un concours ouvert peut démarrer (état actuel : {concours.get_etat_display()})."
+        )
+    concours.etat = Concours.Etat.EN_COURS
+    concours.save(update_fields=["etat", "modifie_le"])
