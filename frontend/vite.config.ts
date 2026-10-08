@@ -2,7 +2,7 @@ import vue from "@vitejs/plugin-vue";
 import { defineConfig } from "vitest/config";
 
 // Le build écrit dans static/frontend/ avec des noms FIXES : le gabarit Django
-// templates/tirage.html les référence directement (pas de manifeste à lire).
+// templates/tirage.html, scene.html et commande.html les référencent directement (pas de manifeste à lire).
 export default defineConfig({
   plugins: [vue()],
   base: "/static/frontend/",
@@ -11,11 +11,11 @@ export default defineConfig({
     emptyOutDir: true,
     cssCodeSplit: false,
     rollupOptions: {
-      input: "src/tirage/main.ts",
+      input: { tirage: "src/tirage/main.ts", scene: "src/scene/main.ts", commande: "src/commande/main.ts" },
       output: {
-        entryFileNames: "tirage.js",
-        chunkFileNames: "tirage-[name].js",
-        assetFileNames: "tirage[extname]",
+        entryFileNames: "[name].js",
+        chunkFileNames: "partage-[hash].js",
+        assetFileNames: "frontend[extname]", // un seul fichier de style pour les trois écrans
       },
     },
   },

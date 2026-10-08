@@ -1,0 +1,23 @@
+.scene { position: fixed; inset: 0; background: #0b2f30; color: #fbf7ee; overflow: hidden; font-family: system-ui, "Segoe UI", sans-serif; }
+.scene .cadre { position: absolute; inset: 0; overflow: hidden; }
+.scene .diapo, .scene .attente { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 6vh 8vw; }
+.scene h1 { font-size: calc(5vw * var(--taille)); margin: .2em 0; }
+.scene .etiquette { font-size: calc(2.2vw * var(--taille)); letter-spacing: .08em; text-transform: uppercase; opacity: .8; margin: 0; }
+/* Le texte arabe se lit de droite à gauche (dir="rtl") ; cela n'a rien à voir avec le sens du balayage. */
+.scene .verset { font-family: "Amiri Quran", "Scheherazade New", "Traditional Arabic", serif; font-size: calc(6vw * var(--taille));
+  line-height: 1.9; margin: 0; max-width: 90vw; }
+.scene .reference { font-size: calc(2.2vw * var(--taille)); opacity: .85; margin-top: 2vh; }
+.scene .enonce { font-size: calc(4vw * var(--taille)); max-width: 85vw; }
+.scene .attente-texte { font-size: calc(4vw * var(--taille)); opacity: .8; }
+.scene .bandeau { position: fixed; top: 0; left: 0; right: 0; z-index: 5; margin: 0; padding: .5rem; text-align: center; background: #8a5a00; color: #fff; }
+.scene .pause { position: fixed; right: 2vw; top: 2vh; z-index: 4; background: #c9a227; color: #1d2b2b; padding: .4em 1em; border-radius: 1em; font-size: 2vw; font-weight: 700; }
+.scene .plein-ecran { position: fixed; right: 1vw; bottom: 1vh; z-index: 4; background: transparent; color: #fbf7ee; border: 0; font-size: 1.6rem; opacity: .25; cursor: pointer; }
+.scene .plein-ecran:hover, .scene .plein-ecran:focus-visible { opacity: 1; }
+
+/* Balayage de DROITE à GAUCHE (RM-12) : la nouvelle diapositive entre par la droite, l'ancienne sort par la gauche. */
+.balayage-enter-active, .balayage-leave-active { transition: transform .5s ease; }
+.balayage-enter-from { transform: translateX(100%); }
+.balayage-leave-to { transform: translateX(-100%); }
+.sans-enter-active, .sans-leave-active { transition: none; }
+@media (prefers-reduced-motion: reduce) { .balayage-enter-active, .balayage-leave-active { transition: none; } }

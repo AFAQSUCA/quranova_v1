@@ -7,4 +7,5 @@ urlpatterns = [
     path("", TemplateView.as_view(template_name="accueil.html"), name="accueil"),
     path("admin/", admin.site.urls),
     path("", include("apps.prestations.urls")),
+    path("", include("apps.presentation.urls")),
 ]

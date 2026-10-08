@@ -57,7 +57,11 @@ class TerminalAdmin(AdminDuClient):
         def creer():
             terminal, jeton = terminaux.creer_terminal(obj.session, obj.nom, obj.type)
             obj.__dict__.update(terminal.__dict__)
-            adresse = request.build_absolute_uri(reverse("prestations:ecran_tirage")) + "#" + jeton
+            if terminal.type == Terminal.Type.SCENE:
+                chemin = reverse("presentation:ecran_scene", args=[terminal.session_id])
+            else:
+                chemin = reverse("prestations:ecran_tirage")
+            adresse = request.build_absolute_uri(chemin) + "#" + jeton
             messages.warning(
                 request,
                 f"Terminal créé. Ouvrez cette adresse sur la tablette (elle ne sera plus affichée) : {adresse}",
