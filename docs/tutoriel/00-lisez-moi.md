@@ -43,6 +43,7 @@ Essayez d'abord seul, en vous aidant des tests. Si vous manquez de temps, la sol
 | [11](11-jures-et-import-csv.md) | Jurés, codes d'accès de session, import CSV des candidats | 1.2 |
 | [12](12-questions-lots-series.md) | Questions, passages coraniques, lots et séries | 3.1-3.2 |
 | [13](13-prestations-et-tirage.md) | Prestations, tirage, ouverture d'épreuve, annulation | 3.2-3.3 |
+| [14](14-administration.md) | L'administration : voir et manipuler les données | console |
 
 ## Si vous êtes bloqué
 
