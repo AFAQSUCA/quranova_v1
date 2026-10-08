@@ -8,7 +8,8 @@ fait tourner l'application sur un Wi-Fi dédié, sans Internet ; tablettes de ti
 
 - Cahier des charges : `docs/cdc/00-index.md` (une section par fichier). **Avant toute tâche, lis la ou les sections concernées.**
 - Planning et itérations : `docs/cdc/24-planning-et-phasage.md` ; prompts de travail : `docs/prompts-iterations.md`.
-- Phase en cours : **Phase 0 — Cadrage et corpus** (mettre à jour cette ligne à chaque changement de phase).
+- Phase en cours : **Phase 1 — Conception** (mettre à jour cette ligne à chaque changement de phase).
+  Reste de la phase 0 à clôturer : règles `TODO(human)` de `apps/coran/services.py` (garde d'immuabilité, contrôles du §12.2, traversée de sourates) et jalon J0 (validation du corpus par le référent coranique).
 
 ## Qui je suis et comment travailler avec moi
 
