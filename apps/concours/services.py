@@ -6,7 +6,7 @@ from django.utils import timezone
 
 from apps.audit.services import journaliser
 from apps.concours.exceptions import ConfigurationInvalideError, ValidationRefuseeError
-from apps.concours.models import Concours
+from apps.concours.models import Categorie, Concours
 from apps.coran.models import VersionCorpus
 from apps.utilisateurs.models import Utilisateur
 
@@ -50,6 +50,11 @@ def problemes_de_configuration(concours):
         for epreuve in epreuves:
             if not epreuve.criteres.exists():
                 problemes.append(f"L'épreuve « {epreuve.nom} » n'a aucun critère de notation.")
+        for epreuve in epreuves:
+            if categorie.regle_departage == Categorie.RegleDepartage.CRITERE_PRIORITAIRE and not epreuve.critere_prioritaire_id:
+                problemes.append(
+                    f"L'épreuve « {epreuve.nom} » : la règle de départage « critère prioritaire » exige de désigner ce critère."
+                )
     return problemes
 
 
@@ -75,6 +80,7 @@ def empreinte_configuration(concours):
                     "exclusion_definitive": epreuve.exclusion_definitive,
                     "mode_affichage": epreuve.mode_affichage,
                     "affichage_scene": epreuve.affichage_scene,
+                    **({"critere_prioritaire": epreuve.critere_prioritaire.libelle} if epreuve.critere_prioritaire_id else {}),
                     "criteres": [
                         {
                             "libelle": critere.libelle,

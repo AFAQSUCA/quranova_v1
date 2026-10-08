@@ -261,3 +261,40 @@ def test_l_empreinte_est_stable_quand_rien_ne_change(concours_pret_a_valider):
     concours, _ = concours_pret_a_valider
 
     assert services.empreinte_configuration(concours) == services.empreinte_configuration(concours)
+
+
+# --- Critère prioritaire (§10.4) -------------------------------------------------------------
+
+
+@pytest.mark.django_db
+def test_la_regle_critere_prioritaire_exige_de_designer_le_critere():
+    from apps.commun.tests.outils import creer_categorie, creer_concours, creer_critere, creer_epreuve
+    from apps.concours import services
+    from apps.concours.models import Categorie
+
+    concours = creer_concours()
+    categorie = creer_categorie(concours, regle_departage=Categorie.RegleDepartage.CRITERE_PRIORITAIRE)
+    epreuve = creer_epreuve(categorie)
+    creer_critere(epreuve)
+
+    assert any("critère prioritaire" in p for p in services.problemes_de_configuration(concours))
+
+    epreuve.critere_prioritaire = epreuve.criteres.get()
+    epreuve.save()
+    assert services.problemes_de_configuration(concours) == []
+
+
+@pytest.mark.django_db
+def test_designer_un_critere_prioritaire_change_l_empreinte_de_la_configuration():
+    from apps.commun.tests.outils import creer_categorie, creer_concours, creer_critere, creer_epreuve
+    from apps.concours import services
+
+    concours = creer_concours()
+    epreuve = creer_epreuve(creer_categorie(concours))
+    creer_critere(epreuve)
+    avant = services.empreinte_configuration(concours)
+
+    epreuve.critere_prioritaire = epreuve.criteres.get()
+    epreuve.save()
+
+    assert services.empreinte_configuration(concours) != avant

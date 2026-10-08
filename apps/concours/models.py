@@ -4,6 +4,7 @@ from django.db import models
 from django.db.models import F, Q
 
 from apps.commun.models import ModeleDuClient
+from apps.concours.exceptions import ConfigurationInvalideError
 
 
 class Concours(ModeleDuClient):
@@ -185,6 +186,11 @@ class Epreuve(ModeleDuClient):
     # Désactivé par défaut : en mémorisation, l'écran scène ne doit pas être visible du candidat (§9.1).
     affichage_scene = models.BooleanField(default=False)
     etat = models.CharField(max_length=20, choices=Etat.choices, default=Etat.EN_PREPARATION)
+    # §10.4 : critère de départage quand la règle de la catégorie est « priorité à un critère » (aucune valeur inventée).
+    critere_prioritaire = models.ForeignKey(
+        "concours.CritereNotation", null=True, blank=True, on_delete=models.PROTECT, related_name="+",
+        help_text="Critère qui départage les égalités si la catégorie le prévoit.",
+    )
 
     class Meta:
         verbose_name = "épreuve"
@@ -205,6 +211,11 @@ class Epreuve(ModeleDuClient):
     def questions_par_candidat(self):
         """Q = T x P (RM-03) : calculé, jamais saisi."""
         return self.tirages_par_candidat * self.questions_par_serie
+
+    def save(self, *args, **kwargs):
+        if self.critere_prioritaire_id is not None and self.critere_prioritaire.epreuve_id != self.pk:
+            raise ConfigurationInvalideError("Le critère prioritaire doit être un critère de cette épreuve.")
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.nom

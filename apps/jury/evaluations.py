@@ -57,7 +57,7 @@ def lire_valeur(brut, critere):
     if valeur != valeur.quantize(DEUX_DECIMALES):
         raise NoteInvalideError(f"« {critere.libelle} » : au plus deux décimales.")
     if valeur < 0 or valeur > critere.maximum:
-        raise NoteInvalideError(f"« {critere.libelle} » : la note doit être comprise entre 0 et {critere.maximum:g}.")
+        raise NoteInvalideError(f"« {critere.libelle} » : la note doit être comprise entre 0 et {format(Decimal(critere.maximum).normalize(), 'f')}.")
     return valeur.quantize(DEUX_DECIMALES)
 
 
