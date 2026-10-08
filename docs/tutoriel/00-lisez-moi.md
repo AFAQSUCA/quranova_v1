@@ -42,6 +42,7 @@ Essayez d'abord seul, en vous aidant des tests. Si vous manquez de temps, la sol
 | [10](10-concours-et-candidats.md) | Concours, catégories, épreuves, barème ; candidats, participations, consentements | 1.2 |
 | [11](11-jures-et-import-csv.md) | Jurés, codes d'accès de session, import CSV des candidats | 1.2 |
 | [12](12-questions-lots-series.md) | Questions, passages coraniques, lots et séries | 3.1-3.2 |
+| [13](13-prestations-et-tirage.md) | Prestations, tirage, ouverture d'épreuve, annulation | 3.2-3.3 |
 
 ## Si vous êtes bloqué
 
