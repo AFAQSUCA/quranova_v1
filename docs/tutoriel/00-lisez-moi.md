@@ -45,6 +45,10 @@ Essayez d'abord seul, en vous aidant des tests. Si vous manquez de temps, la sol
 | [13](13-prestations-et-tirage.md) | Prestations, tirage, ouverture d'épreuve, annulation | 3.2-3.3 |
 | [14](14-administration.md) | L'administration : voir et manipuler les données | console |
 | [15](15-ecran-de-tirage.md) | L'écran de tirage : Vue 3, Pinia, API à jeton | 3.4 |
+| [16](16-protocole-et-diapositives.md) | Protocole temps réel, segmentation, plan des diapositives | 1.3, 3a |
+| [17](17-etat-et-commandes.md) | État de présentation, commandes versionnées, transitions | 3b |
+| [18](18-consumer-websocket.md) | Le consumer WebSocket (Channels) | 3c |
+| [19](19-ecrans-scene-et-commande.md) | Écrans de scène et de commande (Vue) | 3d |
 
 ## Si vous êtes bloqué
 
