@@ -1,9 +1,11 @@
 """Tests de la création d'une question à partir de références coraniques (§8.4, REC-04, REC-05)."""
 import pytest
+from django.utils import timezone
 
 from apps.commun.tests.outils import creer_organisation, creer_version_validee
 from apps.coran.exceptions import ReferenceInvalideError
-from apps.coran.tests.outils import creer_sourate
+from apps.coran.models import VersionCorpus
+from apps.coran.tests.outils import creer_sourate, creer_version
 from apps.questions import services
 from apps.questions.models import PassageCoranique, Question
 
@@ -11,9 +13,12 @@ from apps.questions.models import PassageCoranique, Question
 @pytest.fixture
 def version(db):
     """Une version de corpus minimale : sourate 1 (7 versets), sourate 2 (286), sourate 3 (200)."""
-    version = creer_version_validee()
+    version = creer_version()  # importée : on peut y écrire ; on la valide APRÈS (RM-27 : une version validée est figée)
     for numero, versets in ((1, 7), (2, 286), (3, 200)):
         creer_sourate(version, numero=numero, nombre_versets=versets, ordre_revelation=numero)
+    version.statut = VersionCorpus.Statut.VALIDEE
+    version.date_validation = timezone.now()
+    version.save()
     return version
 
 
