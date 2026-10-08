@@ -27,6 +27,8 @@ from apps.prestations.exceptions import (
     TirageInvalideError,
 )
 from apps.questions.exceptions import QuestionInvalideError, SerieInvalideError
+from apps.resultats.exceptions import ClassementInvalideError, NoteManquanteError, RegleNonPriseEnChargeError
+from apps.jury.exceptions import CorrectionInvalideError, EvaluationInterditeError
 from apps.utilisateurs.exceptions import AffectationInvalideError
 from apps.utilisateurs.models import Utilisateur
 from apps.utilisateurs.services import missions_accessibles
@@ -46,6 +48,11 @@ ERREURS_METIER = (
     OuvertureEpreuveRefuseeError,
     QuestionInvalideError,
     SerieInvalideError,
+    ClassementInvalideError,
+    NoteManquanteError,
+    RegleNonPriseEnChargeError,
+    CorrectionInvalideError,
+    EvaluationInterditeError,
     IntegrityError,
 )
 

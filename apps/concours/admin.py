@@ -4,7 +4,11 @@ from django.contrib import admin
 from apps.commun.admin import AdminDuClient, InlineDuClient, appliquer_action, role_admin
 from apps.concours import services
 from apps.concours.models import Categorie, Concours, CritereNotation, Epreuve, Session
+from django.utils.html import format_html, format_html_join
+
 from apps.prestations.services import ouvrir_epreuve
+from apps.resultats import services as services_resultats
+from apps.resultats import validation
 from apps.utilisateurs.models import Utilisateur
 
 
@@ -60,8 +64,56 @@ class EpreuveAdmin(AdminDuClient):
     list_filter = ("etat", "categorie__concours")
     search_fields = ("nom",)
     inlines = [CritereInline]
-    readonly_fields = ("etat",)
-    actions = ["ouvrir"]
+    readonly_fields = ("etat", "classement_provisoire")
+    actions = ["ouvrir", "valider_le_classement", "valider_le_classement_avec_egalites"]
+
+    @admin.display(description="Classement provisoire (recalculé à chaque affichage)")
+    def classement_provisoire(self, obj):
+        if obj is None or obj.pk is None:
+            return "—"
+        try:
+            lignes = services_resultats.classement_provisoire(obj)
+        except NotImplementedError as regle:
+            return f"Calcul indisponible : {regle}"
+        except Exception as erreur:  # une règle non prise en charge ne doit pas casser la fiche
+            return f"Calcul indisponible : {erreur}"
+        if not lignes:
+            return "Aucun candidat en compétition."
+        return format_html(
+            "<table><tr><th>Rang</th><th>Candidat</th><th>Score</th><th>Évaluations</th><th></th></tr>{}</table>",
+            format_html_join(
+                "",
+                "<tr><td>{}</td><td>n° {} — {}</td><td>{}</td><td>{}/{}</td><td>{}</td></tr>",
+                (
+                    (
+                        ("—" if l["rang"] is None else f"{l['rang']}{' (ex aequo)' if l['ex_aequo'] else ''}"),
+                        l["participation"].numero_candidat, l["participation"].candidat.nom_complet,
+                        "—" if l["score"] is None else l["score"],
+                        l["evaluations_validees"], l["evaluations_attendues"],
+                        "" if l["complet"] else "notation incomplète : " + ", ".join(l["jures_manquants"]),
+                    )
+                    for l in lignes
+                ),
+            ),
+        )
+
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        if role_admin(request.user) == Utilisateur.Role.RESPONSABLE_CLIENT:
+            return {k: v for k, v in actions.items() if k.startswith("valider_le_classement")}
+        for nom in ("valider_le_classement", "valider_le_classement_avec_egalites"):
+            actions.pop(nom, None)  # le client valide, le prestataire exécute (RM-18)
+        return actions
+
+    @admin.action(description="Valider le classement définitif (responsable client)")
+    def valider_le_classement(self, request, queryset):
+        appliquer_action(request, queryset, lambda e: validation.valider_classement(e, request.user), "classement validé")
+
+    @admin.action(description="Valider le classement définitif, en confirmant les ex aequo")
+    def valider_le_classement_avec_egalites(self, request, queryset):
+        appliquer_action(
+            request, queryset, lambda e: validation.valider_classement(e, request.user, confirmer_egalites=True), "classement validé"
+        )
 
     @admin.action(description="Ouvrir l'épreuve (lot complet et suffisant)")
     def ouvrir(self, request, queryset):
