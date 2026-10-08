@@ -44,6 +44,7 @@ Essayez d'abord seul, en vous aidant des tests. Si vous manquez de temps, la sol
 | [12](12-questions-lots-series.md) | Questions, passages coraniques, lots et séries | 3.1-3.2 |
 | [13](13-prestations-et-tirage.md) | Prestations, tirage, ouverture d'épreuve, annulation | 3.2-3.3 |
 | [14](14-administration.md) | L'administration : voir et manipuler les données | console |
+| [15](15-ecran-de-tirage.md) | L'écran de tirage : Vue 3, Pinia, API à jeton | 3.4 |
 
 ## Si vous êtes bloqué
 
