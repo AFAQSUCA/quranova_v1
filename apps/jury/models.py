@@ -105,3 +105,110 @@ class CodeAccesJure(ModeleDuClient):
 
     def __str__(self):
         return f"Code de {self.jure} pour {self.session}"
+
+
+class Evaluation(ModeleDuClient):
+    """L'évaluation d'une prestation par UN juré : brouillon, puis validée (§10.2, RM-15 ; D43).
+
+    Les notes sont enregistrées séparément par juré. Une évaluation validée ne change plus que par une
+    correction approuvée (``CorrectionNote``).
+    """
+
+    PARENTS_CLIENT = ("jure", "prestation")
+
+    class Statut(models.TextChoices):
+        BROUILLON = "brouillon", "Brouillon"
+        VALIDEE = "validee", "Validée"
+
+    jure = models.ForeignKey(Jure, on_delete=models.PROTECT, related_name="evaluations")
+    prestation = models.ForeignKey("prestations.Prestation", on_delete=models.PROTECT, related_name="evaluations")
+    statut = models.CharField(max_length=10, choices=Statut.choices, default=Statut.BROUILLON)
+    observation = models.TextField(blank=True)
+    validee_le = models.DateTimeField(null=True, blank=True)
+    # D43 : libellés des séries évaluées, figés à la validation (REC-11 : « le bon tirage »).
+    series_evaluees = models.JSONField(default=list, blank=True)
+
+    class Meta:
+        verbose_name = "évaluation"
+        verbose_name_plural = "évaluations"
+        ordering = ["prestation", "jure"]
+        constraints = [
+            models.UniqueConstraint(fields=["jure", "prestation"], name="evaluation_unique_par_jure_et_prestation"),
+            models.CheckConstraint(
+                condition=(Q(statut="brouillon", validee_le__isnull=True) | Q(statut="validee", validee_le__isnull=False)),
+                name="evaluation_validee_a_une_date",
+            ),
+        ]
+
+    def __str__(self):
+        return f"Évaluation de {self.jure} ({self.get_statut_display()})"
+
+
+class Note(ModeleDuClient):
+    """La valeur d'un critère dans une évaluation.
+
+    RM-16 : une note MANQUANTE n'a pas de ligne ; un ZÉRO est une ligne à 0. On ne confond jamais les deux.
+    """
+
+    PARENTS_CLIENT = ("evaluation", "critere")
+
+    evaluation = models.ForeignKey(Evaluation, on_delete=models.PROTECT, related_name="notes")
+    critere = models.ForeignKey("concours.CritereNotation", on_delete=models.PROTECT, related_name="notes")
+    valeur = models.DecimalField(max_digits=6, decimal_places=2)
+
+    class Meta:
+        verbose_name = "note"
+        verbose_name_plural = "notes"
+        ordering = ["evaluation", "critere__ordre"]
+        constraints = [
+            models.UniqueConstraint(fields=["evaluation", "critere"], name="note_unique_par_critere"),
+            models.CheckConstraint(condition=Q(valeur__gte=0), name="note_positive_ou_nulle"),
+        ]
+
+    def __str__(self):
+        return f"{self.critere} : {self.valeur}"
+
+
+class CorrectionNote(ModeleDuClient):
+    """Demande motivée de correction d'une note validée, approuvée par le responsable client (§10.2, REC-17).
+
+    Conserve l'ancienne valeur, la nouvelle, l'auteur (le juré), l'approbateur, les dates et le motif.
+    """
+
+    PARENTS_CLIENT = ("evaluation", "critere")
+
+    class Statut(models.TextChoices):
+        DEMANDEE = "demandee", "Demandée"
+        APPROUVEE = "approuvee", "Approuvée"
+        REFUSEE = "refusee", "Refusée"
+
+    evaluation = models.ForeignKey(Evaluation, on_delete=models.PROTECT, related_name="corrections")
+    critere = models.ForeignKey("concours.CritereNotation", on_delete=models.PROTECT, related_name="+")
+    ancienne_valeur = models.DecimalField(max_digits=6, decimal_places=2)
+    nouvelle_valeur = models.DecimalField(max_digits=6, decimal_places=2)
+    motif = models.TextField()
+    demandee_le = models.DateTimeField()
+    statut = models.CharField(max_length=10, choices=Statut.choices, default=Statut.DEMANDEE)
+    traitee_par = models.ForeignKey("utilisateurs.Utilisateur", null=True, blank=True, on_delete=models.PROTECT, related_name="+")
+    traitee_le = models.DateTimeField(null=True, blank=True)
+    commentaire_decision = models.TextField(blank=True)
+
+    class Meta:
+        verbose_name = "correction de note"
+        verbose_name_plural = "corrections de notes"
+        ordering = ["demandee_le"]
+        constraints = [
+            models.CheckConstraint(
+                condition=(
+                    Q(statut="demandee", traitee_par__isnull=True, traitee_le__isnull=True)
+                    | (~Q(statut="demandee") & Q(traitee_par__isnull=False, traitee_le__isnull=False))
+                ),
+                name="correction_traitee_a_un_auteur_et_une_date",
+            ),
+            models.UniqueConstraint(
+                fields=["evaluation", "critere"], condition=Q(statut="demandee"), name="correction_une_en_attente_par_note"
+            ),
+        ]
+
+    def __str__(self):
+        return f"Correction {self.critere} : {self.ancienne_valeur} → {self.nouvelle_valeur} ({self.get_statut_display()})"
