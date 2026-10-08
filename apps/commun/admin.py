@@ -20,8 +20,10 @@ from apps.concours.exceptions import ConfigurationInvalideError, ValidationRefus
 from apps.jury.exceptions import AffectationInvalideError as AffectationJuryInvalideError
 from apps.prestations.exceptions import (
     AnnulationInvalideError,
+    AppelInvalideError,
     OuvertureEpreuveRefuseeError,
     PrestationInvalideError,
+    TerminalInvalideError,
     TirageInvalideError,
 )
 from apps.questions.exceptions import QuestionInvalideError, SerieInvalideError
@@ -40,6 +42,7 @@ ERREURS_METIER = (
     PrestationInvalideError,
     TirageInvalideError,
     AnnulationInvalideError,
+    AppelInvalideError,
     OuvertureEpreuveRefuseeError,
     QuestionInvalideError,
     SerieInvalideError,

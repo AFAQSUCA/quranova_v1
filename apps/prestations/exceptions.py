@@ -24,3 +24,15 @@ class OuvertureEpreuveRefuseeError(Exception):
 
 class AnnulationInvalideError(Exception):
     """L'annulation d'un tirage est refusée (RM-25)."""
+
+
+class TerminalInvalideError(Exception):
+    """Jeton inconnu, révoqué ou absent : le terminal n'est pas authentifié (§15)."""
+
+
+class AppelInvalideError(Exception):
+    """L'opérateur ne peut pas appeler cette prestation sur ce terminal (§8.5, REC-14)."""
+
+
+class PasDAppelError(TirageImpossibleError):
+    """Aucun candidat n'est appelé sur ce terminal : l'opérateur doit d'abord l'appeler."""

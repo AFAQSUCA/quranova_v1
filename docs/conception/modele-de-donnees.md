@@ -87,6 +87,10 @@ de l'étape 1.2 (« Modèles, application par application »).
 | D28 | Le tirage ne démarre qu'avec un `id_demande` unique ; une demande annulée n'est pas rejouable. Le tirage T>1 laisse la prestation « en attente » jusqu'au T-ième tirage. | |
 | D29 | **Console provisoire** : en attendant les vrais écrans de gestion, l'administration Django sert aux trois rôles. L'accès dépend du **rôle** (administrateur et opérateur écrivent, responsable client consulte et valide la configuration), pas des permissions Django par modèle ; `is_staff` est fixé à vrai à la création d'un compte. Chaque liste et chaque menu déroulant est filtré par client (RM-20). *Limite connue : le cloisonnement est au niveau du client, pas encore de la mission.* | |
 | D30 | Dans l'administration, les états (concours, épreuve, prestation) et les tirages ne s'écrivent pas à la main : ils passent par les services (actions « Ouvrir », « Démarrer », « Valider la configuration »). Une participation se crée par `inscrire` (numéro attribué sous verrou), une série par `composer_serie`. | |
+| D31 | Un terminal de tirage s'authentifie par un **jeton secret** (256 bits, `secrets`) envoyé dans l'en-tête `Authorization: Bearer` ; seule son empreinte HMAC est stockée ; il est révocable et propre à une session. Sans cookie, donc sans CSRF. Le jeton est transmis à la tablette dans le **fragment** de l'adresse (`/tirage/#jeton`), qui n'est jamais envoyé au serveur ni écrit dans ses journaux. | |
+| D32 | La tablette interroge `GET /api/tirage/etat/` toutes les 2 secondes (pas de WebSocket pour l'instant). Le WebSocket arrive avec le diaporama (itération 3). | |
+| D33 | L'écran de tirage n'affiche pas les références de début des questions (option du §8.5, repoussée). | |
+| D34 | La tablette affiche le **numéro et le prénom** du candidat appelé, jamais son nom de famille (écran visible de la salle, parfois pour des mineurs, §16), et jamais le texte d'un verset (RM-14). Le client n'envoie que `id_demande` : la prestation est celle appelée par l'opérateur (REC-25). | |
 
 ### Ce qui reste hors de ce lot
 

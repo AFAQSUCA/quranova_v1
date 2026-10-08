@@ -122,3 +122,40 @@ class Tirage(ModeleDuClient):
 
     def __str__(self):
         return f"Tirage {self.rang} de {self.prestation} : {self.serie}"
+
+
+class TerminalTirage(ModeleDuClient):
+    """Une tablette de tirage, ouverte en mode kiosque par l'opérateur (§15.1, §8.6).
+
+    Le terminal s'authentifie par un jeton secret (D31) dont seule l'empreinte est stockée.
+    Le candidat appelé est FIXÉ PAR L'OPÉRATEUR (``prestation_appelee``) : le candidat ne choisit
+    jamais son identité, et le client n'envoie jamais d'identifiant de prestation (REC-25).
+    """
+
+    PARENTS_CLIENT = ("session",)
+
+    session = models.ForeignKey("concours.Session", on_delete=models.PROTECT, related_name="terminaux_tirage")
+    nom = models.CharField(max_length=100)
+    empreinte = models.CharField(max_length=64, unique=True)
+    prestation_appelee = models.ForeignKey(
+        Prestation, null=True, blank=True, on_delete=models.PROTECT, related_name="+"
+    )
+    revoque_le = models.DateTimeField(null=True, blank=True)
+    derniere_activite = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = "terminal de tirage"
+        verbose_name_plural = "terminaux de tirage"
+        ordering = ["session", "nom"]
+        constraints = [
+            models.UniqueConstraint(fields=["session", "nom"], name="terminal_nom_unique_par_session"),
+        ]
+
+    def save(self, *args, **kwargs):
+        self.verifier_organisation()
+        if self.prestation_appelee_id is not None and self.prestation_appelee.session_id != self.session_id:
+            raise PrestationInvalideError("La prestation appelée n'appartient pas à la session du terminal.")
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.nom} ({self.session})"

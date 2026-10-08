@@ -349,3 +349,47 @@ def test_ouvrir_une_epreuve_signale_la_regle_non_ecrite_sans_erreur_500(administ
         services.series_necessaires = original
 
     assert reponse.status_code == 200 and "TODO(human)" in messages_de(reponse)
+
+
+@pytest.mark.django_db
+def test_un_terminal_se_cree_dans_l_administration_et_le_jeton_n_est_montre_qu_une_fois(administrateur, client):
+    from apps.prestations.models import TerminalTirage
+
+    session = creer_session()
+
+    reponse = client.post(url(TerminalTirage, "add"), {"session": session.pk, "nom": "Tablette A"}, follow=True)
+
+    terminal = TerminalTirage.objects.get()
+    texte = messages_de(reponse)
+    assert "/tirage/#" in texte
+    jeton = texte.split("#", 1)[1].strip()
+    assert terminal.empreinte != jeton and jeton not in client.get(url(TerminalTirage, "change", terminal.pk)).content.decode()
+
+
+@pytest.mark.django_db
+def test_appeler_un_candidat_au_tirage_depuis_l_administration(administrateur, client):
+    from apps.prestations import terminaux
+    from apps.prestations.models import TerminalTirage
+
+    epreuve = creer_epreuve_ouverte(series=2)
+    session = creer_session(epreuve.categorie.concours)
+    terminal, _ = terminaux.creer_terminal(session, "T")
+    prestation = creer_prestation(epreuve, session=session)
+
+    client.post(url(Prestation, "changelist"), {"action": "appeler_au_tirage", "_selected_action": [str(prestation.pk)]})
+
+    assert TerminalTirage.objects.get().prestation_appelee == prestation
+
+
+@pytest.mark.django_db
+def test_appeler_sans_terminal_donne_un_message(administrateur, client):
+    epreuve = creer_epreuve_ouverte(series=2)
+    prestation = creer_prestation(epreuve)
+
+    reponse = client.post(
+        url(Prestation, "changelist"),
+        {"action": "appeler_au_tirage", "_selected_action": [str(prestation.pk)]},
+        follow=True,
+    )
+
+    assert "exactement un" in messages_de(reponse)

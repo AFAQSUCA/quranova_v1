@@ -75,3 +75,12 @@ def creer_tirage(prestation, serie, **champs):
     valeurs = {"prestation": prestation, "serie": serie, "rang": 1, "id_demande": uuid.uuid4()}
     valeurs.update(champs)
     return Tirage.objects.create(**valeurs)
+
+
+def creer_terminal_de_test(epreuve, nom="Tablette 1"):
+    """Un terminal de tirage pour la session du concours de l'épreuve ; renvoie (terminal, jeton, session)."""
+    from apps.prestations import terminaux
+
+    session = creer_session(epreuve.categorie.concours)
+    terminal, jeton = terminaux.creer_terminal(session, nom)
+    return terminal, jeton, session
