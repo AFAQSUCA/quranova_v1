@@ -40,6 +40,7 @@ Essayez d'abord seul, en vous aidant des tests. Si vous manquez de temps, la sol
 | [08](08-conception-phase-1.md) | Décisions de conception du modèle de données | 1.1 |
 | [09](09-socle-clients-utilisateurs.md) | Classes de base, clients, utilisateurs et rôles | 1.2 |
 | [10](10-concours-et-candidats.md) | Concours, catégories, épreuves, barème ; candidats, participations, consentements | 1.2 |
+| [11](11-jures-et-import-csv.md) | Jurés, codes d'accès de session, import CSV des candidats | 1.2 |
 
 ## Si vous êtes bloqué
 
