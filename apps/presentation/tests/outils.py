@@ -48,3 +48,32 @@ def creer_prestation_tiree(passages=(((2, 3), (2, 5)), ((1, 1), (1, 2))), series
     Prestation.objects.filter(pk=prestation.pk).update(etat=Prestation.Etat.TIRE)
     prestation.refresh_from_db()
     return prestation, epreuve, version
+
+
+def operateur_de(epreuve):
+    """Un opérateur affecté à la mission du concours de l'épreuve."""
+    from apps.commun.tests.outils import creer_utilisateur
+    from apps.utilisateurs.models import AffectationOperateur, Utilisateur
+
+    operateur = creer_utilisateur(Utilisateur.Role.OPERATEUR)
+    AffectationOperateur.objects.create(mission=epreuve.categorie.concours.mission, utilisateur=operateur)
+    return operateur
+
+
+def commande(session, action, version=None, *, auteur, prestation=None, id_commande=None):
+    """Envoie une commande au service avec un identifiant neuf (ou celui donné)."""
+    from apps.presentation import services
+
+    return services.appliquer_commande(
+        session, id_commande or uuid.uuid4(), action, version, auteur=auteur, prestation=prestation
+    )
+
+
+def presentation_demarree(**options):
+    """(prestation, session, operateur, état) avec la présentation préparée puis démarrée (version 2)."""
+    prestation, epreuve, _ = creer_prestation_tiree(**options)
+    operateur = operateur_de(epreuve)
+    session = prestation.session
+    commande(session, "preparer", auteur=operateur, prestation=prestation)
+    resultat = commande(session, "demarrer", 1, auteur=operateur)
+    return prestation, session, operateur, resultat.etat

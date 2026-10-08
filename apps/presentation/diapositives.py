@@ -40,10 +40,14 @@ def construire_plan(prestation, taille_max=TAILLE_SEGMENT_PAR_DEFAUT, segmenter=
         total = len(liaisons)
         for liaison in liaisons:
             question = liaison.question
-            repere = {"serie": serie.libelle, "question_rang": liaison.rang, "question_total": total}
+            repere = {
+                "serie": serie.libelle, "serie_id": str(serie.pk),
+                "question_rang": liaison.rang, "question_total": total,
+            }
             if question.type == Question.Type.PASSAGE_CORANIQUE:
                 passage = question.passage
-                ajouter("intercalaire_question", libelle=passage.libelle, **repere)
+                repere["libelle"] = passage.libelle
+                ajouter("intercalaire_question", **repere)
                 versets = resoudre_passage(passage.debut, passage.fin, question.version_corpus)
                 for verset in versets:
                     segments = segmenter(verset.texte, taille_max)
@@ -57,10 +61,11 @@ def construire_plan(prestation, taille_max=TAILLE_SEGMENT_PAR_DEFAUT, segmenter=
                         )
                         debut += len(segment)
             else:
-                ajouter("intercalaire_question", libelle="Énoncé", **repere)
+                repere["libelle"] = "Énoncé"
+                ajouter("intercalaire_question", **repere)
                 ajouter("enonce", question_id=str(question.pk), **repere)
             ajouter("fin_question", **repere)
-        ajouter("fin_serie", serie=serie.libelle)
+        ajouter("fin_serie", serie=serie.libelle, serie_id=str(serie.pk))
 
     total_diapositives = len(plan)
     for index, diapositive in enumerate(plan):
@@ -80,3 +85,13 @@ def textes_du_plan(plan):
         elif d["type"] == "enonce":
             textes[d["index"]] = Question.objects.values_list("enonce", flat=True).get(pk=d["question_id"])
     return textes
+
+
+def texte_de(diapositive):
+    """Le texte d'UNE diapositive (une requête), ou ``None`` pour un intercalaire (jamais de texte coranique)."""
+    if diapositive["type"] == "verset":
+        texte = Verset.objects.values_list("texte", flat=True).get(pk=diapositive["verset_id"])
+        return texte[diapositive["debut"] : diapositive["fin"]]
+    if diapositive["type"] == "enonce":
+        return Question.objects.values_list("enonce", flat=True).get(pk=diapositive["question_id"])
+    return None
