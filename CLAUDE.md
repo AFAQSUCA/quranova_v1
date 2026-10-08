@@ -101,6 +101,9 @@ python manage.py check                             # vérifier la configuration
 python manage.py migrate                           # appliquer les migrations (PostgreSQL)
 python manage.py runserver                         # lancer le serveur de développement (ASGI via daphne)
 python manage.py createsuperuser                  # créer l'administrateur ; puis http://127.0.0.1:8000/admin/
+cd frontend; npm install                           # installer les dépendances du front (Node.js 22+)
+npm run build                                      # compiler le front vers static\frontend\ (servi par Django)
+npm test                                           # tests du front (vitest) ; npm run typecheck pour les types
 pytest                                             # lancer les tests
 python manage.py import_corpus                     # importe data\corpus\quran-uthmani.xml et quran-data.xml (version « importée »)
 python manage.py import_corpus --dry-run           # lit et contrôle, puis annule sans rien enregistrer

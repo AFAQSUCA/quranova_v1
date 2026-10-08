@@ -91,6 +91,7 @@ de l'étape 1.2 (« Modèles, application par application »).
 | D32 | La tablette interroge `GET /api/tirage/etat/` toutes les 2 secondes (pas de WebSocket pour l'instant). Le WebSocket arrive avec le diaporama (itération 3). | |
 | D33 | L'écran de tirage n'affiche pas les références de début des questions (option du §8.5, repoussée). | |
 | D34 | La tablette affiche le **numéro et le prénom** du candidat appelé, jamais son nom de famille (écran visible de la salle, parfois pour des mineurs, §16), et jamais le texte d'un verset (RM-14). Le client n'envoie que `id_demande` : la prestation est celle appelée par l'opérateur (REC-25). | |
+| D35 | **Dépendances du front** (validées par l'utilisateur) : `vue`, `pinia` (imposés par §13) ; en développement `vite`, `@vitejs/plugin-vue`, `typescript`, `vue-tsc`, `vitest`, `@vue/test-utils`, `jsdom`. **TypeScript est volontairement fixé en 5.9** (`~5.9`) : la version 7, plus récente, n'est pas encore compatible avec `vue-tsc`. Le build écrit dans `static/frontend/` avec des noms fixes (`tirage.js`, `tirage.css`) ; ce dossier n'est pas versionné. Node.js 22 ou plus est requis. | |
 
 ### Ce qui reste hors de ce lot
 
