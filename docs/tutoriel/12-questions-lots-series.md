@@ -834,7 +834,7 @@ python manage.py migrate
 pytest apps\questions
 ```
 
-Attendu : `45 passed`. Puis `pytest` complet : **407 + 21 = 428 réussis**, plus les 66 échecs des règles `TODO(human)` de `apps\coran\services.py`.
+Attendu : `45 passed`. Puis `pytest` complet : **434 réussis**, plus les 66 échecs des règles `TODO(human)` de `apps\coran\services.py`.
 
 ## Pourquoi ces choix
 
