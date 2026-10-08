@@ -68,7 +68,10 @@ def total_evaluation(notes, criteres):
     ``CritereCalcul``. Si une note manque pour un critère, levez ``NoteManquanteError`` (RM-16 : jamais zéro).
     Un zéro SAISI est une note valable. Renvoyez un ``Decimal`` exact (non arrondi).
     """
-    raise NotImplementedError("TODO(human) : total d'une évaluation (voir la docstring)")
+    manquants = [c.libelle for c in criteres if c.id not in notes]
+    if manquants:
+        raise NoteManquanteError("Note manquante : " + ", ".join(manquants) + ".")  # RM-16 : jamais zéro
+    return sum((notes[c.id] * c.coefficient for c in criteres), Decimal(0))
 
 
 def calculer_resultat(participation_id, evaluations, criteres, nombre_attendu):
@@ -82,7 +85,21 @@ def calculer_resultat(participation_id, evaluations, criteres, nombre_attendu):
       ``None`` (jamais 0) s'il n'y a aucune évaluation ;
     - ``moyennes_criteres`` : pour chaque critère, la moyenne (arrondie à 2 décimales) des notes brutes reçues.
     """
-    raise NotImplementedError("TODO(human) : résultat d'un candidat (voir la docstring)")
+    totaux = tuple(total_evaluation(e.notes, criteres) for e in evaluations)
+    n = len(totaux)
+    moyennes_criteres = {
+        c.id: arrondir(sum((e.notes[c.id] for e in evaluations), Decimal(0)) / n) for c in criteres
+    } if n else {}
+    return ResultatCalcule(
+        participation_id=participation_id,
+        totaux_jures=totaux,
+        nombre_evaluations=n,
+        nombre_attendu=nombre_attendu,
+        complet=nombre_attendu > 0 and n >= nombre_attendu,
+        score_moyenne=arrondir(sum(totaux, Decimal(0)) / n) if n else None,
+        score_total=arrondir(sum(totaux, Decimal(0))) if n else None,
+        moyennes_criteres=moyennes_criteres,
+    )
 
 
 def classer(resultats, regle_classement, regle_departage="", critere_prioritaire_id=None):
@@ -101,4 +118,32 @@ def classer(resultats, regle_classement, regle_departage="", critere_prioritaire
     - tout candidat encore à égalité après départage a ``ex_aequo=True`` ; les autres ``False`` ;
     - l'ordre des candidats parfaitement à égalité est celui de l'entrée (stable).
     """
-    raise NotImplementedError("TODO(human) : classement et départage (voir la docstring)")
+    if regle_classement not in ("moyenne", "total"):
+        raise RegleNonPriseEnChargeError(f"Règle de classement « {regle_classement} » non prise en charge.")
+    if regle_departage == "critere_prioritaire" and critere_prioritaire_id is None:
+        raise ValueError("Le départage par critère prioritaire exige l'identifiant du critère.")
+
+    def score(r):
+        return r.score_moyenne if regle_classement == "moyenne" else r.score_total
+
+    def departage(r):
+        if regle_departage == "moyenne_generale":
+            return r.score_moyenne
+        if regle_departage == "critere_prioritaire":
+            return r.moyennes_criteres.get(critere_prioritaire_id)
+        return None  # aucune règle applicable automatiquement : on n'invente rien (§10.4)
+
+    classes = [r for r in resultats if r.complet]
+    autres = [r for r in resultats if not r.complet]
+    # tri stable : meilleur score d'abord, puis meilleur départage ; les égalités gardent l'ordre d'entrée
+    classes.sort(key=lambda r: (score(r), departage(r) if departage(r) is not None else Decimal(0)), reverse=True)
+
+    cles = [(score(r), departage(r)) for r in classes]
+    lignes, rang = [], 0
+    for i, r in enumerate(classes):
+        if i == 0 or cles[i] != cles[i - 1]:
+            rang = i + 1
+        ex_aequo = (i > 0 and cles[i] == cles[i - 1]) or (i + 1 < len(classes) and cles[i] == cles[i + 1])
+        lignes.append(LigneClassement(r.participation_id, rang, ex_aequo, score(r), True))
+    lignes += [LigneClassement(r.participation_id, None, False, score(r), False) for r in autres]
+    return lignes

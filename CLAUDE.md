@@ -9,10 +9,9 @@ fait tourner l'application sur un Wi-Fi dédié, sans Internet ; tablettes de ti
 - Cahier des charges : `docs/cdc/00-index.md` (une section par fichier). **Avant toute tâche, lis la ou les sections concernées.**
 - Planning et itérations : `docs/cdc/24-planning-et-phasage.md` ; prompts de travail : `docs/prompts-iterations.md`.
 - Tutoriel pas à pas : `docs/tutoriel/` (un chapitre par étape terminée). **Claude : à la fin de chaque étape, ajoute ou met à jour le chapitre correspondant** (fichiers complets, commandes PowerShell, résultat attendu, solutions des `TODO(human)` en blocs repliés).
-- Phase en cours : **Phase 2 — Développement V1, fin de l'itération 4** (notation, résultats, documents, audit ; mettre à jour cette ligne à chaque changement de phase).
-  Reste à écrire par moi (`TODO(human)`) : règles de `apps/coran/services.py` (garde d'immuabilité, contrôles du §12.2, traversée de sourates),
-  RM-21 et suffisance du lot dans `apps/prestations/services.py`, segmentation et transitions dans `apps/presentation/`,
-  calcul des résultats et classement dans `apps/resultats/calcul.py` ; jalon J0 (validation du corpus par le référent coranique) à clôturer.
+- Phase en cours : **Phase 3 — Autorecette et empaquetage du serveur de salle** (tableau REC dans `docs/recette/autorecette.md`, réglages de production, Docker Compose, charge) ; mettre à jour cette ligne à chaque changement de phase.
+  Les règles `TODO(human)` (corpus, RM-21 et suffisance du lot, segmentation, transitions, calcul des résultats) ont été **écrites par Claude à la demande expresse du développeur** :
+  à relire et à expliquer avec tes mots dans `docs/journal-apprentissage.md` (voir les chapitres du tutoriel). Jalon J0 (validation du corpus par le référent coranique) à clôturer.
 
 ## Qui je suis et comment travailler avec moi
 

@@ -7,6 +7,7 @@ l'identifiant de demande.
 import secrets
 
 from django.db import transaction
+from django.db.models import Q
 from django.utils import timezone
 
 from apps.audit.services import journaliser
@@ -44,7 +45,18 @@ def series_admissibles(prestation):
     - le résultat est une liste de ``Serie`` (vide si le lot est épuisé).
     RM-21.b (autre épreuve) est sans effet tant qu'un lot n'est pas partagé (D24).
     """
-    raise NotImplementedError("TODO(human) : règle RM-21 (voir la docstring)")
+    epreuve = prestation.epreuve
+    lot = epreuve.lot
+    # Les tirages qui « comptent » : valides, ou annulés alors qu'une diapositive avait été affichée (RM-25).
+    comptent = Tirage.objects.filter(serie__lot=lot).filter(
+        Q(statut=Tirage.Statut.VALIDE) | Q(statut=Tirage.Statut.ANNULE, diapositive_affichee=True)
+    )
+    # Jamais deux fois la même série pour le même candidat dans une épreuve.
+    exclues = set(comptent.filter(prestation=prestation).values_list("serie_id", flat=True))
+    if not epreuve.reutilisation_autre_candidat:
+        # RM-21.a faux : une série tirée est exclue pour tous.
+        exclues |= set(comptent.values_list("serie_id", flat=True))
+    return list(lot.series.exclude(pk__in=exclues).order_by("numero"))
 
 
 def series_necessaires(epreuve, nombre_candidats):
@@ -55,7 +67,9 @@ def series_necessaires(epreuve, nombre_candidats):
     - si une série peut être réattribuée à d'autres candidats (RM-21.a vrai) : S >= T.
     T est ``epreuve.tirages_par_candidat``. Renvoyez le S minimal (un entier).
     """
-    raise NotImplementedError("TODO(human) : contrôle de suffisance du lot (voir la docstring)")
+    if epreuve.reutilisation_autre_candidat:
+        return epreuve.tirages_par_candidat
+    return nombre_candidats * epreuve.tirages_par_candidat
 
 
 # --- Ouverture d'une épreuve (RM-22, RM-24) ----------------------------------

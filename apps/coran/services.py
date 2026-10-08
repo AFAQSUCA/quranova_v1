@@ -4,50 +4,74 @@ Ces fonctions ne touchent pas à la base de données : elles reçoivent des
 valeurs et lèvent ``CorpusImmuableError`` si l'opération est interdite.
 Les modèles se chargent de lire l'état réel en base et d'appeler ces fonctions.
 """
-from apps.coran.exceptions import CorpusImmuableError, ReferenceInvalideError  # noqa: F401
+from apps.coran.exceptions import CorpusImmuableError, CorpusInvalideError, ReferenceInvalideError
+
+
+STATUTS_FIGES = {"validee", "active", "retiree"}
+
+TRANSITIONS_AUTORISEES = {
+    "importee": {"validee"},
+    "validee": {"active", "retiree"},
+    "active": {"retiree"},
+    "retiree": set(),
+}
+
+
+
+
+NOMBRE_DE_SOURATES = 114
+NOMBRE_DE_VERSETS = 6236
 
 
 def verifier_transition_statut(ancien_statut, nouveau_statut, date_validation):
-    """Refuse un changement de statut d'une version du corpus qui n'est pas autorisé.
-
-    Statuts possibles : « importee », « validee », « active », « retiree ».
-
-    TODO(human) : écrivez la règle.
-    - Quelles transitions sont permises (par exemple importee -> validee) ?
-    - Peut-on revenir en arrière (validee -> importee) ? Pourquoi serait-ce dangereux ?
-    - Une version peut-elle devenir « validee » sans date de validation (PV du référent) ?
-    Levez CorpusImmuableError avec un message explicite si la transition est refusée.
-    """
+    """Refuse un changement de statut d'une version du corpus qui n'est pas autorisé."""
+    if nouveau_statut not in TRANSITIONS_AUTORISEES.get(ancien_statut, set()):
+        raise CorpusImmuableError(
+            f"Transition de statut interdite : « {ancien_statut} » vers « {nouveau_statut} »."
+        )
+    if nouveau_statut == "validee" and date_validation is None:
+        raise CorpusImmuableError(
+            "Une version ne peut pas être validée sans date de validation (procès-verbal du référent)."
+        )
 
 
 def verifier_ecriture_autorisee(statut_version):
-    """Refuse toute écriture sur le contenu d'une version dont le statut est figé.
-
-    « Écriture » = création, modification ou suppression d'une sourate, d'un verset,
-    ou modification des champs d'identité de la version (empreinte, fichier...).
-
-    TODO(human) : écrivez la règle.
-    - Pour quels statuts le contenu est-il figé ?
-    Levez CorpusImmuableError avec un message explicite si l'écriture est refusée.
-    """
+    """Refuse toute écriture sur le contenu d'une version dont le statut est figé."""
+    if statut_version in STATUTS_FIGES:
+        raise CorpusImmuableError(
+            f"Version « {statut_version} » : son contenu est figé. "
+            "Pour corriger, importez une nouvelle version."
+        )
 
 
 def controler_corpus(corpus):
-    """Contrôles automatiques du §12.2, point 3, appliqués AVANT toute écriture en base.
+    """Contrôles automatiques du §12.2, point 3 : collecte toutes les erreurs, puis les signale."""
+    erreurs = []
 
-    ``corpus`` est un ``CorpusLu`` (cf. importation.py) : ``corpus.sourates`` est un tuple de
-    ``SourateLue`` ; chacune porte ``numero``, ``nombre_versets`` (valeur déclarée par les
-    métadonnées Tanzil) et ``versets`` (tuple de ``VersetLu`` avec ``numero`` et ``texte``).
+    numeros = [s.numero for s in corpus.sourates]
+    if numeros != list(range(1, NOMBRE_DE_SOURATES + 1)):
+        erreurs.append(
+            f"{len(numeros)} sourates lues ; attendu : les sourates 1 à {NOMBRE_DE_SOURATES}, sans trou ni doublon"
+        )
 
-    TODO(human) : écrivez les contrôles, en levant CorpusInvalideError avec un message
-    explicite (quelle sourate, quel verset, quelle valeur attendue) :
-    - exactement 114 sourates, numérotées de 1 à 114 sans trou ni doublon ;
-    - exactement 6 236 versets au total ;
-    - pour chaque sourate, le nombre de versets lus est égal à ``nombre_versets`` ;
-    - dans chaque sourate, la numérotation des versets est continue (1, 2, 3, ...) ;
-    - aucun verset vide (texte composé uniquement d'espaces compris).
-    Vous choisissez : s'arrêter à la première erreur, ou les collecter toutes dans un seul message.
-    """
+    total = sum(len(s.versets) for s in corpus.sourates)
+    if total != NOMBRE_DE_VERSETS:
+        erreurs.append(f"{total} versets lus ; attendu : {NOMBRE_DE_VERSETS}")
+
+    for sourate in corpus.sourates:
+        lus = len(sourate.versets)
+        if lus != sourate.nombre_versets:
+            erreurs.append(
+                f"sourate {sourate.numero} : {lus} versets lus, {sourate.nombre_versets} annoncés par les métadonnées"
+            )
+        if [v.numero for v in sourate.versets] != list(range(1, lus + 1)):
+            erreurs.append(f"sourate {sourate.numero} : numérotation des versets discontinue ou dupliquée")
+        for verset in sourate.versets:
+            if not verset.texte.strip():
+                erreurs.append(f"verset {sourate.numero}:{verset.numero} : texte vide")
+
+    if erreurs:
+        raise CorpusInvalideError("Corpus invalide : " + " ; ".join(erreurs) + ".")
 
 
 # --- Passages coraniques (§8.4, §12.4) ------------------------------------------------
@@ -106,17 +130,15 @@ def verifier_ordre_passage(debut, fin):
 
 
 def references_du_passage(plan, debut, fin):
-    """Liste, dans l'ordre canonique, les références de ``debut`` à ``fin`` INCLUSES.
-
-    ``plan`` : {numéro de sourate: nombre de versets}, dans l'ordre des sourates.
-    ``debut`` et ``fin`` : couples (sourate, verset), déjà validés (ils existent et
-    ``debut`` <= ``fin``). Renvoie une liste de couples, par exemple pour le plan réel :
-    references_du_passage(plan, (1, 6), (2, 5)) -> [(1, 6), (1, 7), (2, 1), ..., (2, 5)]
-
-    TODO(human) : écrivez la gestion de la traversée de sourates.
-    - Un passage dans une seule sourate : de debut[1] à fin[1].
-    - Un passage sur plusieurs sourates : fin de la première, sourates du milieu EN ENTIER,
-      début de la dernière. Les versets sont numérotés à partir de 1 (la basmala n'est pas un
-      verset numéroté, §12.4) et le plan donne le dernier verset de chaque sourate.
-    - Le résultat est trié, sans doublon, et ne modifie pas ``plan``.
-    """
+    """Liste, dans l'ordre canonique, les références de ``debut`` à ``fin`` INCLUSES."""
+    (sourate_debut, verset_debut), (sourate_fin, verset_fin) = debut, fin
+    references = []
+    for sourate, nombre_de_versets in plan.items():
+        if sourate < sourate_debut or sourate > sourate_fin:
+            continue  # hors du passage
+        # Première sourate : on part du verset de début ; les suivantes, du verset 1.
+        premier = verset_debut if sourate == sourate_debut else 1
+        # Dernière sourate : on s'arrête au verset de fin ; les précédentes, au dernier verset.
+        dernier = verset_fin if sourate == sourate_fin else nombre_de_versets
+        references.extend((sourate, numero) for numero in range(premier, dernier + 1))
+    return references

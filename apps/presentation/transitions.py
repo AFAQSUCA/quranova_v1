@@ -4,7 +4,7 @@ Fonction PURE : elle ne touche ni la base ni le réseau. Elle reçoit la positio
 renvoie la nouvelle position, ou refuse. Le service ``appliquer_commande`` se charge du reste (verrou,
 version, journal).
 """
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from apps.presentation.exceptions import TransitionInterditeError  # noqa: F401
 
@@ -37,4 +37,34 @@ def appliquer_transition(position, total, action):
       « preparer » (qui n'est pas une transition : elle crée l'état) ou une action inconnue.
     La position reçue n'est jamais modifiée (``Position`` est figée) : renvoyez-en une nouvelle.
     """
-    raise NotImplementedError("TODO(human) : transitions de la présentation (voir la docstring)")
+    phase, index = position.phase, position.index
+    if phase == TERMINEE:
+        raise TransitionInterditeError("La présentation est terminée : plus aucune commande n'est possible.")
+    if action == "demarrer":
+        if phase != PREPAREE:
+            raise TransitionInterditeError("La présentation est déjà démarrée.")
+        return Position(AFFICHAGE, 0, position.rejeu)
+    if phase == PREPAREE:
+        raise TransitionInterditeError("La présentation n'est pas démarrée : utilisez « Démarrer ».")
+    if action == "reprendre":
+        if phase != PAUSE:
+            raise TransitionInterditeError("La présentation n'est pas en pause.")
+        return replace(position, phase=AFFICHAGE)
+    if action == "terminer":
+        return replace(position, phase=TERMINEE)  # depuis l'affichage ou la pause
+    if phase == PAUSE:
+        raise TransitionInterditeError("La présentation est en pause : reprenez avant de continuer.")
+    # À partir d'ici, la phase est « affichage ».
+    if action == "suivante":
+        if index >= total - 1:
+            raise TransitionInterditeError("C'est la dernière diapositive : utilisez « Terminer la prestation ».")
+        return replace(position, index=index + 1)
+    if action == "precedente":
+        if index <= 0:
+            raise TransitionInterditeError("C'est déjà la première diapositive.")
+        return replace(position, index=index - 1)
+    if action == "pause":
+        return replace(position, phase=PAUSE)
+    if action == "reafficher":
+        return replace(position, rejeu=position.rejeu + 1)
+    raise TransitionInterditeError(f"Action inconnue ou non permise ici : « {action} ».")
