@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     "apps.concours",
     "apps.candidats",
     "apps.jury",
+    "apps.questions",
     "apps.coran",
 ]
 
