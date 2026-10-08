@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "channels",
+    "apps.coran",
 ]
 
 MIDDLEWARE = [
@@ -77,7 +78,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LANGUAGE_CODE = "fr-fr"
-TIME_ZONE = "Europe/Paris"
+TIME_ZONE = "Africa/Abidjan"
 USE_I18N = True
 USE_TZ = True
 

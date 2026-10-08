@@ -47,6 +47,7 @@ je découvre Django Channels, HTMX et Vue 3.
 
 Applications Django prévues (§13.8) : `clients`, `utilisateurs`, `concours`, `candidats`, `questions`, `coran`,
 `prestations`, `presentation`, `jury`, `resultats`, `audit` (puis `synchro` en V2). Front temps réel dans `frontend/`.
+Les applications vivent dans le dossier `apps/` (ex. `apps.coran`, label `coran`) ; chaque application est créée au moment où on en a besoin.
 
 - La logique métier va dans des **fonctions de service** (`services.py`), pas dans les vues ni les templates.
 - Les vues restent fines : permissions → appel du service → réponse.
