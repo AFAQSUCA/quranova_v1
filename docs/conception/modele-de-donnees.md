@@ -82,7 +82,9 @@ de l'étape 1.2 (« Modèles, application par application »).
 | D23 | `CodeAccesJure` vit dans l'application `jury` (pas `utilisateurs`) pour éviter une dépendance circulaire. Le code (8 caractères, alphabet sans `0 O 1 I`, tiré avec `secrets`) n'est jamais stocké : seule son empreinte HMAC-SHA256 (clé `SECRET_KEY`) l'est. Un seul code actif par juré et par session ; en régénérer un révoque l'ancien. La limitation des tentatives se fera dans les vues. | |
 | D24 | Un lot par épreuve en V1 (`Lot.epreuve` est un `OneToOneField`). Le partage d'un lot entre épreuves (RM-21.b) est repoussé ; le paramètre est stocké mais sans effet tant qu'aucun lot n'est partagé. | |
 | D25 | Un tirage n'est possible que si le concours est « en cours » et l'épreuve « ouverte » (§8.5, point 1). *(à implémenter avec `effectuer_tirage`)* | |
-| D26 | L'annulation d'un tirage exige un motif et un auteur. En attendant le diaporama (itération 3), la prestation porte un booléen `diapositive_affichee` qui décide de la réintégration de la série (RM-25). *(à implémenter avec `annuler_tirage`)* | |
+| D26 | L'annulation d'un tirage exige un motif, un auteur et une date (contrainte en base) ; elle est réservée au personnel du prestataire. Le tirage n'est jamais supprimé (ni par `delete()`, ni remplacé). **Correction par rapport au plan** : le drapeau `diapositive_affichee` est porté par le **tirage** (pas par la prestation), car une prestation peut avoir T tirages et seul celui dont la série a été affichée reste exclu (RM-25). Le diaporama (itération 3) le renseignera. | |
+| D27 | Un tirage annulé dont une diapositive a été affichée compte comme un tirage valide pour l'exclusion (RM-21) : la série reste exclue pour ce candidat, et pour les autres selon RM-21.a. Sans diapositive affichée, il est ignoré (série réintégrée). *À confirmer : le CDC §8.5 dit « demeure exclue ».* | |
+| D28 | Le tirage ne démarre qu'avec un `id_demande` unique ; une demande annulée n'est pas rejouable. Le tirage T>1 laisse la prestation « en attente » jusqu'au T-ième tirage. | |
 
 ### Ce qui reste hors de ce lot
 
