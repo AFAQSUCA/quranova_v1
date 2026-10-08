@@ -7,7 +7,7 @@ from apps.concours.models import Concours, Epreuve
 from apps.coran.models import VersionCorpus
 from apps.coran.tests.outils import creer_sourate, creer_version
 from apps.prestations import services
-from apps.prestations.models import Prestation, TerminalTirage
+from apps.prestations.models import Prestation, Terminal
 from apps.questions.models import Serie
 
 
@@ -53,7 +53,7 @@ def test_la_demo_prepare_un_concours_pret_a_tirer(corpus, settings, regles_ecrit
     assert Epreuve.objects.get().etat == Epreuve.Etat.OUVERTE
     assert Serie.objects.count() == 6
     assert Participation.objects.filter(statut="admis").count() == 6
-    assert Prestation.objects.count() == 6 and TerminalTirage.objects.count() == 1
+    assert Prestation.objects.count() == 6 and Terminal.objects.count() == 1
     corpus.refresh_from_db()
     assert corpus.statut == VersionCorpus.Statut.VALIDEE
 

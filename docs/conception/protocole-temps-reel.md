@@ -185,7 +185,7 @@ serveur → {"type":"etat","instantane":true,"version":20,…}      ← sans ani
 | N° | Décision |
 |---|---|
 | D36 | `pytest-asyncio` (dev) pour tester le consumer. |
-| D37 | `TerminalTirage` devient `Terminal` avec un type `tirage` ou `scene`. |
+| D37 | `Terminal` devient `Terminal` avec un type `tirage` ou `scene`. |
 | D38 | Le jeton de la scène passe par le premier message, jamais par l'URL. |
 | D39 | Le plan des diapositives est calculé à « Préparer l'affichage » puis figé ; il ne contient que des références. |
 | D40 | Le jury se raccorde à l'itération 4. |

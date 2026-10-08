@@ -353,23 +353,23 @@ def test_ouvrir_une_epreuve_signale_la_regle_non_ecrite_sans_erreur_500(administ
 
 @pytest.mark.django_db
 def test_un_terminal_se_cree_dans_l_administration_et_le_jeton_n_est_montre_qu_une_fois(administrateur, client):
-    from apps.prestations.models import TerminalTirage
+    from apps.prestations.models import Terminal
 
     session = creer_session()
 
-    reponse = client.post(url(TerminalTirage, "add"), {"session": session.pk, "nom": "Tablette A"}, follow=True)
+    reponse = client.post(url(Terminal, "add"), {"session": session.pk, "nom": "Tablette A", "type": "tirage"}, follow=True)
 
-    terminal = TerminalTirage.objects.get()
+    terminal = Terminal.objects.get()
     texte = messages_de(reponse)
     assert "/tirage/#" in texte
     jeton = texte.split("#", 1)[1].strip()
-    assert terminal.empreinte != jeton and jeton not in client.get(url(TerminalTirage, "change", terminal.pk)).content.decode()
+    assert terminal.empreinte != jeton and jeton not in client.get(url(Terminal, "change", terminal.pk)).content.decode()
 
 
 @pytest.mark.django_db
 def test_appeler_un_candidat_au_tirage_depuis_l_administration(administrateur, client):
     from apps.prestations import terminaux
-    from apps.prestations.models import TerminalTirage
+    from apps.prestations.models import Terminal
 
     epreuve = creer_epreuve_ouverte(series=2)
     session = creer_session(epreuve.categorie.concours)
@@ -378,7 +378,7 @@ def test_appeler_un_candidat_au_tirage_depuis_l_administration(administrateur, c
 
     client.post(url(Prestation, "changelist"), {"action": "appeler_au_tirage", "_selected_action": [str(prestation.pk)]})
 
-    assert TerminalTirage.objects.get().prestation_appelee == prestation
+    assert Terminal.objects.get().prestation_appelee == prestation
 
 
 @pytest.mark.django_db

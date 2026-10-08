@@ -5,7 +5,7 @@ from django.urls import reverse
 from apps.commun.admin import AdminDuClient, ConsultationSeule, appliquer_action
 from apps.prestations import terminaux
 from apps.prestations.exceptions import AppelInvalideError
-from apps.prestations.models import Prestation, TerminalTirage, Tirage
+from apps.prestations.models import Prestation, Terminal, Tirage
 
 
 @admin.register(Prestation)
@@ -18,7 +18,7 @@ class PrestationAdmin(AdminDuClient):
     @admin.action(description="Appeler au tirage (terminal de la session)")
     def appeler_au_tirage(self, request, queryset):
         def appeler(prestation):
-            actifs = list(prestation.session.terminaux_tirage.filter(revoque_le__isnull=True))
+            actifs = list(prestation.session.terminaux.filter(type=Terminal.Type.TIRAGE, revoque_le__isnull=True))
             if len(actifs) != 1:
                 raise AppelInvalideError(
                     f"{len(actifs)} terminal(aux) actif(s) pour cette session : il en faut exactement un."
@@ -36,26 +36,26 @@ class TirageAdmin(ConsultationSeule):
     list_filter = ("statut", "prestation__epreuve")
 
 
-@admin.register(TerminalTirage)
-class TerminalTirageAdmin(AdminDuClient):
+@admin.register(Terminal)
+class TerminalAdmin(AdminDuClient):
     """Une tablette de tirage. Le jeton n'est affiché qu'une fois, à la création (D31)."""
 
-    list_display = ("nom", "session", "prestation_appelee", "revoque_le", "derniere_activite")
+    list_display = ("nom", "type", "session", "prestation_appelee", "revoque_le", "derniere_activite")
     list_filter = ("session",)
     actions = ["liberer", "revoquer"]
 
     def get_fields(self, request, obj=None):
-        return ("session", "nom") if obj is None else ("session", "nom", "prestation_appelee", "revoque_le", "derniere_activite")
+        return ("session", "nom", "type") if obj is None else ("session", "nom", "type", "prestation_appelee", "revoque_le", "derniere_activite")
 
     def get_readonly_fields(self, request, obj=None):
-        return ("session", "nom", "prestation_appelee", "revoque_le", "derniere_activite") if obj else ()
+        return ("session", "nom", "type", "prestation_appelee", "revoque_le", "derniere_activite") if obj else ()
 
     def has_change_permission(self, request, obj=None):
         return False if obj else super().has_change_permission(request, obj)
 
     def save_model(self, request, obj, form, change):
         def creer():
-            terminal, jeton = terminaux.creer_terminal(obj.session, obj.nom)
+            terminal, jeton = terminaux.creer_terminal(obj.session, obj.nom, obj.type)
             obj.__dict__.update(terminal.__dict__)
             adresse = request.build_absolute_uri(reverse("prestations:ecran_tirage")) + "#" + jeton
             messages.warning(

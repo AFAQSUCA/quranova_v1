@@ -10,18 +10,18 @@ from django.utils import timezone
 from apps.commun.jetons import empreinte_du_jeton, fabriquer_jeton
 from apps.prestations import services
 from apps.prestations.exceptions import AppelInvalideError, PasDAppelError, TerminalInvalideError
-from apps.prestations.models import Prestation, TerminalTirage, Tirage
+from apps.prestations.models import Prestation, Terminal, Tirage
 from apps.utilisateurs.models import Utilisateur
 from apps.utilisateurs.services import missions_accessibles
 
 CONTEXTE_JETON = "terminal-tirage"
 
 
-def creer_terminal(session, nom):
+def creer_terminal(session, nom, type=Terminal.Type.TIRAGE):
     """Crée un terminal ; renvoie ``(terminal, jeton)``. Le jeton n'est montré qu'à cet instant (D31)."""
     jeton = fabriquer_jeton()
-    terminal = TerminalTirage.objects.create(
-        session=session, nom=nom, empreinte=empreinte_du_jeton(jeton, CONTEXTE_JETON)
+    terminal = Terminal.objects.create(
+        session=session, nom=nom, type=type, empreinte=empreinte_du_jeton(jeton, CONTEXTE_JETON)
     )
     return terminal, jeton
 
@@ -32,16 +32,20 @@ def revoquer_terminal(terminal):
     terminal.save(update_fields=["revoque_le", "prestation_appelee", "modifie_le"])
 
 
-def authentifier_terminal(jeton):
-    """Le terminal correspondant au jeton, ou ``TerminalInvalideError`` (message volontairement vague)."""
+def authentifier_terminal(jeton, type=Terminal.Type.TIRAGE):
+    """Le terminal de ce ``type`` correspondant au jeton, ou ``TerminalInvalideError`` (message vague).
+
+    Le type fait partie de l'authentification : le jeton d'une scène ne donne aucun accès à l'API de tirage,
+    ni l'inverse (REC-14).
+    """
     if not jeton:
         raise TerminalInvalideError("Terminal non reconnu.")
-    terminal = TerminalTirage.objects.filter(
-        empreinte=empreinte_du_jeton(jeton, CONTEXTE_JETON), revoque_le__isnull=True
+    terminal = Terminal.objects.filter(
+        empreinte=empreinte_du_jeton(jeton, CONTEXTE_JETON), type=type, revoque_le__isnull=True
     ).first()
     if terminal is None:
         raise TerminalInvalideError("Terminal non reconnu.")
-    TerminalTirage.objects.filter(pk=terminal.pk).update(derniere_activite=timezone.now())
+    Terminal.objects.filter(pk=terminal.pk).update(derniere_activite=timezone.now())
     terminal.refresh_from_db()
     return terminal
 
@@ -54,7 +58,7 @@ def appeler_prestation(terminal, prestation, operateur):
     if not missions_accessibles(operateur).filter(pk=mission.pk).exists():
         raise AppelInvalideError("Vous n'avez pas accès à la mission de cette prestation (RM-20).")
     with transaction.atomic():
-        terminal = TerminalTirage.objects.select_for_update().get(pk=terminal.pk)
+        terminal = Terminal.objects.select_for_update().get(pk=terminal.pk)
         if terminal.revoque_le is not None:
             raise AppelInvalideError("Ce terminal est révoqué.")
         if prestation.session_id != terminal.session_id:

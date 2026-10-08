@@ -3,12 +3,13 @@ import json
 import uuid
 
 import pytest
+from django.db import IntegrityError, transaction
 from django.utils import timezone
 
 from apps.commun.tests.outils import creer_mission, creer_session, creer_utilisateur
 from apps.prestations import terminaux
 from apps.prestations.exceptions import AppelInvalideError, PasDAppelError, TerminalInvalideError
-from apps.prestations.models import Prestation, TerminalTirage, Tirage
+from apps.prestations.models import Prestation, Terminal, Tirage
 from apps.prestations.tests.outils import creer_epreuve_ouverte, creer_prestation
 from apps.utilisateurs.models import AffectationOperateur, Utilisateur
 
@@ -45,7 +46,7 @@ def test_d31_le_jeton_n_est_jamais_stocke_en_clair(epreuve):
 
     assert len(jeton) >= 40
     assert jeton not in terminal.empreinte and len(terminal.empreinte) == 64
-    assert TerminalTirage.objects.filter(empreinte=jeton).count() == 0
+    assert Terminal.objects.filter(empreinte=jeton).count() == 0
     assert terminal.organisation_id == epreuve.organisation_id
 
 
@@ -80,6 +81,28 @@ def test_un_terminal_revoque_est_refuse(terminal):
 
     with pytest.raises(TerminalInvalideError):
         terminaux.authentifier_terminal(terminal.jeton_de_test)
+
+
+@pytest.mark.django_db
+def test_d37_le_jeton_d_une_scene_n_ouvre_pas_l_api_de_tirage_et_inversement(epreuve, terminal):
+    session = terminal.session
+    scene, jeton_scene = terminaux.creer_terminal(session, "Scène 1", Terminal.Type.SCENE)
+
+    with pytest.raises(TerminalInvalideError):
+        terminaux.authentifier_terminal(jeton_scene)  # type « tirage » attendu
+    assert terminaux.authentifier_terminal(jeton_scene, Terminal.Type.SCENE) == scene
+    with pytest.raises(TerminalInvalideError):
+        terminaux.authentifier_terminal(terminal.jeton_de_test, Terminal.Type.SCENE)
+
+
+@pytest.mark.django_db
+def test_seule_une_tablette_de_tirage_peut_avoir_un_candidat_appele(epreuve, terminal):
+    scene, _ = terminaux.creer_terminal(terminal.session, "Scène 1", Terminal.Type.SCENE)
+    prestation = prestation_pour(epreuve, terminal)
+
+    scene.prestation_appelee = prestation
+    with pytest.raises(IntegrityError), transaction.atomic():
+        scene.save()
 
 
 # --- Appel d'un candidat par l'opérateur ----------------------------------------

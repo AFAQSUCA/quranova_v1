@@ -124,8 +124,8 @@ class Tirage(ModeleDuClient):
         return f"Tirage {self.rang} de {self.prestation} : {self.serie}"
 
 
-class TerminalTirage(ModeleDuClient):
-    """Une tablette de tirage, ouverte en mode kiosque par l'opérateur (§15.1, §8.6).
+class Terminal(ModeleDuClient):
+    """Un terminal de la salle : tablette de tirage ou écran de scène (§15.1, §8.6, §9.4 ; D31, D37).
 
     Le terminal s'authentifie par un jeton secret (D31) dont seule l'empreinte est stockée.
     Le candidat appelé est FIXÉ PAR L'OPÉRATEUR (``prestation_appelee``) : le candidat ne choisit
@@ -134,8 +134,13 @@ class TerminalTirage(ModeleDuClient):
 
     PARENTS_CLIENT = ("session",)
 
-    session = models.ForeignKey("concours.Session", on_delete=models.PROTECT, related_name="terminaux_tirage")
+    class Type(models.TextChoices):
+        TIRAGE = "tirage", "Tablette de tirage"
+        SCENE = "scene", "Écran de scène"
+
+    session = models.ForeignKey("concours.Session", on_delete=models.PROTECT, related_name="terminaux")
     nom = models.CharField(max_length=100)
+    type = models.CharField(max_length=10, choices=Type.choices, default=Type.TIRAGE)
     empreinte = models.CharField(max_length=64, unique=True)
     prestation_appelee = models.ForeignKey(
         Prestation, null=True, blank=True, on_delete=models.PROTECT, related_name="+"
@@ -144,11 +149,16 @@ class TerminalTirage(ModeleDuClient):
     derniere_activite = models.DateTimeField(null=True, blank=True)
 
     class Meta:
-        verbose_name = "terminal de tirage"
-        verbose_name_plural = "terminaux de tirage"
+        verbose_name = "terminal"
+        verbose_name_plural = "terminaux"
         ordering = ["session", "nom"]
         constraints = [
             models.UniqueConstraint(fields=["session", "nom"], name="terminal_nom_unique_par_session"),
+            # Seule une tablette de tirage a un candidat « appelé » : l'écran de scène suit la session.
+            models.CheckConstraint(
+                condition=Q(type="tirage") | Q(prestation_appelee__isnull=True),
+                name="terminal_appel_reserve_au_tirage",
+            ),
         ]
 
     def save(self, *args, **kwargs):
