@@ -27,10 +27,10 @@ export const usePresentationStore = defineStore("presentation", () => {
   const message = ref<string | null>(null);
   let client: ClientWS | null = null;
 
-  function demarrer(url: string, jeton: string | null): void {
+  function demarrer(url: string, jeton: string | null, cleJeton = "jeton"): void {
     client = new ClientWS({
       url,
-      authentification: jeton ? () => ({ type: "auth", jeton }) : undefined,
+      authentification: jeton ? () => ({ type: "auth", [cleJeton]: jeton }) : undefined,
       surEtat: (nouvelEtat) => {
         connexion.value = nouvelEtat;
         // Reconnexion : une commande restée sans réponse repart avec le MÊME identifiant (idempotence, RM-30).

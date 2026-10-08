@@ -11,7 +11,7 @@ export default defineConfig({
     emptyOutDir: true,
     cssCodeSplit: false,
     rollupOptions: {
-      input: { tirage: "src/tirage/main.ts", scene: "src/scene/main.ts", commande: "src/commande/main.ts" },
+      input: { tirage: "src/tirage/main.ts", scene: "src/scene/main.ts", commande: "src/commande/main.ts", jury: "src/jury/main.ts" },
       output: {
         entryFileNames: "[name].js",
         chunkFileNames: "partage-[hash].js",

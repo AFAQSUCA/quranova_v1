@@ -232,3 +232,14 @@ def test_les_methodes_non_prevues_sont_refusees(client, poste):
 
     assert client.post(url("api_prestations", session), **en_tetes).status_code == 405
     assert client.get(url("api_valider", session, prestation), **en_tetes).status_code == 405
+
+
+@pytest.mark.django_db
+def test_la_page_du_jure_est_publique_et_vide(client, poste):
+    session = poste[0]
+
+    reponse = client.get(reverse("jury:ecran_jury", args=[session.pk]))
+
+    contenu = reponse.content.decode()
+    assert reponse.status_code == 200 and 'id="app"' in contenu and "jury.js" in contenu
+    assert client.get(reverse("jury:ecran_jury", args=[uuid.uuid4()])).status_code == 404
