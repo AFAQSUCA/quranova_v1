@@ -50,6 +50,10 @@ Essayez d'abord seul, en vous aidant des tests. Si vous manquez de temps, la sol
 | [18](18-consumer-websocket.md) | Le consumer WebSocket (Channels) | 3c |
 | [19](19-ecrans-scene-et-commande.md) | Écrans de scène et de commande (Vue) | 3d |
 | [20](20-journal-d-audit.md) | Le journal d'audit chaîné | 4a |
+| [21](21-evaluations-et-acces-jury.md) | Évaluations des jurés, connexion par code, API de notation | 4b, 4c |
+| [22](22-ecran-du-jure.md) | L'écran du juré en Vue | 4d |
+| [23](23-resultats-et-classement.md) | Résultats, classement et validation par le responsable client | 4e, 4f |
+| [24](24-documents-et-sauvegarde.md) | Procès-verbal, exports, sauvegarde et restauration | 4g, 4h |
 
 ## Si vous êtes bloqué
 
