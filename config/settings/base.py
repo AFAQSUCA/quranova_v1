@@ -25,6 +25,9 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "channels",
+    "apps.commun",
+    "apps.clients",
+    "apps.utilisateurs",
     "apps.coran",
 ]
 
@@ -86,3 +89,10 @@ STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Utilisateur personnalisé (rôles, organisation) : à fixer AVANT la première migration d'un projet.
+AUTH_USER_MODEL = "utilisateurs.Utilisateur"
+
+# Fichiers téléversés (logos des clients, formulaires de consentement...). Jamais versionnés.
+MEDIA_URL = "media/"
+MEDIA_ROOT = BASE_DIR / "media"

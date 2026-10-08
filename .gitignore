@@ -8,3 +8,4 @@ frontend/dist/
 staticfiles/
 *.log
 db.sqlite3
+media/
