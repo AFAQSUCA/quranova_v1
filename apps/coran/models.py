@@ -140,3 +140,49 @@ class Sourate(models.Model):
 
     def __str__(self):
         return f"{self.numero}. {self.nom_translitteration}"
+
+
+class Verset(models.Model):
+    """Un verset d'une sourate : son texte exact, tel que fourni par Tanzil (§12.2).
+
+    Règle absolue n°1 : le texte n'est jamais saisi, corrigé ni normalisé
+    (aucune normalisation Unicode, aucune suppression de diacritiques).
+    Il est stocké tel quel, en UTF-8, et sa version est celle de sa sourate.
+    """
+
+    # PROTECT : supprimer une sourate ne doit jamais emporter ses versets.
+    sourate = models.ForeignKey(
+        Sourate, on_delete=models.PROTECT, related_name="versets"
+    )
+    numero = models.PositiveSmallIntegerField(
+        help_text="Numéro du verset dans sa sourate, à partir de 1."
+    )
+    texte = models.TextField(
+        help_text="Texte exact du verset, repris du fichier Tanzil sans aucune transformation."
+    )
+
+    class Meta:
+        verbose_name = "verset"
+        verbose_name_plural = "versets"
+        # Ordre canonique : numéro de sourate, puis numéro de verset.
+        ordering = ["sourate__numero", "numero"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["sourate", "numero"], name="verset_numero_unique_par_sourate"
+            ),
+            models.CheckConstraint(
+                condition=Q(numero__gte=1), name="verset_numero_au_moins_1"
+            ),
+            # REC-30 : aucun verset vide (au moins un caractère non blanc).
+            models.CheckConstraint(
+                condition=Q(texte__regex=r"\S"), name="verset_texte_non_vide"
+            ),
+        ]
+
+    @property
+    def reference(self):
+        """Référence « sourate:verset » (ex. 2:255), cf. §12.4."""
+        return f"{self.sourate.numero}:{self.numero}"
+
+    def __str__(self):
+        return self.reference

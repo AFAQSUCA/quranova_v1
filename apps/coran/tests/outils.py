@@ -1,10 +1,11 @@
 """Fonctions utilitaires partagées par les tests de l'application coran."""
 import itertools
 
-from apps.coran.models import Sourate, VersionCorpus
+from apps.coran.models import Sourate, Verset, VersionCorpus
 
 _compteur_versions = itertools.count(1)
 _compteur_sourates = itertools.count(1)
+_compteur_versets = itertools.count(1)
 
 
 def creer_version(**champs):
@@ -33,3 +34,15 @@ def creer_sourate(version=None, **champs):
     }
     valeurs.update(champs)
     return Sourate.objects.create(**valeurs)
+
+
+def creer_verset(sourate=None, **champs):
+    """Crée un verset de test ; le numéro est unique par défaut et le texte est neutre."""
+    n = next(_compteur_versets)
+    valeurs = {
+        "sourate": sourate or creer_sourate(),
+        "numero": n,
+        "texte": f"texte-de-test-{n}",
+    }
+    valeurs.update(champs)
+    return Verset.objects.create(**valeurs)
