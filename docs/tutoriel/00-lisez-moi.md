@@ -49,6 +49,7 @@ Essayez d'abord seul, en vous aidant des tests. Si vous manquez de temps, la sol
 | [17](17-etat-et-commandes.md) | État de présentation, commandes versionnées, transitions | 3b |
 | [18](18-consumer-websocket.md) | Le consumer WebSocket (Channels) | 3c |
 | [19](19-ecrans-scene-et-commande.md) | Écrans de scène et de commande (Vue) | 3d |
+| [20](20-journal-d-audit.md) | Le journal d'audit chaîné | 4a |
 
 ## Si vous êtes bloqué
 
