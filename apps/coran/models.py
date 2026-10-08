@@ -6,6 +6,8 @@ saisi, corrigé ni normalisé depuis l'application (règle absolue n°1).
 from django.db import models
 from django.db.models import Q
 
+from apps.coran import services
+
 
 class VersionCorpus(models.Model):
     """Une version identifiée du corpus : source, empreinte, statut (§12.3).
@@ -68,6 +70,54 @@ class VersionCorpus(models.Model):
 
     def __str__(self):
         return f"{self.source} {self.version_source} ({self.get_riwaya_display()}) — {self.get_statut_display()}"
+
+    # Champs qui identifient le fichier source : ils ne changent plus une fois la version figée.
+    CHAMPS_FIGES = (
+        "source",
+        "version_source",
+        "riwaya",
+        "nom_fichier",
+        "empreinte_sha256",
+        "date_import",
+        "date_validation",
+    )
+
+    def save(self, *args, **kwargs):
+        # On compare à l'état RÉEL en base, jamais à l'objet en mémoire (il peut être périmé).
+        ancien = VersionCorpus.objects.filter(pk=self.pk).first() if self.pk else None
+        if ancien is not None:
+            if ancien.statut != self.statut:
+                services.verifier_transition_statut(
+                    ancien.statut, self.statut, self.date_validation
+                )
+            if any(getattr(ancien, c) != getattr(self, c) for c in self.CHAMPS_FIGES):
+                services.verifier_ecriture_autorisee(ancien.statut)
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        statut = (
+            VersionCorpus.objects.filter(pk=self.pk).values_list("statut", flat=True).first()
+        )
+        if statut is not None:
+            services.verifier_ecriture_autorisee(statut)
+        return super().delete(*args, **kwargs)
+
+
+def _verifier_versions_modifiables(version_ids):
+    """Vérifie, sur l'état réel en base, que toutes ces versions acceptent des écritures."""
+    statuts = VersionCorpus.objects.filter(pk__in=version_ids).values_list(
+        "statut", flat=True
+    )
+    for statut in statuts:
+        services.verifier_ecriture_autorisee(statut)
+
+
+def _verifier_sourates_modifiables(sourate_ids):
+    """Même vérification, à partir des sourates (donc des versions dont elles dépendent)."""
+    version_ids = Sourate.objects.filter(pk__in=sourate_ids).values_list(
+        "version_id", flat=True
+    )
+    _verifier_versions_modifiables(set(version_ids))
 
 
 class Sourate(models.Model):
@@ -141,6 +191,26 @@ class Sourate(models.Model):
     def __str__(self):
         return f"{self.numero}. {self.nom_translitteration}"
 
+    def save(self, *args, **kwargs):
+        # Version actuelle ET version précédente en base (si on déplace la sourate).
+        version_ids = {self.version_id}
+        if self.pk:
+            ancienne = (
+                Sourate.objects.filter(pk=self.pk).values_list("version_id", flat=True).first()
+            )
+            if ancienne is not None:
+                version_ids.add(ancienne)
+        _verifier_versions_modifiables(version_ids)
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        version_id = (
+            Sourate.objects.filter(pk=self.pk).values_list("version_id", flat=True).first()
+        )
+        if version_id is not None:
+            _verifier_versions_modifiables({version_id})
+        return super().delete(*args, **kwargs)
+
 
 class Verset(models.Model):
     """Un verset d'une sourate : son texte exact, tel que fourni par Tanzil (§12.2).
@@ -186,3 +256,23 @@ class Verset(models.Model):
 
     def __str__(self):
         return self.reference
+
+    def save(self, *args, **kwargs):
+        # Sourate actuelle ET sourate précédente en base (si on déplace le verset).
+        sourate_ids = {self.sourate_id}
+        if self.pk:
+            ancienne = (
+                Verset.objects.filter(pk=self.pk).values_list("sourate_id", flat=True).first()
+            )
+            if ancienne is not None:
+                sourate_ids.add(ancienne)
+        _verifier_sourates_modifiables(sourate_ids)
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        sourate_id = (
+            Verset.objects.filter(pk=self.pk).values_list("sourate_id", flat=True).first()
+        )
+        if sourate_id is not None:
+            _verifier_sourates_modifiables({sourate_id})
+        return super().delete(*args, **kwargs)

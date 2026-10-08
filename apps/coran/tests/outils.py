@@ -23,14 +23,15 @@ def creer_version(**champs):
 def creer_sourate(version=None, **champs):
     """Crée une sourate de test ; numéro et ordre de révélation sont uniques par défaut."""
     n = next(_compteur_sourates)
+    rang = (n - 1) % 114 + 1  # reste entre 1 et 114 même après de nombreux tests
     valeurs = {
         "version": version or creer_version(),
-        "numero": n,
+        "numero": rang,
         "nom_arabe": f"nom-arabe-de-test-{n}",
         "nom_translitteration": f"Sourate-test-{n}",
         "nombre_versets": 7,
         "type_revelation": Sourate.TypeRevelation.MECQUOISE,
-        "ordre_revelation": n,
+        "ordre_revelation": rang,
     }
     valeurs.update(champs)
     return Sourate.objects.create(**valeurs)
