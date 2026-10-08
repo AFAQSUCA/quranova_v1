@@ -15,6 +15,7 @@ from datetime import date, datetime
 
 from django.db import transaction
 
+from apps.audit.services import journaliser
 from apps.candidats.models import Candidat, Participation
 from apps.candidats.services import inscrire
 from apps.concours.models import Concours
@@ -247,7 +248,7 @@ def _ecrire(plan, concours, rapport):
         )
 
 
-def importer_candidats(concours, chemin, *, simuler=False):
+def importer_candidats(concours, chemin, *, simuler=False, auteur=None):
     """Importe un fichier CSV de candidats dans un concours ; renvoie un ``RapportImport``."""
     rapport = RapportImport(simulation=simuler)
     texte = _decoder(open(chemin, "rb").read())
@@ -274,4 +275,11 @@ def importer_candidats(concours, chemin, *, simuler=False):
         _ecrire(plan, concours, rapport)
         if simuler:
             transaction.set_rollback(True)
+        else:
+            journaliser(
+                "candidats.importes", organisation=concours.organisation, auteur=auteur, objet=concours,
+                auteur_libelle="" if auteur else "commande importer_candidats",
+                details={"fichier": str(chemin).replace("\\", "/").rsplit("/", 1)[-1],
+                         "lignes": rapport.lignes_lues, "inscrits": len(rapport.inscriptions)},
+            )
     return rapport

@@ -94,6 +94,10 @@ de l'étape 1.2 (« Modèles, application par application »).
 | D35 | **Dépendances du front** (validées par l'utilisateur) : `vue`, `pinia` (imposés par §13) ; en développement `vite`, `@vitejs/plugin-vue`, `typescript`, `vue-tsc`, `vitest`, `@vue/test-utils`, `jsdom`. **TypeScript est volontairement fixé en 5.9** (`~5.9`) : la version 7, plus récente, n'est pas encore compatible avec `vue-tsc`. Le build écrit dans `static/frontend/` avec des noms fixes (`tirage.js`, `tirage.css`) ; ce dossier n'est pas versionné. Node.js 22 ou plus est requis. | |
 | D36 à D41 | Voir `docs/conception/protocole-temps-reel.md` (§8) : `pytest-asyncio`, `Terminal` généralisé (tirage / scène), jeton de la scène par premier message, plan de diapositives figé à « Préparer l'affichage », jury à l'itération 4, une présentation active par session. | |
 | D42 | La taille d'une diapositive (nombre maximal de caractères d'un segment de verset) est pour l'instant une **constante** (`TAILLE_SEGMENT_PAR_DEFAUT` = 180). Elle deviendra un réglage de l'épreuve (§9.2 : « taille de texte configurée »), ce qui fera partie de la configuration validée par le client (empreinte, D14). | |
+| D43 | Une évaluation par couple (juré, prestation), portant sur toutes les séries tirées par la prestation. Pour REC-11 (« le bon tirage »), le lien se fait par la prestation ; la validation enregistre aussi le libellé des séries évaluées. *(itération 4, étape 4b)* | |
+| D44 | Le juré reçoit le **texte des versets** sur sa tablette, comme l'opérateur (§9.1) ; ce rôle est vérifié côté serveur. *(étape 4c)* | |
+| D45 | Le journal d'audit est protégé par un **déclencheur PostgreSQL** (UPDATE et DELETE refusés, même en SQL direct) en plus du contrôle des empreintes. Pas de déclencheur TRUNCATE (Django vide les tables de test ainsi) : la disparition d'entrées est détectée par la tête de chaîne. Une chaîne par client (RM-20) et une chaîne « système ». | |
+| D46 | Le jeton de connexion d'un juré a la durée de validité de son code de session. *(étape 4c)* | |
 
 ### Ce qui reste hors de ce lot
 

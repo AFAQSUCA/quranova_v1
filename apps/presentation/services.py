@@ -8,6 +8,7 @@ from dataclasses import dataclass
 
 from django.db import transaction
 
+from apps.audit.services import journaliser
 from apps.prestations.models import Prestation, Tirage
 from apps.presentation import diapositives
 from apps.presentation.exceptions import PlanImpossibleError, TransitionInterditeError
@@ -110,6 +111,11 @@ def appliquer_commande(session, id_commande, action, version_attendue=None, *, a
         etat.version += 1
         etat.save(update_fields=["phase", "index", "rejeu", "version", "modifie_le"])
         _synchroniser_prestation(etat, action)
+        if action == "precedente":  # §15.2 : un retour en arrière est une opération sensible
+            journaliser(
+                "diaporama.precedente", organisation=session.organisation, auteur=auteur, objet=etat.prestation,
+                details={"version": etat.version, "diapositive": etat.index},
+            )
         _journaliser(session, id_commande, action, version_attendue, auteur,
                      CommandePresentation.Statut.APPLIQUEE, version_apres=etat.version, prestation=etat.prestation)
         return Resultat("appliquee", etat.version, etat=etat)

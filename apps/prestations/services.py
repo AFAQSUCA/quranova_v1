@@ -9,6 +9,7 @@ import secrets
 from django.db import transaction
 from django.utils import timezone
 
+from apps.audit.services import journaliser
 from apps.candidats.models import Participation
 from apps.candidats.services import verifier_pret_pour_tirage
 from apps.concours.models import Concours, Epreuve
@@ -156,6 +157,13 @@ def effectuer_tirage(prestation, id_demande, *, terminal=""):
         if deja_tires + 1 >= epreuve.tirages_par_candidat:
             prestation.etat = Prestation.Etat.TIRE
             prestation.save(update_fields=["etat", "modifie_le"])
+        # Dans la même transaction : pas de tirage sans trace, pas de trace sans tirage (§15.2).
+        journaliser(
+            "tirage.effectue", organisation=prestation.organisation, objet=tirage,
+            auteur_libelle=f"terminal {terminal}" if terminal else "", terminal=terminal,
+            details={"prestation": prestation.pk, "candidat": prestation.participation.numero_candidat,
+                     "serie": serie.libelle, "rang": tirage.rang},
+        )
     return tirage
 
 
@@ -194,6 +202,11 @@ def annuler_tirage(tirage, auteur, motif, *, maintenant=None):
         tirage.annule_par = auteur
         tirage.annule_le = maintenant or timezone.now()
         tirage.save()
+        journaliser(
+            "tirage.annule", organisation=tirage.organisation, auteur=auteur, objet=tirage,
+            details={"prestation": prestation.pk, "serie": tirage.serie.libelle, "motif": motif,
+                     "diapositive_affichee": tirage.diapositive_affichee},
+        )
         # Il manque désormais un tirage valide : la prestation attend de nouveau son tirage.
         prestation.etat = Prestation.Etat.EN_ATTENTE
         prestation.save(update_fields=["etat", "modifie_le"])

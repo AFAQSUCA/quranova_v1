@@ -4,6 +4,7 @@ import json
 
 from django.utils import timezone
 
+from apps.audit.services import journaliser
 from apps.concours.exceptions import ConfigurationInvalideError, ValidationRefuseeError
 from apps.concours.models import Concours
 from apps.coran.models import VersionCorpus
@@ -136,6 +137,10 @@ def valider_configuration(concours, utilisateur):
             "modifie_le",
         ]
     )
+    journaliser(
+        "concours.configuration_validee", organisation=concours.organisation, auteur=utilisateur, objet=concours,
+        details={"empreinte": concours.configuration_empreinte},
+    )
 
 
 def ouvrir_concours(concours):
@@ -158,6 +163,7 @@ def ouvrir_concours(concours):
         )
     concours.etat = Concours.Etat.OUVERT
     concours.save(update_fields=["etat", "modifie_le"])
+    journaliser("concours.ouvert", organisation=concours.organisation, objet=concours)
 
 
 def demarrer_concours(concours):
