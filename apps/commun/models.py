@@ -49,7 +49,8 @@ class ModeleDuClient(ModeleHorodate):
     class Meta:
         abstract = True
 
-    def save(self, *args, **kwargs):
+    def verifier_organisation(self):
+        """Recopie l'organisation du parent si elle manque, refuse toute incohérence (RM-20)."""
         for nom in self.PARENTS_CLIENT:
             if getattr(self, f"{nom}_id") is None:
                 continue
@@ -61,4 +62,7 @@ class ModeleDuClient(ModeleHorodate):
                     f"{type(self).__name__} : l'organisation ({self.organisation_id}) diffère "
                     f"de celle de son parent « {nom} » ({parent.organisation_id})."
                 )
+
+    def save(self, *args, **kwargs):
+        self.verifier_organisation()
         super().save(*args, **kwargs)
