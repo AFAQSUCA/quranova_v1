@@ -5,10 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
   <meta name="robots" content="noindex">
   <title>QURANOVA — Tirage</title>
-  <link rel="icon" href="data:,">
+  <link rel="icon" href="{% static 'img/favicon.png' %}">
+  <link rel="stylesheet" href="{% static 'css/charte.css' %}">
   <link rel="stylesheet" href="{% static 'frontend/frontend.css' %}">
 </head>
-<body class="page-tirage">
+<body class="page-tirage"{% if marque.couleur_principale %} style="--client-principal: {{ marque.couleur_principale }};{% if marque.couleur_secondaire %} --client-secondaire: {{ marque.couleur_secondaire }};{% endif %}"{% endif %}>
+  {% include "_marque.html" %}
   <div id="app"></div>
   <noscript>Cet écran nécessite JavaScript.</noscript>
   <script type="module" src="{% static 'frontend/tirage.js' %}"></script>

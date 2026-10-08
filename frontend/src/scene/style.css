@@ -1,4 +1,4 @@
-.scene { position: fixed; inset: 0; background: #0b2f30; color: #fbf7ee; overflow: hidden; font-family: system-ui, "Segoe UI", sans-serif; }
+.scene { position: fixed; inset: 0; background: #073a24; color: #fbf7ee; overflow: hidden; font-family: system-ui, "Segoe UI", sans-serif; }
 .scene .cadre { position: absolute; inset: 0; overflow: hidden; }
 .scene .diapo, .scene .attente { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
   text-align: center; padding: 6vh 8vw; }

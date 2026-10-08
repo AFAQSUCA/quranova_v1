@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+{% load static %}<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="utf-8">
@@ -13,10 +13,19 @@ th { background: #eee; } .droite { text-align: right; } tr { page-break-inside: 
 .bandeau { padding: .4em .8em; border: 2px solid #333; margin: 1em 0; } .provisoire { border-color: #a12; color: #a12; font-weight: bold; }
 .signatures { display: flex; gap: 3em; margin-top: 3em; page-break-inside: avoid; } .signatures div { flex: 1; border-top: 1px solid #333; padding-top: .3em; }
 .empreinte { font-family: monospace; font-size: 9pt; word-break: break-all; }
+.entete { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid {{ marque.couleur_principale|default:"#0a4c30" }}; padding-bottom: .5em; margin-bottom: 1em; }
+.entete img { max-height: 22mm; max-width: 55mm; object-fit: contain; }
+h2 { border-bottom-color: {{ marque.couleur_principale|default:"#0a4c30" }}; }
+.pied-marque { margin-top: 2em; font-size: 8pt; color: #666; text-align: center; }
+.pied-marque img { height: 9mm; vertical-align: middle; margin-right: .5em; }
 @media screen { body { max-width: 190mm; margin: 1em auto; padding: 0 1em; } }
 </style>
 </head>
 <body>
+<div class="entete">
+  <div>{% if marque.logo_url %}<img src="{{ marque.logo_url }}" alt="Logo de {{ marque.nom }}">{% else %}<strong>{{ marque.nom }}</strong>{% endif %}</div>
+  <img src="{% static 'img/quranova-logo.png' %}" alt="QURANOVA">
+</div>
 <h1>Procès-verbal {% if definitif %}définitif{% else %}provisoire{% endif %}</h1>
 <p>{{ concours.nom }} {{ concours.edition }} — {{ concours.mission.organisation.nom }}<br>
 {{ concours.mission.lieu }}, du {{ concours.date_debut|date:"d/m/Y" }} au {{ concours.date_fin|date:"d/m/Y" }}<br>
@@ -58,5 +67,6 @@ du client et n'y figure donc pas :
 <table><tr><th>Opération</th><th class="droite">Nombre</th></tr>{% for action, n in audit.actions %}<tr><td>{{ action }}</td><td class="droite">{{ n }}</td></tr>{% endfor %}</table>
 
 <div class="signatures"><div>Le responsable du client<br><br><br></div><div>L'opérateur du prestataire<br><br><br></div></div>
+<p class="pied-marque"><img src="{% static 'img/quranova-logo.png' %}" alt="">Document produit avec QURANOVA — plateforme de gestion des concours du Saint Coran.</p>
 </body>
 </html>

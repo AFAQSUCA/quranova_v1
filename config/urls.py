@@ -1,4 +1,6 @@
 """Routes racine du projet QURANOVA."""
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 from django.views.generic import TemplateView
@@ -11,3 +13,11 @@ urlpatterns = [
     path("", include("apps.jury.urls")),
     path("", include("apps.resultats.urls")),
 ]
+
+if settings.DEBUG:
+    # En développement seulement : Django sert les logos téléversés. En production, c'est Nginx (phase 3).
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+admin.site.site_header = "QURANOVA — Administration"
+admin.site.site_title = "QURANOVA"
+admin.site.index_title = "Gestion des concours"

@@ -9,6 +9,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_GET
 
+from apps.clients.marque import marque_du_client
 from apps.concours.models import Session
 from apps.prestations.models import Prestation
 from apps.presentation.services import peut_commander
@@ -23,7 +24,8 @@ def _session_commandable(request, session_id):
 
 @require_GET
 def ecran_scene(request, session_id):
-    return render(request, "scene.html", {"session_id": session_id})
+    session = get_object_or_404(Session.objects.select_related("concours__organisation"), pk=session_id)
+    return render(request, "scene.html", {"session_id": session_id, "marque": marque_du_client(session.concours.organisation)})
 
 
 @require_GET
@@ -31,7 +33,9 @@ def ecran_commande(request, session_id):
     if not request.user.is_authenticated:
         return redirect(f"{reverse('admin:login')}?next={request.path}")
     session = _session_commandable(request, session_id)
-    return render(request, "commande.html", {"session_id": session.pk})
+    return render(request, "commande.html", {
+        "session_id": session.pk, "marque": marque_du_client(session.concours.organisation),
+    })
 
 
 @require_GET

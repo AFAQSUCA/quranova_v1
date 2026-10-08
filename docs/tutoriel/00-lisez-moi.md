@@ -54,6 +54,7 @@ Essayez d'abord seul, en vous aidant des tests. Si vous manquez de temps, la sol
 | [22](22-ecran-du-jure.md) | L'écran du juré en Vue | 4d |
 | [23](23-resultats-et-classement.md) | Résultats, classement et validation par le responsable client | 4e, 4f |
 | [24](24-documents-et-sauvegarde.md) | Procès-verbal, exports, sauvegarde et restauration | 4g, 4h |
+| [25](25-identite-visuelle.md) | Identité visuelle : logo, charte, marque du client | 6 (phase 3) |
 
 ## Si vous êtes bloqué
 

@@ -104,3 +104,5 @@ de l'étape 1.2 (« Modèles, application par application »).
 - `Jure` et `AffectationJury`, `CodeAccesJure` : lot suivant de l'itération 1 (avec l'import CSV des candidats).
 - Le verrouillage des paramètres structurants quand le concours est « en cours » (§7.2), avec modification exceptionnelle motivée et tracée : à concevoir avec le journal d'audit.
 - Les lots, séries et questions (itération 2), les tirages (itération 2), etc.
+
+| D49 | Identité visuelle : charte vert/or tirée du logo ; sur les écrans publics le **client** est en avant (logo, couleur) et QURANOVA discret (sceau) ; l'écran de tirage n'a pas de marque client (terminal sans session). |

@@ -1,0 +1,21 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block extrastyle %}{{ block.super }}
+<link rel="icon" href="{% static 'img/favicon.png' %}">
+<link rel="stylesheet" href="{% static 'css/charte.css' %}">
+<style>
+  :root { --primary: #0a4c30; --secondary: #073a24; --accent: #c9a227; --primary-fg: #fff; --link-fg: #0a4c30; --link-hover-color: #073a24;
+          --header-bg: #0a4c30; --header-color: #fbf7ee; --header-link-color: #fff; --breadcrumbs-bg: #073a24; --breadcrumbs-link-fg: #e9d9a0;
+          --button-bg: #0a4c30; --button-hover-bg: #073a24; --default-button-bg: #c9a227; --default-button-hover-bg: #b08f1e; --object-tools-bg: #0a4c30; }
+  #header { border-bottom: 4px solid #c9a227; }
+  #branding h1 { display: flex; align-items: center; gap: .6rem; }
+  #branding h1 img { height: 2.6rem; background: #fff; border-radius: .4rem; padding: .1rem .3rem; }
+</style>
+{% endblock %}
+
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'admin:index' %}"><img src="{% static 'img/quranova-embleme.png' %}" alt="QURANOVA" style="height:2.6rem;vertical-align:middle"> QURANOVA — Administration</a></h1>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}

@@ -25,6 +25,7 @@ from apps.candidats.models import Consentement, Participation
 from apps.candidats.services import est_mineur
 from apps.concours.models import Epreuve
 from apps.jury.models import Evaluation
+from apps.clients.marque import marque_du_client
 from apps.prestations.models import Prestation, Tirage
 from apps.resultats import validation
 
@@ -90,6 +91,7 @@ def contexte_pv(concours, auteur=None):
     problemes = verifier_chaine(concours.organisation)
     actions = Counter(EntreeAudit.objects.filter(organisation=concours.organisation).values_list("action", flat=True))
     return {
+        "marque": marque_du_client(concours.organisation),
         "concours": concours, "auteur": auteur, "genere_le": timezone.now(), "sections": sections,
         "non_valides": non_valides, "definitif": not non_valides and bool(sections),
         "historique": historique, "incidents": [h for h in historique if h["annulation"]],
