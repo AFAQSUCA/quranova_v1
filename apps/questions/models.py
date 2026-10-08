@@ -104,3 +104,72 @@ class PassageCoranique(ModeleDuClient):
 
     def __str__(self):
         return self.libelle
+
+
+class Lot(ModeleDuClient):
+    """Les séries préparées pour une épreuve (§8.2).
+
+    Un lot par épreuve en V1 (D24) : le partage d'un lot entre épreuves (RM-21.b) viendra plus tard.
+    """
+
+    PARENTS_CLIENT = ("epreuve",)
+
+    epreuve = models.OneToOneField("concours.Epreuve", on_delete=models.PROTECT, related_name="lot")
+
+    class Meta:
+        verbose_name = "lot"
+        verbose_name_plural = "lots"
+
+    def __str__(self):
+        return f"Lot de l'épreuve {self.epreuve}"
+
+
+class Serie(ModeleDuClient):
+    """Une série du lot : P questions ordonnées (RM-22).
+
+    La disponibilité d'une série n'est PAS stockée ici : elle se déduit des tirages (D2).
+    """
+
+    PARENTS_CLIENT = ("lot",)
+
+    lot = models.ForeignKey(Lot, on_delete=models.PROTECT, related_name="series")
+    numero = models.PositiveIntegerField()
+
+    class Meta:
+        verbose_name = "série"
+        verbose_name_plural = "séries"
+        ordering = ["lot", "numero"]
+        constraints = [
+            models.UniqueConstraint(fields=["lot", "numero"], name="serie_numero_unique_par_lot"),
+            models.CheckConstraint(condition=Q(numero__gte=1), name="serie_numero_au_moins_1"),
+        ]
+
+    @property
+    def libelle(self):
+        return f"Série {self.numero}"
+
+    def __str__(self):
+        return self.libelle
+
+
+class QuestionDeSerie(ModeleDuClient):
+    """Une question à son rang dans une série."""
+
+    PARENTS_CLIENT = ("serie", "question")
+
+    serie = models.ForeignKey(Serie, on_delete=models.PROTECT, related_name="questions_ordonnees")
+    question = models.ForeignKey(Question, on_delete=models.PROTECT, related_name="appartenances")
+    rang = models.PositiveSmallIntegerField()
+
+    class Meta:
+        verbose_name = "question de série"
+        verbose_name_plural = "questions de série"
+        ordering = ["serie", "rang"]
+        constraints = [
+            models.UniqueConstraint(fields=["serie", "rang"], name="questiondeserie_rang_unique"),
+            models.UniqueConstraint(fields=["serie", "question"], name="questiondeserie_question_unique"),
+            models.CheckConstraint(condition=Q(rang__gte=1), name="questiondeserie_rang_au_moins_1"),
+        ]
+
+    def __str__(self):
+        return f"{self.serie} — question {self.rang}"
