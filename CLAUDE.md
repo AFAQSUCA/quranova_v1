@@ -102,6 +102,7 @@ python manage.py runserver                         # lancer le serveur de dével
 pytest                                             # lancer les tests
 python manage.py import_corpus                     # importe data\corpus\quran-uthmani.xml et quran-data.xml (version « importée »)
 python manage.py import_corpus --dry-run           # lit et contrôle, puis annule sans rien enregistrer
+python manage.py importer_candidats <uuid-concours> fichier.csv [--dry-run]   # importe des candidats (tout ou rien)
 ```
 
 ## Définition de « terminé » pour une étape

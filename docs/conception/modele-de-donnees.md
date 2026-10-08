@@ -77,6 +77,9 @@ de l'étape 1.2 (« Modèles, application par application »).
 | D18 | **Consentement retiré = formulaire conservé et marqué « retiré »** ; un retrait partiel se fait en retirant le formulaire puis en en enregistrant un nouveau. Un seul formulaire valide par participation. | §16.2 : le retrait prend effet pour l'avenir et l'historique reste. |
 | D19 | `Format` du concours : seul « présentiel » en V1. | en ligne et hybride sont en V2 (§5.2). |
 | D20 | Le stockage **chiffré** des formulaires de consentement et des logos est repoussé à la sécurité du serveur de salle (§15). Le champ fichier existe déjà. | |
+| D21 | L'import CSV des candidats est **tout ou rien** : toutes les lignes sont contrôlées avant toute écriture, le rapport liste **toutes** les erreurs (avec le numéro de ligne du fichier), et une option de simulation (`--dry-run`) donne le même rapport sans rien enregistrer. CSV uniquement (UTF-8 ou Windows-1252, séparateur `;`, `,` ou tabulation) ; Excel `.xlsx` exigerait une dépendance (`openpyxl`) à valider d'abord. | |
+| D22 | Doublon de candidat = même nom et prénom (casse ignorée) et même date de naissance, **dans le même client uniquement** (RM-20). Un candidat existant est réutilisé ; la même personne dans deux catégories donne un seul `Candidat` et deux `Participation` ; la même personne deux fois dans la même catégorie est une erreur. | |
+| D23 | `CodeAccesJure` vit dans l'application `jury` (pas `utilisateurs`) pour éviter une dépendance circulaire. Le code (8 caractères, alphabet sans `0 O 1 I`, tiré avec `secrets`) n'est jamais stocké : seule son empreinte HMAC-SHA256 (clé `SECRET_KEY`) l'est. Un seul code actif par juré et par session ; en régénérer un révoque l'ancien. La limitation des tentatives se fera dans les vues. | |
 
 ### Ce qui reste hors de ce lot
 

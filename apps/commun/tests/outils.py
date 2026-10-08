@@ -9,6 +9,7 @@ from apps.clients.models import Mission, Organisation
 from apps.concours.models import Categorie, Concours, CritereNotation, Epreuve, Session
 from apps.coran.models import VersionCorpus
 from apps.coran.tests.outils import creer_version
+from apps.jury.models import Jure
 from apps.utilisateurs.models import Utilisateur
 
 _compteur = itertools.count(1)
@@ -155,3 +156,14 @@ def creer_consentement(participation=None, **champs):
     }
     valeurs.update(champs)
     return Consentement.objects.create(**valeurs)
+
+
+def creer_jure(organisation=None, **champs):
+    n = next(_compteur)
+    valeurs = {
+        "organisation": organisation or creer_organisation(),
+        "nom": f"Jure-nom-test-{n}",
+        "prenom": f"Jure-prenom-test-{n}",
+    }
+    valeurs.update(champs)
+    return Jure.objects.create(**valeurs)
