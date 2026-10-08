@@ -106,3 +106,5 @@ de l'étape 1.2 (« Modèles, application par application »).
 - Les lots, séries et questions (itération 2), les tirages (itération 2), etc.
 
 | D49 | Identité visuelle : charte vert/or tirée du logo ; sur les écrans publics le **client** est en avant (logo, couleur) et QURANOVA discret (sceau) ; l'écran de tirage n'a pas de marque client (terminal sans session). |
+
+| D50 | Production : `config/settings/prod.py` refuse de démarrer sans clé secrète solide (≥ 50 car., hors modèle) ni `DJANGO_ALLOWED_HOSTS` explicite (jamais `*`) ; couche de canaux Redis (`channels-redis`, dépendance validée) ; pas de redirection HTTPS (Wi-Fi local sans Internet) sauf `DJANGO_HTTPS=1`. |

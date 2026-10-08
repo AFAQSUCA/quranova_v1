@@ -109,7 +109,8 @@ python manage.py creer_demo --valider-corpus-pour-test   # données de démonstr
 cd frontend; npm install                           # installer les dépendances du front (Node.js 22+)
 npm run build                                      # compiler le front vers static\frontend\ (servi par Django)
 npm test                                           # tests du front (vitest) ; npm run typecheck pour les types
-pytest                                             # lancer les tests
+pytest                                             # lancer les tests (le test d'intégration Redis est ignoré sans Redis)
+$env:DJANGO_SETTINGS_MODULE="config.settings.prod"; python manage.py check --deploy   # contrôle des réglages de production (variables DJANGO_ALLOWED_HOSTS, REDIS_URL…)
 python manage.py import_corpus                     # importe data\corpus\quran-uthmani.xml et quran-data.xml (version « importée »)
 python manage.py import_corpus --dry-run           # lit et contrôle, puis annule sans rien enregistrer
 python manage.py importer_candidats <uuid-concours> fichier.csv [--dry-run]   # importe des candidats (tout ou rien)
