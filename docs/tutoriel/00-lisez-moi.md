@@ -39,6 +39,7 @@ Essayez d'abord seul, en vous aidant des tests. Si vous manquez de temps, la sol
 | [07](07-passages-coraniques.md) | Résoudre un passage en versets (REC-04, 31, 32) | 0.5 |
 | [08](08-conception-phase-1.md) | Décisions de conception du modèle de données | 1.1 |
 | [09](09-socle-clients-utilisateurs.md) | Classes de base, clients, utilisateurs et rôles | 1.2 |
+| [10](10-concours-et-candidats.md) | Concours, catégories, épreuves, barème ; candidats, participations, consentements | 1.2 |
 
 ## Si vous êtes bloqué
 
@@ -51,7 +52,7 @@ Essayez d'abord seul, en vous aidant des tests. Si vous manquez de temps, la sol
 
 ```text
 Phase 0  Cadrage et corpus       chapitres 01 à 07   (S1-S2)
-Phase 1  Conception              chapitres 08 à ...  (S3-S4)
+Phase 1  Conception              chapitres 08 à ...  (S3-S4) ; la phase 2 (itération 1) commence au chapitre 9
 Phase 2  Développement V1        4 itérations : clients/concours, tirage, diaporama, notation
 Phase 3  Autorecette et kit      tests de recette, Docker
 Phase 4  Concours pilote
