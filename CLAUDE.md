@@ -119,6 +119,7 @@ python manage.py importer_candidats <uuid-concours> fichier.csv [--dry-run]   # 
 .\scripts\arreter.ps1                                # arrête (données conservées)
 .\scripts\tests-docker.ps1                           # lance pytest dans l'image Docker
 .\scripts\sauvegarder.ps1                            # sauvegarde horodatée depuis le conteneur
+docker compose exec web python manage.py simuler_charge --confirmer-base-jetable --url http://nginx   # charge REC-19/20 (base JETABLE)
 ```
 
 ## Définition de « terminé » pour une étape

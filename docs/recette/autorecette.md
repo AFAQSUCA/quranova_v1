@@ -23,8 +23,8 @@ Légende : **A** = couvert par un test automatisé (`pytest` / `npm test`) · **
 | 16 | PV : résultats validés seulement | A | `apps/resultats/tests/test_documents.py` |
 | 17 | Correction d'une note validée | A | `apps/jury/tests/test_evaluations.py`, `apps/resultats/tests/test_validation.py` |
 | 18 | Restauration | A | `apps/commun/tests/test_sauvegarde.py` |
-| 19 | Charge : 500 candidats, 30 terminaux | **P3** | `scripts/charge.py` (étape 6.2) |
-| 20 | Propagation < 300 ms (95 %) | **P3** | idem |
+| 19 | Charge : 500 candidats, 30 terminaux | outil prêt · objectifs à mesurer sur le matériel cible | `simuler_charge` ; résultats et goulots : `docs/recette/charge.md` |
+| 20 | Propagation < 300 ms (95 %) | outil prêt · à mesurer sur le matériel cible | idem (p95 mesuré : 306–612 ms dans le bac à sable) |
 | 21 | Coupure Wi-Fi 30 s | A (logique client) · M (matériel) | Backoff testé dans `client.test.ts` ; coupure réelle à jouer en répétition |
 | 23 | Redémarrage scène + juré | A | `test_rec15_rec23_…`, brouillon serveur du juré |
 | 24 | Deux « suivante » simultanées | A | `test_commandes.py`, `test_consumer.py` |

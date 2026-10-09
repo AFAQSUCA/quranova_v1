@@ -110,3 +110,5 @@ de l'étape 1.2 (« Modèles, application par application »).
 | D50 | Production : `config/settings/prod.py` refuse de démarrer sans clé secrète solide (≥ 50 car., hors modèle) ni `DJANGO_ALLOWED_HOSTS` explicite (jamais `*`) ; couche de canaux Redis (`channels-redis`, dépendance validée) ; pas de redirection HTTPS (Wi-Fi local sans Internet) sauf `DJANGO_HTTPS=1`. |
 
 | D51 | Empaquetage : Docker Compose (db, redis, web/Daphne, nginx) ; front compilé dans l'image (pas de Node en production) ; Redis sans persistance ; `ALLOWED_HOSTS` = adresses du serveur ; images construites avec Internet puis utilisées hors ligne ; tests exécutables dans l'image (`--profile outils`). |
+
+| D52 | Simulation de charge sans dépendance (client HTTP stdlib + client WebSocket maison) ; commande réservée aux bases jetables ; pool de connexions PostgreSQL prévu mais désactivé (`DB_POOL`) en attendant l'accord sur `psycopg_pool` ; le tirage reste sérialisé par le verrou de lot. |
