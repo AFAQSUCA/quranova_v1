@@ -1,14 +1,17 @@
 """Règles d'un concours : corpus figé (RM-27, RM-09) et validation de la configuration (RM-31)."""
 import hashlib
 import json
+from dataclasses import dataclass, field
 
+from django.db import transaction
 from django.utils import timezone
 
 from apps.audit.services import journaliser
 from apps.concours.exceptions import ConfigurationInvalideError, ValidationRefuseeError
-from apps.concours.models import Categorie, Concours
+from apps.concours.models import Categorie, Concours, CritereNotation, Epreuve
 from apps.coran.models import VersionCorpus
 from apps.utilisateurs.models import Utilisateur
+from apps.utilisateurs.services import missions_accessibles
 
 
 def _statut_actuel_du_corpus(version_id):
@@ -180,3 +183,138 @@ def demarrer_concours(concours):
         )
     concours.etat = Concours.Etat.EN_COURS
     concours.save(update_fields=["etat", "modifie_le"])
+
+
+# --- Duplication d'un concours (§7, REC-02) -------------------------------------------------------------------------
+
+
+@dataclass
+class ResultatDuplication:
+    concours: Concours
+    categories: int = 0
+    epreuves: int = 0
+    criteres: int = 0
+    series: int = 0
+    series_ignorees: int = 0
+    avertissements: list = field(default_factory=list)
+
+
+def _verifier_droit_de_dupliquer(auteur, source, mission):
+    droit = auteur.is_active and (
+        auteur.role == Utilisateur.Role.ADMINISTRATEUR
+        or (
+            auteur.role == Utilisateur.Role.OPERATEUR
+            and missions_accessibles(auteur).filter(pk__in=[source.mission_id, mission.pk]).count() == len({source.mission_id, mission.pk})
+        )
+    )
+    if not droit:
+        raise ConfigurationInvalideError(
+            "Vous n'avez pas le droit de dupliquer ce concours : seul le personnel du prestataire affecté à la mission le peut (RM-20)."
+        )
+
+
+def _recopier_serie(serie, lot_copie, version, organisation, correspondance):
+    """Recrée une série dans ``lot_copie`` ; renvoie ``False`` si elle ne peut pas l'être (sans rien écrire)."""
+    from apps.coran.exceptions import ReferenceInvalideError
+    from apps.questions import services as services_questions
+    from apps.questions.models import Question
+
+    questions = []
+    try:
+        for appartenance in serie.questions_ordonnees.select_related("question").order_by("rang"):
+            ancienne = appartenance.question
+            if ancienne.pk not in correspondance:
+                if ancienne.type == Question.Type.PASSAGE_CORANIQUE:
+                    if version is None:
+                        return False
+                    p = ancienne.passage
+                    correspondance[ancienne.pk] = services_questions.creer_question_passage(
+                        organisation, version, (p.sourate_debut, p.verset_debut), (p.sourate_fin, p.verset_fin)
+                    )  # les références sont revérifiées dans la version de la copie (RM-23)
+                else:
+                    correspondance[ancienne.pk] = services_questions.creer_question_enonce(organisation, ancienne.enonce)
+            questions.append(correspondance[ancienne.pk])
+    except ReferenceInvalideError:
+        return False
+    services_questions.composer_serie(lot_copie, questions)
+    return True
+
+
+def dupliquer_concours(source, *, auteur, nom, edition, date_debut, date_fin, mission=None):
+    """Prépare une nouvelle édition à partir de ``source`` : catégories, épreuves, barèmes et séries (REC-02).
+
+    La copie repart en BROUILLON : configuration NON validée (RM-31), aucune session, aucun candidat, aucun tirage,
+    épreuves « en préparation ». Les questions sont recréées (jamais partagées avec l'original). Si la version du
+    corpus d'origine n'est plus utilisable, la copie n'en a pas et les séries à passages coraniques ne sont pas copiées
+    (RM-23, RM-27) : l'avertissement le dit. Tout ou rien : une erreur n'enregistre rien.
+    """
+    mission = mission or source.mission
+    if mission.organisation_id != source.organisation_id:
+        raise ConfigurationInvalideError("La copie doit rester dans une mission du même client que l'original (RM-20).")
+    _verifier_droit_de_dupliquer(auteur, source, mission)
+    if date_fin < date_debut:
+        raise ConfigurationInvalideError("La date de fin du concours ne peut pas précéder sa date de début.")
+    if Concours.objects.filter(organisation_id=source.organisation_id, nom=nom, edition=edition).exists():
+        raise ConfigurationInvalideError(f"Un concours « {nom} » (édition « {edition} ») existe déjà pour ce client.")
+
+    version = None
+    if source.version_corpus_id and _statut_actuel_du_corpus(source.version_corpus_id) in (
+        VersionCorpus.Statut.VALIDEE, VersionCorpus.Statut.ACTIVE,
+    ):
+        version = source.version_corpus
+
+    with transaction.atomic():
+        copie = Concours.objects.create(
+            mission=mission, nom=nom, edition=edition, format=source.format, date_debut=date_debut, date_fin=date_fin,
+            version_corpus=version,
+        )
+        resultat = ResultatDuplication(concours=copie)
+        correspondance_questions = {}
+        for categorie in source.categories.order_by("nom"):
+            nouvelle_categorie = Categorie.objects.create(
+                concours=copie, nom=categorie.nom, discipline=categorie.discipline, age_minimum=categorie.age_minimum,
+                age_maximum=categorie.age_maximum, effectif_prevu=categorie.effectif_prevu,
+                regle_classement=categorie.regle_classement, regle_departage=categorie.regle_departage,
+            )
+            resultat.categories += 1
+            for epreuve in categorie.epreuves.order_by("ordre"):
+                nouvelle_epreuve = Epreuve.objects.create(
+                    categorie=nouvelle_categorie, nom=epreuve.nom, ordre=epreuve.ordre,
+                    questions_par_serie=epreuve.questions_par_serie, tirages_par_candidat=epreuve.tirages_par_candidat,
+                    reutilisation_autre_candidat=epreuve.reutilisation_autre_candidat,
+                    reutilisation_meme_candidat_autre_epreuve=epreuve.reutilisation_meme_candidat_autre_epreuve,
+                    exclusion_definitive=epreuve.exclusion_definitive, mode_affichage=epreuve.mode_affichage,
+                    affichage_scene=epreuve.affichage_scene, etat=Epreuve.Etat.EN_PREPARATION,
+                )
+                resultat.epreuves += 1
+                criteres = {}
+                for critere in epreuve.criteres.order_by("ordre"):
+                    criteres[critere.pk] = CritereNotation.objects.create(
+                        epreuve=nouvelle_epreuve, libelle=critere.libelle, ordre=critere.ordre,
+                        maximum=critere.maximum, coefficient=critere.coefficient,
+                    )
+                    resultat.criteres += 1
+                if epreuve.critere_prioritaire_id:  # le critère de la COPIE, pas celui de l'original
+                    nouvelle_epreuve.critere_prioritaire = criteres[epreuve.critere_prioritaire_id]
+                    nouvelle_epreuve.save(update_fields=["critere_prioritaire", "modifie_le"])
+                lot = getattr(epreuve, "lot", None)
+                if lot is not None:
+                    from apps.questions import services as services_questions
+
+                    lot_copie = services_questions.obtenir_lot(nouvelle_epreuve)
+                    for serie in lot.series.order_by("numero"):
+                        if _recopier_serie(serie, lot_copie, version, copie.organisation, correspondance_questions):
+                            resultat.series += 1
+                        else:
+                            resultat.series_ignorees += 1
+        if version is None:
+            resultat.avertissements.append(
+                "Le corpus du concours d'origine n'est plus utilisable : rattachez une version du corpus validée à la copie "
+                f"avant de l'ouvrir. {resultat.series_ignorees} série(s) contenant des passages coraniques n'ont pas été copiées."
+            )
+        journaliser(
+            "concours.duplique", organisation=copie.organisation, auteur=auteur, objet=copie,
+            details={"source": source.pk, "categories": resultat.categories, "epreuves": resultat.epreuves,
+                     "criteres": resultat.criteres, "series": resultat.series, "series_ignorees": resultat.series_ignorees},
+        )
+    return resultat

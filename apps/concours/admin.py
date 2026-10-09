@@ -1,7 +1,11 @@
 """Administration de la configuration d'un concours (§7.2, RM-27, RM-31)."""
-from django.contrib import admin
+from django import forms
+from django.contrib import admin, messages
+from django.http import HttpResponseRedirect
+from django.template.response import TemplateResponse
 
-from apps.commun.admin import AdminDuClient, InlineDuClient, appliquer_action, role_admin
+from apps.commun.admin import ERREURS_METIER, AdminDuClient, InlineDuClient, appliquer_action, role_admin
+from django.db import transaction
 from apps.concours import services
 from apps.concours.models import Categorie, Concours, CritereNotation, Epreuve, Session
 from django.urls import reverse
@@ -11,6 +15,23 @@ from apps.prestations.services import ouvrir_epreuve
 from apps.resultats import services as services_resultats
 from apps.resultats import validation
 from apps.utilisateurs.models import Utilisateur
+from apps.utilisateurs.services import missions_accessibles
+
+
+class DuplicationForm(forms.Form):
+    """Paramètres de la nouvelle édition (REC-02)."""
+
+    nom = forms.CharField(max_length=200)
+    edition = forms.CharField(max_length=50, label="Édition", help_text="Millésime ou numéro d'édition de la copie.")
+    date_debut = forms.DateField(label="Date de début", widget=forms.DateInput(attrs={"type": "date"}))
+    date_fin = forms.DateField(label="Date de fin", widget=forms.DateInput(attrs={"type": "date"}))
+    mission = forms.ModelChoiceField(queryset=None, label="Mission", help_text="Une mission du même client.")
+
+    def __init__(self, *args, source, utilisateur, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["mission"].queryset = missions_accessibles(utilisateur).filter(organisation=source.organisation)
+        self.fields["mission"].initial = source.mission_id
+        self.fields["nom"].initial = source.nom
 
 
 @admin.register(Concours)
@@ -18,7 +39,7 @@ class ConcoursAdmin(AdminDuClient):
     list_display = ("nom", "edition", "mission", "etat", "version_corpus", "configuration_validee_le")
     list_filter = ("etat", "organisation")
     search_fields = ("nom", "edition")
-    actions = ["valider_la_configuration", "ouvrir", "demarrer"]
+    actions = ["valider_la_configuration", "ouvrir", "demarrer", "dupliquer"]
 
     def get_readonly_fields(self, request, obj=None):
         # L'état et la validation ne changent que par les services (RM-27, RM-31, D14).
@@ -42,6 +63,40 @@ class ConcoursAdmin(AdminDuClient):
             return {"valider_la_configuration": actions["valider_la_configuration"]}
         actions.pop("valider_la_configuration", None)  # le client valide, le prestataire exécute
         return actions
+
+    @admin.action(description="Dupliquer vers une nouvelle édition")
+    def dupliquer(self, request, queryset):
+        if queryset.count() != 1:
+            self.message_user(request, "Sélectionnez un seul concours à dupliquer.", messages.ERROR)
+            return None
+        source = queryset.get()
+        formulaire = DuplicationForm(
+            request.POST if request.POST.get("appliquer") else None, source=source, utilisateur=request.user
+        )
+        if request.POST.get("appliquer") and formulaire.is_valid():
+            d = formulaire.cleaned_data
+            try:
+                with transaction.atomic():
+                    resultat = services.dupliquer_concours(
+                        source, auteur=request.user, nom=d["nom"], edition=d["edition"], date_debut=d["date_debut"],
+                        date_fin=d["date_fin"], mission=d["mission"],
+                    )
+            except ERREURS_METIER as erreur:
+                formulaire.add_error(None, str(erreur))
+            else:
+                self.message_user(
+                    request,
+                    f"Copie créée : {resultat.categories} catégorie(s), {resultat.epreuves} épreuve(s), {resultat.criteres} critère(s), "
+                    f"{resultat.series} série(s). Validation de la configuration à refaire.",
+                    messages.SUCCESS,
+                )
+                for avertissement in resultat.avertissements:
+                    self.message_user(request, avertissement, messages.WARNING)
+                return HttpResponseRedirect(reverse("admin:concours_concours_change", args=[resultat.concours.pk]))
+        return TemplateResponse(
+            request, "admin/concours/dupliquer.html",
+            {**self.admin_site.each_context(request), "title": "Dupliquer un concours", "source": source, "form": formulaire, "opts": self.model._meta},
+        )
 
     @admin.action(description="Valider la configuration (responsable client)")
     def valider_la_configuration(self, request, queryset):

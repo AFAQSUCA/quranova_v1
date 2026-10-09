@@ -114,3 +114,5 @@ de l'étape 1.2 (« Modèles, application par application »).
 | D52 | Simulation de charge sans dépendance (client HTTP stdlib + client WebSocket maison) ; commande réservée aux bases jetables ; pool de connexions PostgreSQL prévu mais désactivé (`DB_POOL`) en attendant l'accord sur `psycopg_pool` ; le tirage reste sérialisé par le verrou de lot. |
 
 | D53 | Pool de connexions PostgreSQL actif par défaut en production (`psycopg_pool`, accord du développeur) ; accessibilité : audit axe-core dans un vrai navigateur sans dépendance projet, scène conservant le balayage (§18.2), zone live sur la commande ; répétition générale chronométrée documentée (REC-40). |
+
+| D54 | Duplication de concours : catégories, épreuves (remises en préparation), barèmes (critère prioritaire remappé) et séries ; questions recréées et passages revérifiés dans la version du corpus ; copie en brouillon, configuration à revalider (RM-31) ; sans candidats, sessions, tirages ni résultats ; sans version utilisable, séries à passages ignorées avec avertissement ; même client (RM-20) ; administrateur ou opérateur affecté ; tout ou rien et journalisée. |

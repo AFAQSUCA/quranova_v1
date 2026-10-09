@@ -11,7 +11,7 @@ fait tourner l'application sur un Wi-Fi dédié, sans Internet ; tablettes de ti
 - Tutoriel pas à pas : `docs/tutoriel/` (un chapitre par étape terminée). **Claude : à la fin de chaque étape, ajoute ou met à jour le chapitre correspondant** (fichiers complets, commandes PowerShell, résultat attendu, solutions des `TODO(human)` en blocs repliés).
 - Phase en cours : **Phase 3 — Autorecette et empaquetage du serveur de salle : développement terminé** (tableau REC : `docs/recette/autorecette.md` ; Docker Compose ; réglages de production ;
   charge : `docs/recette/charge.md` ; accessibilité : `docs/recette/accessibilite.md`). **Reste à faire hors code** : mesurer REC-19/20 sur le portable de salle, jouer la répétition générale
-  (`docs/recette/repetition-generale.md`, REC-40/41/21/36), décider de la duplication de concours (REC-02) et de WeasyPrint, clôturer le jalon J0 (corpus validé par le référent coranique),
+  (`docs/recette/repetition-generale.md`, REC-40/41/21/36), décider de WeasyPrint (PDF), clôturer le jalon J0 (corpus validé par le référent coranique),
   puis phase 4 (concours pilote). Mettre à jour cette ligne à chaque changement de phase.
   Les règles `TODO(human)` (corpus, RM-21 et suffisance du lot, segmentation, transitions, calcul des résultats) ont été **écrites par Claude à la demande expresse du développeur** :
   à relire et à expliquer avec tes mots dans `docs/journal-apprentissage.md`.

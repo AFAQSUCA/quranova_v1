@@ -6,7 +6,7 @@ Légende : **A** = couvert par un test automatisé (`pytest` / `npm test`) · **
 | REC | Sujet | État | Où / comment |
 |---|---|---|---|
 | 01 | Deux clients indépendants | A | `apps/clients/tests/`, `apps/commun/tests/test_modele_du_client.py` |
-| 02 | Créer un concours, puis le dupliquer | A (saisie) · ⚠ (duplication) | La duplication (catégories, épreuves, barèmes, séries) n'est **pas encore codée** : à décider (V1 ou V2) |
+| 02 | Créer un concours, puis le dupliquer | A | saisie : `apps/concours/tests/` ; duplication : `test_duplication.py` (action « Dupliquer vers une nouvelle édition ») |
 | 03 | Paramètres et Q = T × P | A | `apps/concours/tests/test_configuration.py::test_rm03_q_est_calcule_t_fois_p` |
 | 04 | Passage 2:142 à 2:150 | A | `apps/coran/tests/test_passages.py`, `test_regles_passage.py` |
 | 05 | Référence invalide | A | `apps/questions/tests/test_services.py` |
@@ -49,9 +49,7 @@ Légende : **A** = couvert par un test automatisé (`pytest` / `npm test`) · **
 
 ## Lacunes à décider
 
-1. **REC-02 — duplication d'un concours** : absente du code. À trancher : la coder en V1 (service + test) ou la
-   déplacer en V2 dans le cahier des charges.
-2. **REC-28 — analyse automatisée de vulnérabilités** : les tests d'injection sont automatisés, mais l'« analyse
+1. **REC-28 — analyse automatisée de vulnérabilités** : les tests d'injection sont automatisés, mais l'« analyse
    automatisée » demandée par le critère suppose un outil (ex. `bandit`, `pip-audit`). Nouvelle dépendance : à valider.
-3. **REC-08 / REC-10 / REC-21 / REC-41** : une part reste physique (animation, matériel, Wi-Fi, onduleur) : à jouer à
+2. **REC-08 / REC-10 / REC-21 / REC-41** : une part reste physique (animation, matériel, Wi-Fi, onduleur) : à jouer à
    la répétition générale (REC-40).
