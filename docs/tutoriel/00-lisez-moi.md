@@ -56,6 +56,7 @@ Essayez d'abord seul, en vous aidant des tests. Si vous manquez de temps, la sol
 | [24](24-documents-et-sauvegarde.md) | Procès-verbal, exports, sauvegarde et restauration | 4g, 4h |
 | [25](25-identite-visuelle.md) | Identité visuelle : logo, charte, marque du client | 6 (phase 3) |
 | [26](26-reglages-de-production-et-redis.md) | Réglages de production et Redis (channels-redis) | 6.0a (phase 3) |
+| [27](27-docker-compose.md) | Docker Compose : PostgreSQL, Redis, Daphne, Nginx | 6.0b (phase 3) |
 
 ## Si vous êtes bloqué
 

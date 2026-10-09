@@ -11,3 +11,10 @@ def hachage_rapide(settings):
     ne s'applique qu'aux tests, jamais au vrai serveur.
     """
     settings.PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
+
+
+@pytest.fixture(autouse=True)
+def dossier_media_temporaire(settings, tmp_path):
+    """Les fichiers téléversés par les tests (logos, consentements) vont dans un dossier jetable :
+    ni pollution du dossier ``media/`` du développeur, ni dépendance aux droits d'écriture (Docker)."""
+    settings.MEDIA_ROOT = tmp_path / "media"

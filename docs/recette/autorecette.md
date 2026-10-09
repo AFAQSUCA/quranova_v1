@@ -39,7 +39,7 @@ Légende : **A** = couvert par un test automatisé (`pytest` / `npm test`) · **
 | 33 | Verset 2:282 segmenté | A | `apps/presentation/tests/test_segmentation.py` |
 | 34 | Accessibilité | M + P3 | checklist `docs/recette/accessibilite.md` (étape 6.3) |
 | 35 | Réutilisation des séries, lot épuisé | A | `test_rm21_selection.py`, `test_tirage.py::test_lot_epuise_…` |
-| 36 | Panne du serveur de salle < 15 min | **P3** | procédure `docs/recette/reprise-sur-secours.md` (étape 6.0b/6.3) |
+| 36 | Panne du serveur de salle < 15 min | M + P3 | procédure §5 de `docs/recette/installation-serveur-de-salle.md` ; à chronométrer sur le matériel |
 | 37 | Import avec erreurs | A | `apps/candidats/tests/test_import_csv.py` |
 | 38 | Mineur sans consentement | A | `test_rm28_…` (service et API) |
 | 39 | Opérateur ne valide pas | A | `test_validation.py::test_rec39_…` |

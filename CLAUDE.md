@@ -114,6 +114,11 @@ $env:DJANGO_SETTINGS_MODULE="config.settings.prod"; python manage.py check --dep
 python manage.py import_corpus                     # importe data\corpus\quran-uthmani.xml et quran-data.xml (version « importée »)
 python manage.py import_corpus --dry-run           # lit et contrôle, puis annule sans rien enregistrer
 python manage.py importer_candidats <uuid-concours> fichier.csv [--dry-run]   # importe des candidats (tout ou rien)
+# Serveur de salle (phase 3, Docker Desktop) — guide : docs\recette\installation-serveur-de-salle.md
+.\scripts\demarrer.ps1                               # construit et démarre PostgreSQL + Redis + Daphne + Nginx
+.\scripts\arreter.ps1                                # arrête (données conservées)
+.\scripts\tests-docker.ps1                           # lance pytest dans l'image Docker
+.\scripts\sauvegarder.ps1                            # sauvegarde horodatée depuis le conteneur
 ```
 
 ## Définition de « terminé » pour une étape
