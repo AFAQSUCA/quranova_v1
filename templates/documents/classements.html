@@ -1,0 +1,50 @@
+{% load static %}<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Classements — {{ concours.nom }}</title>
+<style>
+@page { size: A4; margin: 18mm 15mm; @bottom-right { content: "Page " counter(page) " / " counter(pages); } }
+body { font-family: "Segoe UI", "DejaVu Sans", system-ui, sans-serif; font-size: 11pt; color: #111; }
+h1 { font-size: 20pt; margin-bottom: 0; } h2 { font-size: 14pt; border-bottom: 2px solid {{ marque.couleur_principale|default:"#0a4c30" }}; margin-top: 1.6em; }
+h3 { font-size: 12pt; margin-bottom: .2em; }
+table { border-collapse: collapse; width: 100%; margin: .4em 0 1em; } th, td { border: 1px solid #888; padding: 3px 6px; text-align: left; font-size: 10pt; }
+th { background: #eee; } .droite { text-align: right; } tr { page-break-inside: avoid; }
+.entete { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid {{ marque.couleur_principale|default:"#0a4c30" }}; padding-bottom: .5em; margin-bottom: 1em; }
+.entete img { max-height: 22mm; max-width: 55mm; object-fit: contain; }
+.bandeau { padding: .4em .8em; border: 2px solid #333; margin: 1em 0; } .provisoire { border-color: #a12; color: #a12; font-weight: bold; }
+.pied-marque { margin-top: 2em; font-size: 8pt; color: #666; text-align: center; }
+.pied-marque img { height: 9mm; vertical-align: middle; margin-right: .5em; }
+</style>
+</head>
+<body>
+<div class="entete">
+  <div>{% if marque.logo_url %}<img src="{{ marque.logo_url }}" alt="Logo de {{ marque.nom }}">{% else %}<strong>{{ marque.nom }}</strong>{% endif %}</div>
+  <img src="{% static 'img/quranova-logo.png' %}" alt="QURANOVA">
+</div>
+<h1>Classements {% if definitif %}définitifs{% else %}(partiels){% endif %}</h1>
+<p>{{ concours.nom }} {{ concours.edition }} — {{ concours.mission.organisation.nom }}<br>
+{{ concours.mission.lieu }}, du {{ concours.date_debut|date:"d/m/Y" }} au {{ concours.date_fin|date:"d/m/Y" }}<br>
+Document généré le {{ genere_le|date:"d/m/Y à H:i" }}{% if auteur %} par {{ auteur }}{% endif %}.</p>
+
+{% if non_valides %}
+<div class="bandeau provisoire">Seuls les classements validés par le responsable du client figurent ici. Non validés, donc absents :
+<ul>{% for e in non_valides %}<li>{{ e }}</li>{% endfor %}</ul></div>
+{% endif %}
+
+{% for categorie, sections in categories %}
+  <h2>{{ categorie.nom }}</h2>
+  {% for s in sections %}
+    <h3>{{ s.epreuve.nom }}</h3>
+    {% if s.classement %}
+    <p>Version {{ s.classement.version }}{% if s.classement.est_correction %} <strong>(corrigée)</strong>{% endif %}, validée le {{ s.classement.valide_le|date:"d/m/Y à H:i" }}
+    par {{ s.classement.valide_par }}.</p>
+    <table><tr><th>Rang</th><th>N°</th><th>Candidat</th><th class="droite">Score</th></tr>
+    {% for l in s.lignes %}<tr><td>{% if l.rang %}{{ l.rang }}{% if l.ex_aequo %} (ex aequo){% endif %}{% else %}—{% endif %}</td><td>{{ l.numero }}</td><td>{{ l.nom }}</td><td class="droite">{{ l.score|default_if_none:"—" }}</td></tr>{% endfor %}</table>
+    {% else %}<p><em>Le classement de cette épreuve n'a pas encore été validé : aucun résultat dans ce document.</em></p>{% endif %}
+  {% endfor %}
+{% empty %}<p>Aucune épreuve.</p>{% endfor %}
+
+<p class="pied-marque"><img src="{% static 'img/quranova-logo.png' %}" alt="">Document produit avec QURANOVA — plateforme de gestion des concours du Saint Coran.</p>
+</body>
+</html>

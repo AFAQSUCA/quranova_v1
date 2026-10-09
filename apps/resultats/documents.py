@@ -7,8 +7,8 @@
 - L'export CSV est en UTF-8 (avec marque d'ordre des octets, pour qu'Excel reconnaisse les accents), séparateur
   point-virgule, un fichier par entité, avec un fichier de documentation des en-têtes (§17.1). Il ne contient aucune
   donnée d'un autre client, et chaque export est journalisé.
-- La génération est réalisée en HTML prêt à imprimer ; le rendu PDF est un simple « enregistrer en PDF » du navigateur
-  tant que la dépendance de génération de PDF n'est pas validée.
+- Le procès-verbal existe en HTML prêt à imprimer et en PDF (WeasyPrint, même HTML : une seule source de vérité) ; les classements
+  par catégorie existent en PDF et en tableur (CSV).
 """
 import csv
 import io
@@ -27,7 +27,7 @@ from apps.concours.models import Epreuve
 from apps.jury.models import Evaluation
 from apps.clients.marque import marque_du_client
 from apps.prestations.models import Prestation, Tirage
-from apps.resultats import validation
+from apps.resultats import pdf, validation
 
 
 def libelle_candidat(participation, consentements_publication):
@@ -104,14 +104,43 @@ def contexte_pv(concours, auteur=None):
     }
 
 
+def _definitif(concours):
+    return not any(s["classement"] is None for s in contexte_pv_resume(concours))
+
+
 def proces_verbal(concours, auteur=None):
     """Le procès-verbal, en HTML prêt à imprimer (journalisé)."""
     html = render_to_string("documents/pv.html", contexte_pv(concours, auteur))
     journaliser(
         "document.pv_genere", organisation=concours.organisation, auteur=auteur, objet=concours,
-        details={"definitif": not any(s["classement"] is None for s in contexte_pv_resume(concours))},
+        details={"definitif": _definitif(concours)},
     )
     return html
+
+
+def proces_verbal_pdf(concours, auteur=None):
+    """Le procès-verbal en PDF (WeasyPrint), fabriqué à partir du même HTML que la version imprimable (journalisé)."""
+    contenu = pdf.html_vers_pdf(render_to_string("documents/pv.html", contexte_pv(concours, auteur)))
+    journaliser(
+        "document.pv_pdf_genere", organisation=concours.organisation, auteur=auteur, objet=concours,
+        details={"definitif": _definitif(concours), "octets": len(contenu)},
+    )
+    return contenu
+
+
+def classements_pdf(concours, auteur=None):
+    """Les classements définitifs par catégorie, en PDF : seulement ceux validés par le responsable du client (RM-18)."""
+    contexte = contexte_pv(concours, auteur)
+    categories = {}
+    for section in contexte["sections"]:
+        categories.setdefault(section["epreuve"].categorie, []).append(section)
+    contexte["categories"] = list(categories.items())
+    contenu = pdf.html_vers_pdf(render_to_string("documents/classements.html", contexte))
+    journaliser(
+        "document.classements_pdf_genere", organisation=concours.organisation, auteur=auteur, objet=concours,
+        details={"definitif": _definitif(concours), "octets": len(contenu)},
+    )
+    return contenu
 
 
 def contexte_pv_resume(concours):

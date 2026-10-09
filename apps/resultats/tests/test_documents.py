@@ -282,10 +282,9 @@ def test_rec29_un_utilisateur_sans_acces_obtient_404(client):
 # --- REC-42 : 500 candidats -----------------------------------------------------------------------------------
 
 
-@pytest.mark.django_db
-def test_rec42_le_pv_de_500_candidats_est_genere_en_moins_de_30_secondes_sans_requete_par_candidat():
+def concours_de_candidats(nombre=500):
+    """Un concours dont l'épreuve a un classement VALIDÉ de ``nombre`` candidats (création en masse, requêtes constantes)."""
     from apps.prestations.tests.outils import creer_epreuve_ouverte, creer_prestation
-    from django.test.utils import CaptureQueriesContext
 
     epreuve = creer_epreuve_ouverte(series=1)
     organisation, categorie, concours = epreuve.organisation, epreuve.categorie, epreuve.categorie.concours
@@ -293,7 +292,7 @@ def test_rec42_le_pv_de_500_candidats_est_genere_en_moins_de_30_secondes_sans_re
     session = creer_prestation(epreuve).session
     responsable = creer_utilisateur(Utilisateur.Role.RESPONSABLE_CLIENT, organisation=organisation)
     candidats = Candidat.objects.bulk_create(
-        [Candidat(organisation=organisation, nom=f"Nom{i}", prenom=f"Prenom{i}", date_naissance=date(1990, 1, 1)) for i in range(500)]
+        [Candidat(organisation=organisation, nom=f"Nom{i}", prenom=f"Prenom{i}", date_naissance=date(1990, 1, 1)) for i in range(nombre)]
     )
     participations = Participation.objects.bulk_create([
         Participation(organisation=organisation, candidat=c, concours=concours, categorie=categorie, numero_candidat=1000 + i, statut="admis")
@@ -310,10 +309,18 @@ def test_rec42_le_pv_de_500_candidats_est_genere_en_moins_de_30_secondes_sans_re
         epreuve=epreuve, version=1, valide_par=responsable, valide_le=timezone.now(), regle_classement="moyenne", empreinte="a" * 64
     )
     LigneDeClassement.objects.bulk_create([
-        LigneDeClassement(organisation=organisation, classement=classement, participation=p, rang=i + 1, score=500 - i,
+        LigneDeClassement(organisation=organisation, classement=classement, participation=p, rang=i + 1, score=nombre - i,
                           evaluations_validees=3, evaluations_attendues=3)
         for i, p in enumerate(participations)
     ])
+    return concours, responsable
+
+
+@pytest.mark.django_db
+def test_rec42_le_pv_de_500_candidats_est_genere_en_moins_de_30_secondes_sans_requete_par_candidat():
+    from django.test.utils import CaptureQueriesContext
+
+    concours, responsable = concours_de_candidats(500)
 
     debut = time.perf_counter()
     with CaptureQueriesContext(connection) as requetes:

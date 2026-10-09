@@ -53,8 +53,10 @@ class ConcoursAdmin(AdminDuClient):
         if obj is None or obj.pk is None:
             return "—"
         return format_html(
-            '<a href="{}" target="_blank">Procès-verbal (imprimable)</a> · <a href="{}">Export des données (CSV)</a>',
-            reverse("resultats:proces_verbal", args=[obj.pk]), reverse("resultats:export", args=[obj.pk]),
+            '<a href="{}" target="_blank">Procès-verbal (imprimable)</a> · <a href="{}">Procès-verbal (PDF)</a> · '
+            '<a href="{}">Classements par catégorie (PDF)</a> · <a href="{}">Export des données (CSV)</a>',
+            reverse("resultats:proces_verbal", args=[obj.pk]), reverse("resultats:proces_verbal_pdf", args=[obj.pk]),
+            reverse("resultats:classements_pdf", args=[obj.pk]), reverse("resultats:export", args=[obj.pk]),
         )
 
     def get_actions(self, request):

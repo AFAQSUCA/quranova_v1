@@ -20,7 +20,7 @@ Légende : **A** = couvert par un test automatisé (`pytest` / `npm test`) · **
 | 13 | Classement = calcul manuel | A | `apps/resultats/tests/test_services.py::test_rec13_…` (TODO(human) `calcul.py`) |
 | 14 | Accès non autorisé | A | consumers, commandes, API jury/tirage |
 | 15 | Reconnexion | A | `test_consumer.py::test_rec15_rec23_…` + `frontend/src/commun/client.test.ts` |
-| 16 | PV : résultats validés seulement | A | `apps/resultats/tests/test_documents.py` |
+| 16 | PV : résultats validés seulement | A | `apps/resultats/tests/test_documents.py` (HTML) et `test_pdf.py` (PDF) |
 | 17 | Correction d'une note validée | A | `apps/jury/tests/test_evaluations.py`, `apps/resultats/tests/test_validation.py` |
 | 18 | Restauration | A | `apps/commun/tests/test_sauvegarde.py` |
 | 19 | Charge : 500 candidats, 30 terminaux | outil prêt · objectifs à mesurer sur le matériel cible | `simuler_charge` ; résultats et goulots : `docs/recette/charge.md` |
@@ -45,7 +45,7 @@ Légende : **A** = couvert par un test automatisé (`pytest` / `npm test`) · **
 | 39 | Opérateur ne valide pas | A | `test_validation.py::test_rec39_…` |
 | 40 | Répétition générale, installation < 45 min | M | `docs/recette/repetition-generale.md` (checklist chronométrée) |
 | 41 | Coupure secteur (onduleur) | M | §4 de `docs/recette/repetition-generale.md` |
-| 42 | PV de 500 candidats < 30 s | A | `test_documents.py::test_rec42_…` |
+| 42 | PV de 500 candidats < 30 s | A | `test_documents.py::test_rec42_…` (HTML) et `test_pdf.py::test_rec42_…` (PDF) |
 
 ## Lacunes à décider
 

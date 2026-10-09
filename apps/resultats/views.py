@@ -5,11 +5,12 @@ sans rien révéler (REC-25, REC-29).
 """
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect
+from django.utils.html import escape
 from django.urls import reverse
 from django.views.decorators.http import require_GET
 
 from apps.concours.models import Concours
-from apps.resultats import documents
+from apps.resultats import documents, pdf
 from apps.utilisateurs.models import Utilisateur
 from apps.utilisateurs.services import missions_accessibles
 
@@ -44,3 +45,34 @@ def export(request, concours_id):
     reponse["Content-Disposition"] = f'attachment; filename="export-{concours.pk}.zip"'
     reponse["Cache-Control"] = "no-store"
     return reponse
+
+
+def _reponse_pdf(request, concours_id, fabriquer, nom_fichier):
+    """Sert un PDF en téléchargement ; si WeasyPrint manque, explique et renvoie vers la version imprimable (503)."""
+    if not request.user.is_authenticated:
+        return redirect(f"{reverse('admin:login')}?next={request.path}")
+    concours = _concours_autorise(request, concours_id)
+    try:
+        contenu = fabriquer(concours, request.user)
+    except pdf.PdfIndisponibleError as erreur:
+        lien = reverse("resultats:proces_verbal", args=[concours.pk])
+        return HttpResponse(
+            f'<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>PDF indisponible</title></head><body><main>'
+            f"<h1>PDF indisponible</h1><p>{escape(str(erreur))}</p>"
+            f'<p><a href="{lien}">Ouvrir la version imprimable</a> puis « Imprimer → Enregistrer en PDF ».</p></main></body></html>',
+            status=503,
+        )
+    reponse = HttpResponse(contenu, content_type="application/pdf")
+    reponse["Content-Disposition"] = f'attachment; filename="{nom_fichier}-{concours.pk}.pdf"'
+    reponse["Cache-Control"] = "no-store"
+    return reponse
+
+
+@require_GET
+def proces_verbal_pdf(request, concours_id):
+    return _reponse_pdf(request, concours_id, lambda c, u: documents.proces_verbal_pdf(c, u), "proces-verbal")
+
+
+@require_GET
+def classements_pdf(request, concours_id):
+    return _reponse_pdf(request, concours_id, lambda c, u: documents.classements_pdf(c, u), "classements")

@@ -14,7 +14,10 @@ RUN mkdir -p /app/static && npm run build
 FROM python:3.12-slim-trixie AS base
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 # postgresql-client : pg_dump / pg_restore pour « manage.py sauvegarder / restaurer » (client 17, serveur 16 : accepté).
-RUN apt-get update && apt-get install -y --no-install-recommends postgresql-client && rm -rf /var/lib/apt/lists/*
+# libpango*, libharfbuzz-subset0, fonts-dejavu-core : WeasyPrint (procès-verbal et classements en PDF).
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        postgresql-client libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz-subset0 fonts-dejavu-core \
+    && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY requirements/ requirements/
 RUN pip install --no-cache-dir -r requirements/base.txt
