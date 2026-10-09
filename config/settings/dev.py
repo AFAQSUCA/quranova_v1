@@ -8,3 +8,7 @@ ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 CHANNEL_LAYERS = {
     "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"},
 }
+
+# Pas de deuxième facteur en développement : les comptes de démonstration (creer_demo) se connectent avec le seul mot de passe.
+# En production (prod.py), EXIGER_2FA reste vrai.
+EXIGER_2FA = False

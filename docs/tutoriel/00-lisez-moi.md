@@ -62,6 +62,7 @@ Essayez d'abord seul, en vous aidant des tests. Si vous manquez de temps, la sol
 | [30](30-duplication-de-concours.md) | Duplication d'un concours (REC-02) | 4 (post-phase 3) |
 | [31](31-pdf-weasyprint.md) | Procès-verbal et classements en PDF (WeasyPrint) | 4 (post-phase 3) |
 | [32](32-analyse-de-securite.md) | Analyse de sécurité automatisée (bandit, pip-audit, npm audit) | REC-28 |
+| [33](33-securite-des-comptes.md) | Sécurité des comptes : mots de passe, limitation des essais, deuxième facteur | A1–A3 (phase 4) |
 
 ## Si vous êtes bloqué
 

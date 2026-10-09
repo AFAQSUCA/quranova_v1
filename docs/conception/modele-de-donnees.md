@@ -120,3 +120,5 @@ de l'étape 1.2 (« Modèles, application par application »).
 | D55 | PDF : WeasyPrint (dépendance validée), même HTML que la version imprimable ; chercheur de ressources limité à `/static/` et `/media/` (aucun accès réseau ni fichier arbitraire) ; PDF indisponible → message et repli vers l'HTML (503), jamais d'erreur 500 ; deux PDF : procès-verbal et classements par catégorie (validés seulement), tous deux journalisés. |
 
 | D56 | Sécurité : bandit, pip-audit et npm audit (outils de développement validés) lancés par `scripts/audit-securite.ps1` ; bandit aussi en garde-fou pytest ; XML corpus refusé avec DOCTYPE/ENTITY (sans `defusedxml`) ; nom de base de restauration validé et identifiants SQL quotés ; `pytest>=9.0.3`. |
+
+| D57 | Comptes du personnel : mot de passe ≥ 12 caractères ; verrou de connexion 5 échecs/compte et 20/adresse sur 15 min, dans le backend ; adresse réelle via `X-Real-IP` derrière Nginx (`PROXY_DE_CONFIANCE`) ; TOTP (`django-otp`, `qrcode`, dépendances validées) obligatoire pour administrateur et opérateurs, contrôlé sur les pages, les API et le WebSocket ; coupé en développement seulement ; réinitialisation par un administrateur. |

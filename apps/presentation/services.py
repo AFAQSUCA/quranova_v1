@@ -45,6 +45,13 @@ def peut_commander(utilisateur, session):
     return missions_accessibles(utilisateur).filter(pk=session.concours.mission_id).exists()
 
 
+def peut_commander_en_ligne(utilisateur, session, session_http):
+    """``peut_commander`` + deuxième facteur validé dans la session du WebSocket (§15.1, règle absolue n° 4 : chaque canal est contrôlé)."""
+    from apps.utilisateurs.otp import session_verifiee
+
+    return peut_commander(utilisateur, session) and session_verifiee(utilisateur, session_http)
+
+
 def etat_actif(session):
     return EtatPresentation.objects.filter(session=session, active=True).first()
 

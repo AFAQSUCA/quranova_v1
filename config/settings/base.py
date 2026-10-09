@@ -25,6 +25,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "channels",
+    "django_otp",
+    "django_otp.plugins.otp_totp",
     "apps.commun",
     "apps.clients",
     "apps.utilisateurs",
@@ -45,6 +47,8 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django_otp.middleware.OTPMiddleware",  # sait si la session a passé le deuxième facteur
+    "apps.utilisateurs.middleware.Exiger2FAMiddleware",  # ferme l'accès du personnel sans ce facteur (§15.1)
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -111,3 +115,7 @@ PROXY_DE_CONFIANCE = False
 
 # Connexion du personnel : limitation des essais (§15.1) ; ModelBackend de Django sinon.
 AUTHENTICATION_BACKENDS = ["apps.utilisateurs.backends.ModelBackendLimite"]
+
+# §15.1 : deuxième facteur TOTP obligatoire pour l'administrateur et les opérateurs. Coupé seulement en développement (dev.py) et dans les tests.
+EXIGER_2FA = True
+OTP_TOTP_ISSUER = "QURANOVA"

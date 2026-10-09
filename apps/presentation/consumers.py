@@ -50,7 +50,7 @@ class PresentationConsumer(AsyncJsonWebsocketConsumer):
             await self.close(code=CODE_INTERDIT)
             return
         utilisateur = self.scope.get("user")
-        if utilisateur is not None and await database_sync_to_async(services.peut_commander)(utilisateur, self.session):
+        if utilisateur is not None and await database_sync_to_async(services.peut_commander_en_ligne)(utilisateur, self.session, self.scope.get("session")):
             await self._entrer(OPERATEUR)  # authentifié par son cookie de session Django
             return
         self._attente_auth = asyncio.create_task(self._delai_authentification())

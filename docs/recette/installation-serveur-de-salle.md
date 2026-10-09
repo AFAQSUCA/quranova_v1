@@ -39,7 +39,7 @@ Quatre conteneurs : **PostgreSQL** (données), **Redis** (messages temps réel),
 .\scripts\arreter.ps1           # arrête (les données sont conservées)
 docker compose logs -f web      # suivre les journaux
 ```
-Première installation seulement : `docker compose exec web python manage.py createsuperuser`.
+Première installation seulement : `docker compose exec web python manage.py createsuperuser` (mot de passe de **12 caractères minimum**). À la première connexion, le **deuxième facteur** est activé : installer une application d'authentification sur le téléphone, scanner le QR code (sans Internet), saisir le code. Un téléphone perdu se règle par « Réinitialiser le deuxième facteur » (administrateur).
 Le démarrage automatique après un redémarrage est assuré par `restart: unless-stopped` + « Démarrer Docker Desktop à l'ouverture de session ».
 
 ## 4. Sauvegardes (REC-18)

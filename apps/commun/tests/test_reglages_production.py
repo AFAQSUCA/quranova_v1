@@ -89,3 +89,11 @@ def test_la_production_active_le_pool_de_connexions_par_defaut_et_peut_le_couper
     coupe = subprocess.run([sys.executable, "-c", code], cwd=RACINE, env={**base, "DB_POOL": "0"}, capture_output=True, text=True)
     assert "'pool'" in actif.stdout and "'max_size': 20" in actif.stdout, actif.stdout + actif.stderr
     assert coupe.stdout.strip() in ("None", "{}"), coupe.stdout
+
+
+def test_la_production_exige_le_deuxieme_facteur_et_fait_confiance_a_nginx_pour_l_adresse():
+    code = "from django.conf import settings as s; print(s.EXIGER_2FA, s.PROXY_DE_CONFIANCE)"
+    env = {"PATH": os.environ["PATH"], "DJANGO_SETTINGS_MODULE": "config.settings.prod", "DB_PASSWORD": "x",
+           "DJANGO_SECRET_KEY": CLE_VALIDE, "DJANGO_ALLOWED_HOSTS": "10.0.0.5"}
+    r = subprocess.run([sys.executable, "-c", code], cwd=RACINE, env=env, capture_output=True, text=True)
+    assert r.stdout.strip() == "True True", r.stdout + r.stderr

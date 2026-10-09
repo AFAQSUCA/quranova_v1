@@ -5,3 +5,5 @@ psycopg[binary,pool]>=3.2,<4
 python-dotenv>=1.0,<2
 channels-redis>=4.2,<5
 weasyprint>=68,<71
+django-otp>=1.5,<2
+qrcode>=7.4,<9

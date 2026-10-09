@@ -475,3 +475,52 @@ async def test_l_operateur_voit_les_jures_connectes(poste):
     assert [j["connecte"] for j in ecrans["jures"]] == [True]
     await op.disconnect()
     await jure.disconnect()
+
+
+# --- Deuxième facteur (§15.1) -----------------------------------------------------------------------------------------------
+
+
+async def test_15_1_un_operateur_sans_deuxieme_facteur_ne_commande_pas_par_websocket(poste, settings):
+    """Le contrôle du deuxième facteur vaut aussi pour le WebSocket : sinon on contournerait la page de vérification."""
+    settings.EXIGER_2FA = True
+    _, session, operateur, _ = poste
+    comm = communicateur(session, operateur)
+    comm.scope["session"] = {}  # session HTTP sans appareil vérifié
+
+    connecte, _ = await comm.connect()
+
+    assert connecte and await comm.receive_nothing(timeout=0.5)  # aucun instantané : il reste en attente d'authentification
+    await comm.disconnect()
+
+
+async def test_15_1_un_operateur_avec_deuxieme_facteur_valide_entre_normalement(poste, settings):
+    from asgiref.sync import sync_to_async
+    from django_otp import DEVICE_ID_SESSION_KEY
+    from django_otp.plugins.otp_totp.models import TOTPDevice
+
+    settings.EXIGER_2FA = True
+    _, session, operateur, _ = poste
+    appareil = await sync_to_async(TOTPDevice.objects.create)(user=operateur, name="t", confirmed=True)
+    comm = communicateur(session, operateur)
+    comm.scope["session"] = {DEVICE_ID_SESSION_KEY: appareil.persistent_id}
+
+    connecte, _ = await comm.connect()
+
+    assert connecte and (await comm.receive_json_from())["type"] == "etat"
+    await comm.disconnect()
+
+
+async def test_15_1_l_appareil_d_un_autre_compte_ne_valide_pas_la_session(poste, settings):
+    from asgiref.sync import sync_to_async
+    from django_otp import DEVICE_ID_SESSION_KEY
+    from django_otp.plugins.otp_totp.models import TOTPDevice
+
+    settings.EXIGER_2FA = True
+    _, session, operateur, _ = poste
+    autre = await sync_to_async(creer_utilisateur)(Utilisateur.Role.OPERATEUR)
+    appareil_de_l_autre = await sync_to_async(TOTPDevice.objects.create)(user=autre, name="t", confirmed=True)
+    comm = communicateur(session, operateur)
+    comm.scope["session"] = {DEVICE_ID_SESSION_KEY: appareil_de_l_autre.persistent_id}
+
+    assert (await comm.connect())[0] and await comm.receive_nothing(timeout=0.5)
+    await comm.disconnect()
