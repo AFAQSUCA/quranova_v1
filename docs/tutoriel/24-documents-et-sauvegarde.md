@@ -13,7 +13,9 @@
 | **§17.1** : export CSV | UTF-8, point-virgule, un fichier par entité, en-têtes documentés, journalisé, sans donnée d'un autre client |
 | **§15.5, REC-18** | sauvegarde `pg_dump` + empreinte SHA-256, rotation, restauration vérifiée par `verifier_audit` |
 
-## Une décision à prendre : le PDF
+## Le PDF (décision prise : WeasyPrint, voir le chapitre 31)
+
+> Mise à jour : ce chapitre décrit l'état de l'étape 4g. Le PDF côté serveur a été ajouté ensuite (chapitre 31) ; le paragraphe ci-dessous est l'ancienne décision en attente.
 
 Le procès-verbal est produit en **HTML prêt à imprimer** (feuille de style `@page` : A4, numéros de page). Depuis le navigateur, « Imprimer → Enregistrer en PDF » donne le PDF. Générer le PDF **côté serveur** demanderait la bibliothèque WeasyPrint (nouvelle dépendance ; sous Windows, elle exige les bibliothèques Pango via MSYS2, voir `DEMARRAGE.md`). Tant que cette dépendance n'est pas validée, on n'ajoute rien.
 
