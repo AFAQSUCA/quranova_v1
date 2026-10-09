@@ -15,3 +15,7 @@ class CorpusDejaImporteError(Exception):
 
 class ReferenceInvalideError(Exception):
     """Une référence de verset ou un passage coranique est invalide (§8.4, REC-31)."""
+
+
+class ValidationCorpusRefuseeError(Exception):
+    """Seul l'administrateur QURANOVA valide ou active une version du corpus (§12.3)."""

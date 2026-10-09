@@ -11,8 +11,8 @@ Avant cela, tout ce que le CdC place en **V1 / « avant le pilote »** et qui n'
 | A3 ✅ | **Authentification à deux facteurs obligatoire** pour l'administrateur et les opérateurs : absente | TOTP (appli d'authentification, fonctionne hors ligne) : enrôlement, vérification à la connexion de l'administration, comptes sans 2FA refusés | **`django-otp`** (+ `qrcode` pour l'enrôlement) — à valider |
 
 ## B. Corpus : jalon J0 et livrable L-07
-- B1. Action d'administration **« Valider cette version du corpus »** réservée à l'administrateur : enregistre le nom du référent coranique, la date et l'empreinte (aujourd'hui il n'existe que les champs du modèle ; la validation d'essai de `creer_demo` n'est qu'un raccourci de développement).
-- B2. **Procès-verbal de validation du corpus** (PDF, WeasyPrint) : version, empreinte SHA-256, résultats des contrôles §12.2 (114 sourates, 6 236 versets, numérotation, versets non vides), espace de signature du référent. C'est le document à faire signer.
+- B1 ✅ Action d'administration **« Valider cette version du corpus »** réservée à l'administrateur : enregistre le nom du référent coranique, la date et l'empreinte (aujourd'hui il n'existe que les champs du modèle ; la validation d'essai de `creer_demo` n'est qu'un raccourci de développement).
+- B2 ✅ **Procès-verbal de validation du corpus** (PDF, WeasyPrint) : version, empreinte SHA-256, résultats des contrôles §12.2 (114 sourates, 6 236 versets, numérotation, versets non vides), espace de signature du référent. C'est le document à faire signer.
 
 ## C. Fonctions du pilote encore manquantes
 - C1. **Journal des incidents** : saisie par l'opérateur (heure, type selon §13.6, description, durée, résolution) ; section 3 du procès-verbal complétée ; alimente le bilan L-09.

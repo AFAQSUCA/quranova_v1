@@ -3,6 +3,7 @@
 Le texte coranique vient uniquement du fichier Tanzil importé : il n'est jamais
 saisi, corrigé ni normalisé depuis l'application (règle absolue n°1).
 """
+from django.conf import settings
 from django.db import models
 from django.db.models import Q
 
@@ -276,3 +277,36 @@ class Verset(models.Model):
         if sourate_id is not None:
             _verifier_sourates_modifiables({sourate_id})
         return super().delete(*args, **kwargs)
+
+
+class ValidationCorpus(models.Model):
+    """La trace de la validation d'une version par le référent coranique (§12.2 point 7, livrable L-07).
+
+    Écrite une seule fois, au moment où l'administrateur enregistre la validation ; jamais modifiée ni supprimée.
+    """
+
+    version = models.OneToOneField(VersionCorpus, on_delete=models.PROTECT, related_name="validation")
+    referent_nom = models.CharField(max_length=200)
+    referent_qualite = models.CharField(max_length=200, blank=True)
+    date_signature = models.DateField(help_text="Date de signature du procès-verbal par le référent coranique.")
+    validee_par = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+")
+    validee_le = models.DateTimeField(auto_now_add=True)
+    controles = models.JSONField(help_text="Résultat de chaque contrôle automatique au moment de la validation.")
+    empreinte_echantillon = models.CharField(
+        max_length=64, help_text="Empreinte de l'échantillon de relecture signé (version + références), pour le retrouver à l'identique."
+    )
+
+    class Meta:
+        verbose_name = "validation du corpus"
+        verbose_name_plural = "validations du corpus"
+
+    def save(self, *args, **kwargs):
+        if not self._state.adding:
+            raise services.CorpusImmuableError("Une validation de corpus n'est jamais modifiée.")
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        raise services.CorpusImmuableError("Une validation de corpus n'est jamais supprimée.")
+
+    def __str__(self):
+        return f"Validation de la version {self.version_id} par {self.referent_nom} le {self.date_signature:%d/%m/%Y}"
