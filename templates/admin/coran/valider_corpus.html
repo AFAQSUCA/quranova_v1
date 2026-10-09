@@ -1,0 +1,17 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<h1>Enregistrer la validation de la version {{ version.pk }}</h1>
+<p>Source : {{ version.source }} {{ version.version_source }} — empreinte <code>{{ version.empreinte_sha256 }}</code></p>
+<p><strong>Ordre à respecter :</strong> imprimez le <a href="{% url 'coran:proces_verbal' version.pk %}" target="_blank">procès-verbal</a>, faites relire l'échantillon par le référent
+coranique, faites-le signer, <em>puis</em> enregistrez ici sa validation. Les contrôles automatiques sont rejoués à l'enregistrement ; s'ils échouent, rien n'est validé.
+Une version validée est <strong>définitivement figée</strong> (RM-27).</p>
+<form method="post">
+  {% csrf_token %}
+  <input type="hidden" name="action" value="enregistrer_la_validation">
+  <input type="hidden" name="_selected_action" value="{{ version.pk }}">
+  <input type="hidden" name="appliquer" value="1">
+  {{ form.as_p }}
+  <input type="submit" class="default" value="Enregistrer la validation">
+  <a href="{% url 'admin:coran_versioncorpus_changelist' %}" class="button">Annuler</a>
+</form>
+{% endblock %}

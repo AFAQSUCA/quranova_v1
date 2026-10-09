@@ -8,7 +8,13 @@ fait tourner l'application sur un Wi-Fi dédié, sans Internet ; tablettes de ti
 
 - Cahier des charges : `docs/cdc/00-index.md` (une section par fichier). **Avant toute tâche, lis la ou les sections concernées.**
 - Planning et itérations : `docs/cdc/24-planning-et-phasage.md` ; prompts de travail : `docs/prompts-iterations.md`.
-- Phase en cours : **Phase 0 — Cadrage et corpus** (mettre à jour cette ligne à chaque changement de phase).
+- Tutoriel pas à pas : `docs/tutoriel/` (un chapitre par étape terminée). **Claude : à la fin de chaque étape, ajoute ou met à jour le chapitre correspondant** (fichiers complets, commandes PowerShell, résultat attendu, solutions des `TODO(human)` en blocs repliés).
+- Phase en cours : **Phase 3 — Autorecette et empaquetage du serveur de salle : développement terminé** (tableau REC : `docs/recette/autorecette.md` ; Docker Compose ; réglages de production ;
+  charge : `docs/recette/charge.md` ; accessibilité : `docs/recette/accessibilite.md`). **Reste à faire hors code** : mesurer REC-19/20 sur le portable de salle, jouer la répétition générale
+  (`docs/recette/repetition-generale.md`, REC-40/41/21/36), clôturer le jalon J0 (corpus validé par le référent coranique),
+  puis phase 4 (concours pilote). Mettre à jour cette ligne à chaque changement de phase.
+  Les règles `TODO(human)` (corpus, RM-21 et suffisance du lot, segmentation, transitions, calcul des résultats) ont été **écrites par Claude à la demande expresse du développeur** :
+  à relire et à expliquer avec tes mots dans `docs/journal-apprentissage.md`.
 
 ## Qui je suis et comment travailler avec moi
 
@@ -33,7 +39,7 @@ je découvre Django Channels, HTMX et Vue 3.
 - Python dans un environnement virtuel `.venv` ; PostgreSQL installé localement sur Windows.
 - **Pas de Docker ni de Redis pendant le développement** (phases 0 à 2) : Channels utilise `InMemoryChannelLayer` en développement.
   Redis et Docker Compose sont introduits en phase 3 pour empaqueter le serveur de salle (Docker Desktop).
-- WeasyPrint sous Windows nécessite les bibliothèques Pango (via MSYS2) ; voir DEMARRAGE.md.
+- WeasyPrint (PDF du procès-verbal et des classements) sous Windows nécessite les bibliothèques Pango (via MSYS2) et la variable `WEASYPRINT_DLL_DIRECTORIES` ; voir DEMARRAGE.md.
 - Évite les dépendances qui ne fonctionnent pas sous Windows ; si une bibliothèque pose problème sous Windows, dis-le avant de l'utiliser.
 
 ## Stack (cf. §13)
@@ -47,6 +53,7 @@ je découvre Django Channels, HTMX et Vue 3.
 
 Applications Django prévues (§13.8) : `clients`, `utilisateurs`, `concours`, `candidats`, `questions`, `coran`,
 `prestations`, `presentation`, `jury`, `resultats`, `audit` (puis `synchro` en V2). Front temps réel dans `frontend/`.
+Les applications vivent dans le dossier `apps/` (ex. `apps.coran`, label `coran`) ; chaque application est créée au moment où on en a besoin.
 
 - La logique métier va dans des **fonctions de service** (`services.py`), pas dans les vues ni les templates.
 - Les vues restent fines : permissions → appel du service → réponse.
@@ -91,10 +98,33 @@ N'utilise **jamais** « passage » seul (dis `PassageCoranique` ou `Prestation`)
 À compléter au fur et à mesure (Claude : mets à jour cette section quand une commande est créée).
 
 ```powershell
-# .venv\Scripts\Activate.ps1                       # activer l'environnement Python
-# python manage.py runserver                         # lancer le serveur de développement (ASGI via daphne)
-# pytest                                             # lancer les tests
-# python manage.py import_corpus data\corpus\quran-uthmani.xml
+.venv\Scripts\Activate.ps1                         # activer l'environnement Python
+pip install -r requirements\dev.txt                # installer les dépendances de développement
+python manage.py check                             # vérifier la configuration
+python manage.py migrate                           # appliquer les migrations (PostgreSQL)
+python manage.py runserver                         # lancer le serveur de développement (ASGI via daphne)
+python manage.py createsuperuser                  # créer l'administrateur ; puis http://127.0.0.1:8000/admin/
+python manage.py verifier_audit                    # contrôle les empreintes chaînées du journal d'audit
+python manage.py sauvegarder --dossier E:\sauvegardes     # sauvegarde PostgreSQL horodatée (à planifier toutes les 15 min)
+python manage.py restaurer E:\sauvegardes\quranova-....dump --vers-base quranova_restaure   # restaure et vérifie
+python manage.py corriger_classement <uuid-epreuve> --utilisateur <responsable> --motif "..."   # nouvelle version du classement
+python manage.py creer_demo --valider-corpus-pour-test   # données de démonstration (DEBUG seulement)
+cd frontend; npm install                           # installer les dépendances du front (Node.js 22+)
+npm run build                                      # compiler le front vers static\frontend\ (servi par Django)
+npm test                                           # tests du front (vitest) ; npm run typecheck pour les types
+pytest                                             # lancer les tests (le test d'intégration Redis est ignoré sans Redis)
+$env:DJANGO_SETTINGS_MODULE="config.settings.prod"; python manage.py check --deploy   # contrôle des réglages de production (variables DJANGO_ALLOWED_HOSTS, REDIS_URL…)
+python manage.py import_corpus                     # importe data\corpus\quran-uthmani.xml et quran-data.xml (version « importée »)
+python manage.py import_corpus --dry-run           # lit et contrôle, puis annule sans rien enregistrer
+python manage.py importer_candidats <uuid-concours> fichier.csv [--dry-run]   # importe des candidats (tout ou rien)
+# Serveur de salle (phase 3, Docker Desktop) — guide : docs\recette\installation-serveur-de-salle.md
+.\scripts\demarrer.ps1                               # construit et démarre PostgreSQL + Redis + Daphne + Nginx
+.\scripts\arreter.ps1                                # arrête (données conservées)
+.\scripts\tests-docker.ps1                           # lance pytest dans l'image Docker
+.\scripts\sauvegarder.ps1                            # sauvegarde horodatée depuis le conteneur
+node scripts\audit-accessibilite.mjs C:\Temp\a11y.json           # audit d'accessibilité (outils : voir docs\recette\accessibilite.md)
+bandit -r apps config -c bandit.yaml -q ; pip-audit -r requirements\dev.txt   # ou .\scripts\audit-securite.ps1 (REC-28)
+docker compose exec web python manage.py simuler_charge --confirmer-base-jetable --url http://nginx   # charge REC-19/20 (base JETABLE)
 ```
 
 ## Définition de « terminé » pour une étape

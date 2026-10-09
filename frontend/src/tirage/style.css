@@ -1,0 +1,35 @@
+:root { --fond: #0a4c30; --papier: #fbf7ee; --or: #c9a227; --texte: #1d2b2b; }
+* { box-sizing: border-box; }
+body.page-tirage { margin: 0; min-height: 100%; background: var(--fond); color: var(--papier);
+  font-family: system-ui, "Segoe UI", sans-serif; -webkit-user-select: none; user-select: none;
+  touch-action: manipulation; }
+.ecran { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; }
+.panneau { text-align: center; max-width: 40rem; width: 100%; }
+h1 { font-size: clamp(2rem, 6vw, 3.5rem); margin: .3em 0; }
+.etiquette { letter-spacing: .08em; text-transform: uppercase; opacity: .8; margin: 0; }
+.consigne { opacity: .85; }
+.bandeau { position: fixed; top: 0; left: 0; right: 0; margin: 0; padding: .6rem; text-align: center;
+  background: #8a5a00; color: #fff; font-size: 1rem; }
+button { font: inherit; border: 0; cursor: pointer; border-radius: 1rem; }
+button:focus-visible { outline: 4px solid #fff; outline-offset: 3px; }
+.gros-bouton { background: var(--or); color: var(--texte); font-size: clamp(1.5rem, 4vw, 2.2rem); font-weight: 700;
+  padding: 1.2rem 2.5rem; margin-top: 1.5rem; min-width: 16rem; min-height: 4.5rem; }
+.gros-bouton:active { transform: scale(.98); }
+.secondaire { background: transparent; color: var(--papier); border: 2px solid var(--papier); padding: 1rem 2rem;
+  font-size: 1.3rem; margin: 1rem .5rem 0; min-height: 3.5rem; }
+.confirmation { margin-top: 1rem; }
+.confirmation p { font-size: 1.6rem; }
+.erreur { background: #5b1d1d; padding: 2rem; border-radius: 1.5rem; }
+.chargement::after { content: ""; display: inline-block; width: 1em; height: 1em; margin-left: .5em;
+  border: 3px solid var(--papier); border-right-color: transparent; border-radius: 50%; animation: tourne 1s linear infinite; }
+@keyframes tourne { to { transform: rotate(360deg); } }
+
+/* Cartes retournées : décoratif seulement, le résultat est déjà enregistré par le serveur. */
+.cartes { list-style: none; padding: 0; margin: 2rem 0; display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap; perspective: 900px; }
+.carte { position: relative; width: 14rem; height: 9rem; transform-style: preserve-3d; transition: transform .8s ease; }
+.carte.retournee { transform: rotateY(180deg); }
+.carte .dos, .carte .face { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  border-radius: 1rem; backface-visibility: hidden; font-size: 2.6rem; font-weight: 700; }
+.carte .dos { background: var(--or); color: var(--texte); }
+.carte .face { background: var(--papier); color: var(--texte); transform: rotateY(180deg); }
+@media (prefers-reduced-motion: reduce) { .carte { transition: none; } .chargement::after { animation: none; } }

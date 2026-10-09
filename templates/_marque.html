@@ -1,0 +1,2 @@
+{% load static %}<aside class="marques" aria-label="Marques">{% if marque %}<div class="marque-client">{% if marque.logo_url %}<img src="{{ marque.logo_url }}" alt="Logo de {{ marque.nom }}">{% else %}<span>{{ marque.nom }}</span>{% endif %}</div>{% endif %}
+<div class="marque-quranova" role="img" aria-label="QURANOVA" title="QURANOVA" style="background-image: url('{% static 'img/quranova-logo.png' %}')"></div></aside>

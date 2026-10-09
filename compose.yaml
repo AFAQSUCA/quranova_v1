@@ -1,0 +1,86 @@
+# Serveur de salle QURANOVA : PostgreSQL + Redis + Daphne (web) + Nginx. Lancer avec scripts\demarrer.ps1.
+# Les secrets viennent du fichier .env (jamais versionné) ; voir .env.example.
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-quranova}
+      POSTGRES_USER: ${DB_USER:-quranova}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD manquant dans .env}
+    volumes:
+      - donnees-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    # Pas de persistance : Redis ne porte que des messages éphémères (la vérité est dans PostgreSQL).
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  web:
+    build:
+      context: .
+      target: web
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.prod
+      DB_HOST: db
+      DB_PORT: "5432"
+      REDIS_URL: redis://redis:6379/0
+      DJANGO_MEDIA_ROOT: /data/media
+    depends_on:
+      db: {condition: service_healthy}
+      redis: {condition: service_healthy}
+    volumes:
+      - fichiers-statiques:/app/staticfiles
+      - fichiers-media:/data/media
+      - ${DOSSIER_SAUVEGARDES:-./sauvegardes}:/data/sauvegardes
+    healthcheck:
+      # L'en-tête Host doit être un hôte autorisé (sinon Django répond 400) : on prend le premier de la liste.
+      test: ["CMD", "python", "-c", "import os, urllib.request as u; h = os.environ['DJANGO_ALLOWED_HOSTS'].split(',')[0]; u.urlopen(u.Request('http://localhost:8000/', headers={'Host': h}), timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    depends_on:
+      web: {condition: service_healthy}
+    ports:
+      - "${PORT_HTTP:-80}:80"
+    volumes:
+      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - fichiers-statiques:/usr/share/nginx/quranova/static:ro
+      - fichiers-media:/usr/share/nginx/quranova/media:ro
+
+  # Tests dans Docker :  docker compose --profile outils run --rm tests
+  tests:
+    profiles: ["outils"]
+    build:
+      context: .
+      target: test
+    env_file: .env
+    environment:
+      DB_HOST: db
+      DB_PORT: "5432"
+    depends_on:
+      db: {condition: service_healthy}
+
+volumes:
+  donnees-postgres:
+  fichiers-statiques:
+  fichiers-media:

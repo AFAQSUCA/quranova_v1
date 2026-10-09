@@ -1,0 +1,16 @@
+.commande { max-width: 60rem; margin: 0 auto; padding: 1.5rem; font-family: system-ui, "Segoe UI", sans-serif; color: #1d2b2b; background: #fbf7ee; min-height: 100vh; }
+.commande h1 { margin: 0 0 .3em; }
+.commande .etat-connexion { margin: 0; font-weight: 600; color: #1d6b3a; }
+.commande .etat-connexion[data-connexion="perdue"], .commande .etat-connexion[data-connexion="connexion"] { color: #8a5a00; }
+.commande .ecrans { list-style: none; padding: 0; margin: .5rem 0 1rem; display: flex; gap: 1rem; flex-wrap: wrap; }
+.commande .ecrans .coupe { color: #a12; font-weight: 600; }
+.commande section { margin: 1rem 0; }
+.commande .preparation { display: flex; gap: .75rem; align-items: center; flex-wrap: wrap; }
+.commande select, .commande button { font: inherit; padding: .8rem 1.2rem; min-height: 3.2rem; border-radius: .6rem; border: 2px solid #1d2b2b; background: #fff; }
+.commande button { cursor: pointer; background: #0a4c30; color: #fbf7ee; border-color: #0a4c30; }
+.commande button.principal { background: #c9a227; color: #1d2b2b; border-color: #c9a227; font-weight: 700; font-size: 1.2rem; }
+.commande button:disabled { opacity: .35; cursor: not-allowed; }
+.commande .boutons { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: .75rem; }
+.commande .apercu { background: #fff; border: 2px solid #ddd; border-radius: .6rem; padding: 1rem; }
+.commande .apercu .texte[dir="rtl"] { font-size: 2rem; line-height: 1.9; font-family: "Amiri Quran", "Scheherazade New", "Traditional Arabic", serif; }
+.commande .message { background: #fde8e8; border: 2px solid #a12; padding: .8rem 1rem; border-radius: .6rem; }

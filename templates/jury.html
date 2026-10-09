@@ -1,0 +1,18 @@
+{% load static %}<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>QURANOVA — Jury</title>
+  <link rel="icon" href="{% static 'img/favicon.png' %}">
+  <link rel="stylesheet" href="{% static 'css/charte.css' %}">
+  <link rel="stylesheet" href="{% static 'frontend/frontend.css' %}">
+</head>
+<body{% if marque.couleur_principale %} style="--client-principal: {{ marque.couleur_principale }};{% if marque.couleur_secondaire %} --client-secondaire: {{ marque.couleur_secondaire }};{% endif %}"{% endif %}>
+  {% include "_marque.html" %}
+  <div id="app"></div>
+  <noscript>Cet écran nécessite JavaScript.</noscript>
+  <script type="module" src="{% static 'frontend/jury.js' %}"></script>
+</body>
+</html>

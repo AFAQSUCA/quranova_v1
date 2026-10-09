@@ -1,0 +1,6 @@
+-r base.txt
+pytest>=9.0.3,<10
+pytest-django>=4.9,<5
+pytest-asyncio>=1.0,<2
+bandit>=1.8,<2
+pip-audit>=2.9,<3
