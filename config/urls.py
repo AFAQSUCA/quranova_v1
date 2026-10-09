@@ -18,6 +18,9 @@ if settings.DEBUG:
     # En développement seulement : Django sert les logos téléversés. En production, c'est Nginx (phase 3).
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
+from apps.utilisateurs.formulaires import FormulaireConnexionAdmin  # noqa: E402
+
+admin.site.login_form = FormulaireConnexionAdmin
 admin.site.site_header = "QURANOVA — Administration"
 admin.site.site_title = "QURANOVA"
 admin.site.index_title = "Gestion des concours"

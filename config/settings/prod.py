@@ -14,6 +14,7 @@ from .base import *  # noqa: F401,F403
 from .base import BASE_DIR, SECRET_KEY
 
 DEBUG = False
+PROXY_DE_CONFIANCE = True  # Daphne n'est joignable que par Nginx, qui pose X-Real-IP (docker/nginx.conf)
 
 # --- Contrôles de démarrage ---------------------------------------------------------------------------------------
 

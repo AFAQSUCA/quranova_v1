@@ -105,3 +105,9 @@ AUTH_USER_MODEL = "utilisateurs.Utilisateur"
 # Fichiers téléversés (logos des clients, formulaires de consentement...). Jamais versionnés.
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
+
+# Adresse réelle du client : REMOTE_ADDR en développement ; X-Real-IP (posé par Nginx) en production (voir apps/commun/reseau.py).
+PROXY_DE_CONFIANCE = False
+
+# Connexion du personnel : limitation des essais (§15.1) ; ModelBackend de Django sinon.
+AUTHENTICATION_BACKENDS = ["apps.utilisateurs.backends.ModelBackendLimite"]

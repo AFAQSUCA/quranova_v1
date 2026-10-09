@@ -79,6 +79,24 @@ def test_d5_apres_cinq_essais_faux_429_meme_avec_le_bon_code(client):
 
 
 @pytest.mark.django_db
+def test_d5_derriere_nginx_les_essais_faux_d_une_tablette_ne_bloquent_pas_les_autres(client, settings):
+    """Sans l'adresse réelle (X-Real-IP), toutes les tablettes auraient l'adresse de Nginx et partageraient les 5 essais."""
+    settings.PROXY_DE_CONFIANCE = True
+    session = creer_session()
+    _, code = services.generer_code(creer_jure(session.organisation), session)
+    for _ in range(5):
+        client.post(url("api_connexion", session), data=json.dumps({"code": "ZZZZ-ZZZZ"}), content_type="application/json",
+                    REMOTE_ADDR="172.18.0.5", HTTP_X_REAL_IP="192.168.50.21")
+
+    bloquee = client.post(url("api_connexion", session), data=json.dumps({"code": code}), content_type="application/json",
+                          REMOTE_ADDR="172.18.0.5", HTTP_X_REAL_IP="192.168.50.21")
+    autre = client.post(url("api_connexion", session), data=json.dumps({"code": code}), content_type="application/json",
+                        REMOTE_ADDR="172.18.0.5", HTTP_X_REAL_IP="192.168.50.22")
+
+    assert bloquee.status_code == 429 and autre.status_code == 200
+
+
+@pytest.mark.django_db
 @pytest.mark.parametrize("corps", [{}, {"code": 12}, []])
 def test_connexion_requete_invalide(client, corps):
     assert post(client, url("api_connexion", creer_session()), {}, corps).status_code == 400

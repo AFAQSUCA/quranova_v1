@@ -8,7 +8,7 @@ from django.contrib.auth.models import AbstractUser, UserManager
 from django.db import models
 from django.db.models import Q
 
-from apps.commun.models import ModeleDuClient
+from apps.commun.models import ModeleDuClient, ModeleHorodate
 from apps.utilisateurs.exceptions import AffectationInvalideError
 
 
@@ -82,3 +82,20 @@ class AffectationOperateur(ModeleDuClient):
                 f"Seul un opérateur peut être affecté à une mission (rôle : {self.utilisateur.role})."
             )
         super().save(*args, **kwargs)
+
+
+class TentativeConnexion(ModeleHorodate):
+    """Un essai de connexion du personnel (réussi ou non), pour limiter les essais d'un compte et d'une adresse (§15.1).
+
+    Pas de clé ``organisation`` : le personnel du prestataire n'appartient à aucun client. L'identifiant est conservé en minuscules,
+    même s'il ne correspond à aucun compte (un attaquant qui devine des noms est limité de la même façon).
+    """
+
+    identifiant = models.CharField(max_length=150)
+    adresse = models.CharField(max_length=64, blank=True)
+    reussie = models.BooleanField()
+
+    class Meta:
+        verbose_name = "tentative de connexion"
+        verbose_name_plural = "tentatives de connexion"
+        indexes = [models.Index(fields=["identifiant", "cree_le"]), models.Index(fields=["adresse", "cree_le"])]

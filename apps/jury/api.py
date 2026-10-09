@@ -13,6 +13,7 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
+from apps.commun.reseau import adresse_du_client
 from apps.concours.models import CritereNotation, Session
 from apps.jury import connexion, evaluations
 from apps.jury.exceptions import (
@@ -94,7 +95,7 @@ def ouvrir(request, session_id):
     corps = _corps(request)
     if corps is None or not isinstance(corps.get("code"), str):
         return _erreur(400, "requete_invalide", "Requête invalide : un code est attendu.")
-    adresse = request.META.get("REMOTE_ADDR", "")
+    adresse = adresse_du_client(request)
     try:
         conn, jeton = connexion.ouvrir_connexion(corps["code"], session, adresse)
     except TropDEssaisError as erreur:
