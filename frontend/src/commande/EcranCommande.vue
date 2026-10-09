@@ -69,12 +69,12 @@ const LIBELLES_PHASE: Record<string, string> = { preparee: "Préparée", afficha
     </section>
 
     <section v-if="store.etat?.prestation" class="courant">
-      <p>
+      <p aria-live="polite" data-testid="annonce-etat">
         Candidat n° {{ store.etat.prestation.candidat.numero }} — {{ store.etat.prestation.candidat.prenom }} ·
         {{ store.etat.prestation.serie }} · <strong data-testid="phase">{{ LIBELLES_PHASE[phase ?? ""] }}</strong>
       </p>
       <div v-if="diapositive" class="apercu">
-        <p class="rang" data-testid="rang">Diapositive {{ diapositive.index + 1 }} / {{ diapositive.total }}</p>
+        <p class="rang" data-testid="rang" aria-live="polite">Diapositive {{ diapositive.index + 1 }} / {{ diapositive.total }}</p>
         <p v-if="diapositive.question">Question {{ diapositive.question.rang }}/{{ diapositive.question.total }} — {{ diapositive.question.libelle }}</p>
         <p v-if="diapositive.texte" class="texte" :lang="diapositive.type === 'verset' ? 'ar' : 'fr'" :dir="diapositive.type === 'verset' ? 'rtl' : 'ltr'">{{ diapositive.texte }}</p>
         <p v-if="diapositive.reference">{{ diapositive.reference }}</p>

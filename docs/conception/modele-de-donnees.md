@@ -112,3 +112,5 @@ de l'étape 1.2 (« Modèles, application par application »).
 | D51 | Empaquetage : Docker Compose (db, redis, web/Daphne, nginx) ; front compilé dans l'image (pas de Node en production) ; Redis sans persistance ; `ALLOWED_HOSTS` = adresses du serveur ; images construites avec Internet puis utilisées hors ligne ; tests exécutables dans l'image (`--profile outils`). |
 
 | D52 | Simulation de charge sans dépendance (client HTTP stdlib + client WebSocket maison) ; commande réservée aux bases jetables ; pool de connexions PostgreSQL prévu mais désactivé (`DB_POOL`) en attendant l'accord sur `psycopg_pool` ; le tirage reste sérialisé par le verrou de lot. |
+
+| D53 | Pool de connexions PostgreSQL actif par défaut en production (`psycopg_pool`, accord du développeur) ; accessibilité : audit axe-core dans un vrai navigateur sans dépendance projet, scène conservant le balayage (§18.2), zone live sur la commande ; répétition générale chronométrée documentée (REC-40). |

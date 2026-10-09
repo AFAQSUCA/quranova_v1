@@ -30,7 +30,7 @@ docker compose exec web python manage.py simuler_charge --confirmer-base-jetable
 
 ## Ce qu'on a appris
 Voir `docs/recette/charge.md` : cohérence parfaite, mais latences au-dessus des objectifs **dans le bac à sable** ; le goulot principal est
-la connexion PostgreSQL ouverte à chaque requête (un pool l'atténue, nouvelle dépendance à valider) ; le tirage est sérialisé par conception.
+la connexion PostgreSQL ouverte à chaque requête (un pool de connexions, activé par défaut en production, l'atténue) ; le tirage est sérialisé par conception.
 
 **Question :** pourquoi une simulation où toutes les tablettes tirent à la même seconde est-elle plus sévère que la réalité, et pourquoi
 faut-il pourtant la lancer ?

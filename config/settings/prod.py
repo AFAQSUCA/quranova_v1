@@ -39,11 +39,11 @@ if not ALLOWED_HOSTS or "*" in ALLOWED_HOSTS:
 # Origines autorisées pour les formulaires (CSRF) : « http://192.168.50.10 » ; à défaut, celles des hôtes en http.
 CSRF_TRUSTED_ORIGINS = _liste("DJANGO_CSRF_TRUSTED_ORIGINS") or [f"http://{h}" for h in ALLOWED_HOSTS]
 
-# --- PostgreSQL : pool de connexions (OPTIONNEL, désactivé par défaut) ----------------------------------------------
+# --- PostgreSQL : pool de connexions ----------------------------------------------------------------------------------
 # Sans pool, chaque requête et chaque commande WebSocket ouvre puis ferme sa propre connexion. En simulation de charge
-# (docs/recette/charge.md), le pool a ramené le p95 de propagation de 537 à 306 ms. Il demande le paquet « psycopg_pool » :
-# après accord, remplacer « psycopg[binary] » par « psycopg[binary,pool] » dans requirements/base.txt, puis DB_POOL=1 dans .env.
-if os.environ.get("DB_POOL", "0") == "1":
+# (docs/recette/charge.md), le pool a ramené le p95 de propagation de 537 à 306 ms et le p95 HTTP de 680 à 401 ms.
+# Actif par défaut ; DB_POOL=0 le désactive (diagnostic). Le pool prête des connexions déjà ouvertes (paquet psycopg_pool).
+if os.environ.get("DB_POOL", "1") == "1":
     DATABASES["default"]["OPTIONS"] = {
         "pool": {"min_size": 4, "max_size": int(os.environ.get("DB_POOL_MAX", "20")), "timeout": 10},
     }

@@ -58,6 +58,7 @@ Essayez d'abord seul, en vous aidant des tests. Si vous manquez de temps, la sol
 | [26](26-reglages-de-production-et-redis.md) | Réglages de production et Redis (channels-redis) | 6.0a (phase 3) |
 | [27](27-docker-compose.md) | Docker Compose : PostgreSQL, Redis, Daphne, Nginx | 6.0b (phase 3) |
 | [28](28-simulation-de-charge.md) | Simulation de charge (REC-19, REC-20) | 6.2 (phase 3) |
+| [29](29-accessibilite-et-repetition-generale.md) | Accessibilité (WCAG 2.1 AA) et répétition générale | 6.3 (phase 3) |
 
 ## Si vous êtes bloqué
 

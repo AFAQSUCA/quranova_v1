@@ -57,16 +57,15 @@ Ce que ces essais apprennent :
 1. **Aucune anomalie de cohérence** dans aucun essai : 500 tirages uniques, aucune série réutilisée, audit intact, aucune commande perdue.
 2. **Goulot n° 1 : une connexion PostgreSQL par requête.** Django ouvre et ferme une connexion pour chaque requête HTTP et chaque commande
    WebSocket (observé au profilage : Daphne à ~120 % de CPU, PostgreSQL à ~60 %). Un **pool de connexions** (`psycopg_pool`) a nettement
-   amélioré les latences (p95 HTTP 680 → 401 ms, propagation 537 → 306 ms). Il est prévu dans `config/settings/prod.py` (variable `DB_POOL=1`)
-   mais **désactivé** : il demande une nouvelle dépendance, à valider.
+   amélioré les latences (p95 HTTP 680 → 401 ms, propagation 537 → 306 ms). Il est **actif par défaut** en production
+   (`config/settings/prod.py`, paquet `psycopg_pool` ajouté avec ton accord ; `DB_POOL=0` pour le couper).
 3. **Goulot n° 2 : le tirage est sérialisé par conception** (verrou sur le lot, règle absolue n° 2) : environ 50 ms par tirage ici. Vingt
    tablettes qui appuient dans la même seconde se mettent en file ; le dernier attend ~1 s. C'est le prix de « jamais deux fois la même série ».
 4. Sur le portable cible (SSD, cœurs non partagés avec le générateur), les temps devraient être nettement meilleurs ; seule la mesure le dira.
 
 ## À faire pour clore REC-19 / REC-20
 
-1. Valider l'ajout de `psycopg_pool` (point 2), puis relancer la simulation.
-2. Lancer la simulation **sur le portable de salle**, depuis un autre ordinateur du Wi-Fi dédié pour que le générateur ne vole pas de CPU
+1. Lancer la simulation **sur le portable de salle**, depuis un autre ordinateur du Wi-Fi dédié pour que le générateur ne vole pas de CPU
    (ou au moins avec le même Docker Compose), et joindre le rapport au dossier de recette.
-3. Si le tirage dépasse 1 s en rafale sur le matériel cible : réduire le travail fait sous le verrou (journal d'audit, requêtes de
+2. Si le tirage dépasse 1 s en rafale sur le matériel cible : réduire le travail fait sous le verrou (journal d'audit, requêtes de
    `series_admissibles`) plutôt que d'assouplir la règle.

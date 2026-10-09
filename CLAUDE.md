@@ -9,9 +9,12 @@ fait tourner l'application sur un Wi-Fi dédié, sans Internet ; tablettes de ti
 - Cahier des charges : `docs/cdc/00-index.md` (une section par fichier). **Avant toute tâche, lis la ou les sections concernées.**
 - Planning et itérations : `docs/cdc/24-planning-et-phasage.md` ; prompts de travail : `docs/prompts-iterations.md`.
 - Tutoriel pas à pas : `docs/tutoriel/` (un chapitre par étape terminée). **Claude : à la fin de chaque étape, ajoute ou met à jour le chapitre correspondant** (fichiers complets, commandes PowerShell, résultat attendu, solutions des `TODO(human)` en blocs repliés).
-- Phase en cours : **Phase 3 — Autorecette et empaquetage du serveur de salle** (tableau REC dans `docs/recette/autorecette.md`, réglages de production, Docker Compose, charge) ; mettre à jour cette ligne à chaque changement de phase.
+- Phase en cours : **Phase 3 — Autorecette et empaquetage du serveur de salle : développement terminé** (tableau REC : `docs/recette/autorecette.md` ; Docker Compose ; réglages de production ;
+  charge : `docs/recette/charge.md` ; accessibilité : `docs/recette/accessibilite.md`). **Reste à faire hors code** : mesurer REC-19/20 sur le portable de salle, jouer la répétition générale
+  (`docs/recette/repetition-generale.md`, REC-40/41/21/36), décider de la duplication de concours (REC-02) et de WeasyPrint, clôturer le jalon J0 (corpus validé par le référent coranique),
+  puis phase 4 (concours pilote). Mettre à jour cette ligne à chaque changement de phase.
   Les règles `TODO(human)` (corpus, RM-21 et suffisance du lot, segmentation, transitions, calcul des résultats) ont été **écrites par Claude à la demande expresse du développeur** :
-  à relire et à expliquer avec tes mots dans `docs/journal-apprentissage.md` (voir les chapitres du tutoriel). Jalon J0 (validation du corpus par le référent coranique) à clôturer.
+  à relire et à expliquer avec tes mots dans `docs/journal-apprentissage.md`.
 
 ## Qui je suis et comment travailler avec moi
 
@@ -119,6 +122,7 @@ python manage.py importer_candidats <uuid-concours> fichier.csv [--dry-run]   # 
 .\scripts\arreter.ps1                                # arrête (données conservées)
 .\scripts\tests-docker.ps1                           # lance pytest dans l'image Docker
 .\scripts\sauvegarder.ps1                            # sauvegarde horodatée depuis le conteneur
+node scripts\audit-accessibilite.mjs C:\Temp\a11y.json           # audit d'accessibilité (outils : voir docs\recette\accessibilite.md)
 docker compose exec web python manage.py simuler_charge --confirmer-base-jetable --url http://nginx   # charge REC-19/20 (base JETABLE)
 ```
 

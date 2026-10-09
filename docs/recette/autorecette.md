@@ -37,14 +37,14 @@ Légende : **A** = couvert par un test automatisé (`pytest` / `npm test`) · **
 | 31 | Références invalides | A | `apps/coran/tests/test_passages.py` |
 | 32 | Traversée de sourates | A | idem |
 | 33 | Verset 2:282 segmenté | A | `apps/presentation/tests/test_segmentation.py` |
-| 34 | Accessibilité | M + P3 | checklist `docs/recette/accessibilite.md` (étape 6.3) |
+| 34 | Accessibilité | A (audit navigateur) + M | `scripts/audit-accessibilite.mjs` : 0 violation axe ; `test_accessibilite.py` ; vérifications manuelles : `docs/recette/accessibilite.md` |
 | 35 | Réutilisation des séries, lot épuisé | A | `test_rm21_selection.py`, `test_tirage.py::test_lot_epuise_…` |
 | 36 | Panne du serveur de salle < 15 min | M + P3 | procédure §5 de `docs/recette/installation-serveur-de-salle.md` ; à chronométrer sur le matériel |
 | 37 | Import avec erreurs | A | `apps/candidats/tests/test_import_csv.py` |
 | 38 | Mineur sans consentement | A | `test_rm28_…` (service et API) |
 | 39 | Opérateur ne valide pas | A | `test_validation.py::test_rec39_…` |
-| 40 | Répétition générale, installation < 45 min | M + P3 | checklist chronométrée (étape 6.3) |
-| 41 | Coupure secteur (onduleur) | M | matériel : à jouer en répétition |
+| 40 | Répétition générale, installation < 45 min | M | `docs/recette/repetition-generale.md` (checklist chronométrée) |
+| 41 | Coupure secteur (onduleur) | M | §4 de `docs/recette/repetition-generale.md` |
 | 42 | PV de 500 candidats < 30 s | A | `test_documents.py::test_rec42_…` |
 
 ## Lacunes à décider

@@ -20,4 +20,5 @@
 .balayage-enter-from { transform: translateX(100%); }
 .balayage-leave-to { transform: translateX(-100%); }
 .sans-enter-active, .sans-leave-active { transition: none; }
-@media (prefers-reduced-motion: reduce) { .balayage-enter-active, .balayage-leave-active { transition: none; } }
+/* §18.2 : l'écran scène CONSERVE le balayage de RM-12 même si le système demande de réduire les animations
+   (c'est un écran collectif, pas un écran individuel) : aucune règle de réduction des animations ici. */

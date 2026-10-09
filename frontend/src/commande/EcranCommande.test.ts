@@ -74,6 +74,19 @@ describe("écran de commande", () => {
     roue.unmount();
   });
 
+  it("REC-34 : la phase et le rang de la diapositive sont annoncés aux lecteurs d'écran (zone live)", async () => {
+    const { roue, socket } = await monte();
+    socket.recevoir(etat({ version: 4, diapositive: diapo({ index: 4, total: 10 }), instantane: true }));
+    await flushPromises();
+
+    expect(roue.get('[data-testid="annonce-etat"]').attributes("aria-live")).toBe("polite");
+    expect(roue.get('[data-testid="rang"]').attributes("aria-live")).toBe("polite");
+    expect(roue.get('[data-testid="rang"]').text()).toContain("5 / 10");
+    // Le texte coranique n'est pas dans une zone live : un lecteur d'écran ne le relit pas à chaque diapositive.
+    expect(roue.get(".texte").element.closest("[aria-live]")).toBeNull();
+    roue.unmount();
+  });
+
   it("REC-24 : tous les boutons sont désactivés tant que la réponse n'est pas arrivée", async () => {
     const { roue, socket } = await monte();
     socket.recevoir(etat({ version: 17, diapositive: diapo(), instantane: true }));

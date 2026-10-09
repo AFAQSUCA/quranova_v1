@@ -79,3 +79,13 @@ def test_un_message_de_groupe_traverse_deux_processus_via_redis():
 
     message = asyncio.run(scenario())
     assert message["version"] == 7
+
+
+def test_la_production_active_le_pool_de_connexions_par_defaut_et_peut_le_couper():
+    code = "from django.conf import settings as s; print(s.DATABASES['default'].get('OPTIONS'))"
+    base = {"PATH": os.environ["PATH"], "DJANGO_SETTINGS_MODULE": "config.settings.prod", "DB_PASSWORD": "x",
+            "DJANGO_SECRET_KEY": CLE_VALIDE, "DJANGO_ALLOWED_HOSTS": "10.0.0.5"}
+    actif = subprocess.run([sys.executable, "-c", code], cwd=RACINE, env=base, capture_output=True, text=True)
+    coupe = subprocess.run([sys.executable, "-c", code], cwd=RACINE, env={**base, "DB_POOL": "0"}, capture_output=True, text=True)
+    assert "'pool'" in actif.stdout and "'max_size': 20" in actif.stdout, actif.stdout + actif.stderr
+    assert coupe.stdout.strip() in ("None", "{}"), coupe.stdout
