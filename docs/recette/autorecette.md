@@ -31,7 +31,7 @@ Légende : **A** = couvert par un test automatisé (`pytest` / `npm test`) · **
 | 25 | IDOR | A | `test_rec25_…` dans admin, jury, présentation, tirage |
 | 26 | XSS | A | PV échappé, tableur neutralisé, **import** (`apps/commun/tests/test_securite.py`) |
 | 27 | CSRF | A | `test_securite.py::test_rec27_…` |
-| 28 | Injection SQL | A (tests) · M (analyse automatisée) | `test_securite.py::test_rec28_…` ; scan type `bandit`/ZAP à décider (nouvelle dépendance) |
+| 28 | Injection SQL | A | tests d'injection (`test_securite.py`, `test_sauvegarde.py`) + analyse automatisée : `scripts/audit-securite.ps1` (bandit, pip-audit, npm audit : aucune alerte) — voir `docs/recette/securite.md` |
 | 29 | Opérateur A ne voit pas le client B | A | `apps/utilisateurs/tests/test_acces_missions.py` |
 | 30 | Intégrité du corpus | A | `apps/coran/tests/test_controles_corpus.py`, `test_import.py` |
 | 31 | Références invalides | A | `apps/coran/tests/test_passages.py` |
@@ -49,7 +49,5 @@ Légende : **A** = couvert par un test automatisé (`pytest` / `npm test`) · **
 
 ## Lacunes à décider
 
-1. **REC-28 — analyse automatisée de vulnérabilités** : les tests d'injection sont automatisés, mais l'« analyse
-   automatisée » demandée par le critère suppose un outil (ex. `bandit`, `pip-audit`). Nouvelle dépendance : à valider.
-2. **REC-08 / REC-10 / REC-21 / REC-41** : une part reste physique (animation, matériel, Wi-Fi, onduleur) : à jouer à
+1. **REC-08 / REC-10 / REC-21 / REC-41** : une part reste physique (animation, matériel, Wi-Fi, onduleur) : à jouer à
    la répétition générale (REC-40).

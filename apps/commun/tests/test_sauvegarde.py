@@ -169,3 +169,12 @@ def test_les_commandes_sauvegarder_et_restaurer(tmp_path, base_restauree):
     assert entree.organisation is None and entree.details["fichier"] == fichier.name  # chaîne « système »
     with pytest.raises(CommandError, match="altérée|empreinte|introuvable"):
         call_command("restaurer", str(tmp_path / "absent.dump"), "--vers-base", base_restauree + "x")
+
+
+@pytest.mark.parametrize("nom", [
+    'x"; DROP DATABASE quranova_dev; --', "a b", "1abc", "", "a" * 64, "-oops", "base;drop", 'guillemet"',
+])
+def test_rec28_un_nom_de_base_dangereux_est_refuse_avant_toute_commande_sql(tmp_path, nom):
+    """Le nom de la base cible finit dans DROP/CREATE DATABASE et dans pg_restore : seuls les identifiants simples passent."""
+    with pytest.raises(sauvegarde.SauvegardeError, match="Nom de base refusé"):
+        sauvegarde.restaurer(tmp_path / "inexistant.dump", nom, ecraser=True)

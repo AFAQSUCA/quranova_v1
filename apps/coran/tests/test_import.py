@@ -147,6 +147,21 @@ def test_fichier_copie_depuis_le_navigateur_est_refuse(tmp_path):
         lire_corpus(texte, meta, version_source="1.1")
 
 
+@pytest.mark.parametrize("declaration", [
+    b'<!DOCTYPE quran [<!ENTITY a "aaaaaaaaaa"><!ENTITY b "&a;&a;&a;&a;&a;&a;&a;&a;&a;&a;">]>',  # « milliard de rires » en miniature
+    b'<!doctype quran [<!entity x SYSTEM "file:///etc/passwd">]>',                                  # entité externe, en minuscules
+    b"<!ENTITY y 'z'>",
+])
+def test_rec28_un_fichier_avec_doctype_ou_entite_est_refuse_avant_l_analyse(tmp_path, declaration):
+    """Un fichier Tanzil authentique n'a ni DOCTYPE ni ENTITY : on refuse tout XML qui en porte (attaques par entités)."""
+    texte, meta = tmp_path / "t.xml", tmp_path / "m.xml"
+    texte.write_bytes(b"<?xml version='1.0'?>\n" + declaration + b"\n<quran/>\n")
+    meta.write_bytes(xml_metadonnees(METADONNEES_MINI).encode("utf-8"))
+
+    with pytest.raises(CorpusInvalideError, match="DOCTYPE ou ENTITY"):
+        lire_corpus(texte, meta, version_source="1.1")
+
+
 def test_sourate_sans_metadonnees_refusee(tmp_path):
     texte, meta = tmp_path / "t.xml", tmp_path / "m.xml"
     texte.write_bytes(xml_texte(SOURATES_MINI).encode("utf-8"))

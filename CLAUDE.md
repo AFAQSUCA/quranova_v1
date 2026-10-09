@@ -123,6 +123,7 @@ python manage.py importer_candidats <uuid-concours> fichier.csv [--dry-run]   # 
 .\scripts\tests-docker.ps1                           # lance pytest dans l'image Docker
 .\scripts\sauvegarder.ps1                            # sauvegarde horodatée depuis le conteneur
 node scripts\audit-accessibilite.mjs C:\Temp\a11y.json           # audit d'accessibilité (outils : voir docs\recette\accessibilite.md)
+bandit -r apps config -c bandit.yaml -q ; pip-audit -r requirements\dev.txt   # ou .\scripts\audit-securite.ps1 (REC-28)
 docker compose exec web python manage.py simuler_charge --confirmer-base-jetable --url http://nginx   # charge REC-19/20 (base JETABLE)
 ```
 

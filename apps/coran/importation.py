@@ -9,7 +9,8 @@ aucune transformation (ni normalisation Unicode, ni suppression d'espaces ou de 
 """
 import hashlib
 import re
-import xml.etree.ElementTree as ET
+# DOCTYPE et ENTITY sont refusés avant l'analyse (voir _lire_xml)
+import xml.etree.ElementTree as ET  # nosec B405
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -69,8 +70,15 @@ def _entier(valeur, description):
 
 
 def _lire_xml(octets, description):
+    # Les fichiers Tanzil n'ont ni DOCTYPE ni ENTITY. On les refuse d'emblée : c'est ce qui permet les attaques par entités XML
+    # (« milliard de rires », entités externes), sans ajouter de dépendance (defusedxml).
+    if b"<!DOCTYPE" in octets.upper() or b"<!ENTITY" in octets.upper():
+        raise CorpusInvalideError(
+            f"{description} contient une déclaration DOCTYPE ou ENTITY : un fichier Tanzil authentique n'en a pas. Import refusé."
+        )
     try:
-        return ET.fromstring(octets)
+        # contenu sans DOCTYPE ni ENTITY (contrôle ci-dessus)
+        return ET.fromstring(octets)  # nosec B314
     except ET.ParseError as erreur:
         raise CorpusInvalideError(
             f"{description} n'est pas un XML valide ({erreur}). "

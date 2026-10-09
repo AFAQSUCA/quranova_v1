@@ -85,7 +85,7 @@ class ClientWS:
         if " 101 " not in lignes[0]:
             ecrivain.close()
             raise ErreurWebSocket(f"{nom} : poignée de main refusée ({lignes[0]})")
-        attendu = base64.b64encode(hashlib.sha1((cle + GUID).encode()).digest()).decode()
+        attendu = base64.b64encode(hashlib.sha1((cle + GUID).encode(), usedforsecurity=False).digest()).decode()  # SHA-1 imposé par la RFC 6455
         if f"sec-websocket-accept: {attendu}".lower() not in reponse.decode("latin-1").lower():
             ecrivain.close()
             raise ErreurWebSocket(f"{nom} : réponse Sec-WebSocket-Accept invalide")

@@ -78,3 +78,23 @@ def test_rec28_la_recherche_de_l_administration_traite_une_injection_comme_du_te
         reponse = navigateur.get(reverse("admin:candidats_candidat_changelist"), {"q": charge})
         assert reponse.status_code == 200
     assert Candidat.objects.count() == 1
+
+
+def test_rec28_l_analyse_statique_bandit_ne_signale_aucune_alerte():
+    """Garde-fou : une alerte de sécurité nouvelle (shell, SQL construit à la main, XML non protégé…) fait échouer les tests.
+
+    Une alerte justifiée se marque ``# nosec Bxxx`` avec l'explication sur la ligne précédente (voir apps/commun/sauvegarde.py).
+    """
+    import subprocess
+    import sys
+    from pathlib import Path
+
+    racine = Path(__file__).resolve().parents[3]
+    try:
+        import bandit  # noqa: F401
+    except ImportError:
+        pytest.skip("bandit n'est pas installé (pip install -r requirements/dev.txt)")
+    resultat = subprocess.run(
+        [sys.executable, "-m", "bandit", "-r", "apps", "config", "-c", "bandit.yaml", "-q"], cwd=racine, capture_output=True, text=True,
+    )
+    assert resultat.returncode == 0, resultat.stdout + resultat.stderr

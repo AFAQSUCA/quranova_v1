@@ -86,7 +86,8 @@ class Simulation:
                     statut2, donnees2 = await self._http(self.http_tirage, connexion, "POST", "/api/tirage/", jeton, {"id_demande": id_demande})
                     if statut2 == 200 and donnees2["tirage"]["serie"] != serie:
                         self.anomalies.append(f"REJEU : la demande {id_demande} a donné deux séries différentes")
-            await asyncio.sleep(self.pause_terminal * random.uniform(0.5, 1.5))  # les tablettes ne sont pas synchronisées
+            # simple désynchronisation de la simulation, rien de secret
+            await asyncio.sleep(self.pause_terminal * random.uniform(0.5, 1.5))  # nosec B311
         connexion.close()
 
     # --- WebSocket ----------------------------------------------------------------------------------------------

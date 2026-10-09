@@ -7,13 +7,16 @@ conservé (rotation).
 """
 import hashlib
 import os
+import re
 import shutil
-import subprocess
+# seuls pg_dump, pg_restore et manage.py sont lancés, jamais via un shell
+import subprocess  # nosec B404
 import sys
 from datetime import datetime
 from pathlib import Path
 
 import psycopg
+from psycopg import sql
 from django.conf import settings
 from django.db import connection
 from django.utils import timezone
@@ -24,6 +27,9 @@ SUFFIXE = ".dump"
 
 class SauvegardeError(Exception):
     pass
+
+
+NOM_DE_BASE_VALIDE = re.compile(r"[A-Za-z_][A-Za-z0-9_]{0,62}")  # un identifiant PostgreSQL simple : jamais de guillemet ni d'espace
 
 
 def _outil(nom):
@@ -69,11 +75,13 @@ def sauvegarder(dossier, conserver=96, maintenant=None):
     temporaire = cible.with_suffix(".en-cours")
     commande = [_outil("pg_dump"), "--format=custom", "--no-owner", f"--file={temporaire}", "--host", p["host"],
                 "--port", p["port"], "--username", p["user"], p["dbname"]]
-    resultat = subprocess.run(commande, env=_environnement(p), capture_output=True, text=True)
+    # liste d'arguments, outil résolu par _outil, pas de shell
+    resultat = subprocess.run(commande, env=_environnement(p), capture_output=True, text=True)  # nosec B603
     if resultat.returncode != 0 or not temporaire.exists() or temporaire.stat().st_size == 0:
         temporaire.unlink(missing_ok=True)
         raise SauvegardeError(f"pg_dump a échoué : {resultat.stderr.strip() or 'fichier vide'}")
-    verification = subprocess.run([_outil("pg_restore"), "--list", str(temporaire)], capture_output=True, text=True)
+    # idem
+    verification = subprocess.run([_outil("pg_restore"), "--list", str(temporaire)], capture_output=True, text=True)  # nosec B603
     if verification.returncode != 0:
         temporaire.unlink(missing_ok=True)
         raise SauvegardeError(f"La sauvegarde produite est illisible : {verification.stderr.strip()}")
@@ -104,6 +112,10 @@ def verifier_sauvegarde(fichier):
 
 def restaurer(fichier, vers_base, ecraser=False, verifier=True):
     """Restaure ``fichier`` dans la base ``vers_base`` (créée) ; ne touche JAMAIS à la base en service sans l'écraser exprès."""
+    if not NOM_DE_BASE_VALIDE.fullmatch(vers_base):  # avant tout : le nom finit dans des commandes SQL et dans pg_restore
+        raise SauvegardeError(
+            f"Nom de base refusé : « {vers_base} ». Utilisez des lettres, chiffres et « _ » (63 caractères au plus, sans commencer par un chiffre)."
+        )
     verifier_sauvegarde(fichier)
     if vers_base == connection.settings_dict["NAME"]:
         raise SauvegardeError("Refus : la restauration vers la base en service écraserait les données courantes. Choisissez une autre base.")
@@ -114,12 +126,13 @@ def restaurer(fichier, vers_base, ecraser=False, verifier=True):
             if existe and not ecraser:
                 raise SauvegardeError(f"La base « {vers_base} » existe déjà : utilisez --ecraser pour la remplacer.")
             if existe:
-                maintenance.execute(f'DROP DATABASE "{vers_base}" WITH (FORCE)')
-            maintenance.execute(f'CREATE DATABASE "{vers_base}"')
+                maintenance.execute(sql.SQL("DROP DATABASE {} WITH (FORCE)").format(sql.Identifier(vers_base)))
+            maintenance.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(vers_base)))
     except psycopg.Error as erreur:
         raise SauvegardeError(f"Impossible de préparer la base « {vers_base} » : {erreur}") from None
     cible = _parametres(vers_base)
-    resultat = subprocess.run(
+    # liste d'arguments ; le nom de base est validé (NOM_DE_BASE_VALIDE)
+    resultat = subprocess.run(  # nosec B603
         [_outil("pg_restore"), "--no-owner", "--exit-on-error", "--host", cible["host"], "--port", cible["port"],
          "--username", cible["user"], "--dbname", vers_base, str(fichier)],
         env=_environnement(cible), capture_output=True, text=True,
@@ -134,7 +147,8 @@ def restaurer(fichier, vers_base, ecraser=False, verifier=True):
 
 def verifier_integrite(base):
     """Lance ``verifier_audit`` SUR la base restaurée (processus à part, pointé vers cette base)."""
-    return subprocess.run(
+    # interpréteur courant et manage.py, nom de base validé
+    return subprocess.run(  # nosec B603
         [sys.executable, str(Path(settings.BASE_DIR) / "manage.py"), "verifier_audit"],
         env={**os.environ, "DB_NAME": base, "DJANGO_SETTINGS_MODULE": os.environ.get("DJANGO_SETTINGS_MODULE", "config.settings.dev")},
         capture_output=True, text=True, cwd=str(settings.BASE_DIR),
