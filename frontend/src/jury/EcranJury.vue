@@ -1,4 +1,6 @@
 <script setup lang="ts">
+// Servi par Django (pas par Vite) : l'adresse est donnée en constante pour que le build ne tente pas de la résoudre.
+const EMBLEME = "/static/img/quranova-embleme.png";
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
 import { usePresentationStore } from "../commun/store";
@@ -45,6 +47,7 @@ function envoyerCorrection(): void {
   <main class="jury">
     <!-- Connexion par code (D4) -->
     <section v-if="!jury.connecte" class="connexion">
+      <img class="embleme" :src="EMBLEME" alt="" aria-hidden="true" />
       <h1>Espace du jury</h1>
       <label for="code">Votre code personnel</label>
       <input id="code" v-model="code" autocomplete="off" autocapitalize="characters" inputmode="text" placeholder="XXXX-XXXX" @keyup.enter="jury.seConnecter(code)" />

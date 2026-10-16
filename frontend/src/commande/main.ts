@@ -2,6 +2,7 @@ import { createPinia } from "pinia";
 import { createApp } from "vue";
 
 import EcranCommande from "./EcranCommande.vue";
+import "../commun/charte.css";
 import "./style.css";
 
 // L'adresse est /commande/<session>/ ; l'opérateur est identifié par son cookie de session Django.

@@ -68,6 +68,7 @@ Essayez d'abord seul, en vous aidant des tests. Si vous manquez de temps, la sol
 | [36](36-fiches-de-secours.md) | Fiches de notation de secours (§13.6) | C2 (phase 4) |
 | [37](37-livrables-d-exploitation.md) | Livrables d'exploitation et gestes du jour J (guide, fiches, modèles) | D (phase 4) |
 | [38](38-interface-d-administration.md) | Interface d'administration : sidebar, barre supérieure, charte vert et or, thème sombre | Habillage |
+| [39](39-ecrans-tirage-scene-jury-commande.md) | Design des écrans temps réel : tirage, scène, jury, commande | Habillage |
 
 ## Si vous êtes bloqué
 

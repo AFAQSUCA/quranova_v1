@@ -3,6 +3,7 @@ import { createApp } from "vue";
 
 import { chargerJeton, CLE_SCENE } from "../tirage/jeton";
 import EcranScene from "./EcranScene.vue";
+import "../commun/charte.css";
 import "./style.css";
 
 // L'adresse est /scene/<session>/#<jeton> : la session dans le chemin, le jeton dans le fragment (D31, D38).

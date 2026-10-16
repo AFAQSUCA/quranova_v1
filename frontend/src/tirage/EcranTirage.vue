@@ -33,7 +33,7 @@ function carteRetournee(rang: number): boolean {
 </script>
 
 <template>
-  <main class="ecran" :data-vue="store.vue">
+  <main class="tirage" :data-vue="store.vue">
     <p v-if="store.horsLigne" class="bandeau" role="status">Connexion au serveur perdue — nouvelle tentative…</p>
 
     <section v-if="store.vue === 'sans_jeton'" class="panneau">
@@ -45,15 +45,15 @@ function carteRetournee(rang: number): boolean {
       <p>Chargement…</p>
     </section>
 
-    <section v-else-if="store.vue === 'attente_appel'" class="panneau">
+    <section v-else-if="store.vue === 'attente_appel'" class="panneau attente">
       <h1>En attente de l'appel du candidat</h1>
       <p>L'opérateur va appeler le prochain candidat.</p>
     </section>
 
-    <section v-else-if="appel && (store.vue === 'pret' || store.vue === 'confirmation')" class="panneau">
+    <section v-else-if="appel && (store.vue === 'pret' || store.vue === 'confirmation')" class="panneau fiche">
       <p class="etiquette">Candidat n° {{ appel.numero_candidat }}</p>
       <h1>{{ appel.prenom }}</h1>
-      <p>{{ appel.epreuve }}</p>
+      <p class="epreuve">{{ appel.epreuve }}</p>
       <button v-if="store.vue === 'pret'" class="gros-bouton" type="button" @click="store.demanderConfirmation()">
         Effectuer mon tirage
       </button>
@@ -68,7 +68,7 @@ function carteRetournee(rang: number): boolean {
       <p class="chargement">Tirage en cours…</p>
     </section>
 
-    <section v-else-if="appel && (store.vue === 'resultat' || store.vue === 'resultat_partiel')" class="panneau">
+    <section v-else-if="appel && (store.vue === 'resultat' || store.vue === 'resultat_partiel')" class="panneau fiche">
       <p class="etiquette">Candidat n° {{ appel.numero_candidat }}</p>
       <h1>{{ appel.prenom }}, votre tirage</h1>
       <ul class="cartes">

@@ -1,33 +1,70 @@
-.jury { max-width: 44rem; margin: 0 auto; padding: 1rem; font-family: system-ui, "Segoe UI", sans-serif; color: #1d2b2b; background: #fbf7ee; min-height: 100vh; font-size: 1.1rem; }
-.jury h1 { margin: .2em 0; }
-.jury .etat { margin: 0 0 .5rem; font-weight: 600; color: #1d6b3a; }
-.jury .etat[data-connexion="perdue"], .jury .etat[data-connexion="connexion"] { color: #8a5a00; }
-.jury input[type="text"], .jury input:not([type]), .jury textarea { font: inherit; padding: .8rem; border: 2px solid #1d2b2b; border-radius: .6rem; width: 100%; box-sizing: border-box; background: #fff; }
-.jury input[aria-invalid="true"] { border-color: #a12; background: #fde8e8; }
-.jury input:disabled, .jury textarea:disabled { background: #eee; color: #555; }
-.jury label { display: block; font-weight: 600; margin: .8rem 0 .2rem; }
-.jury button { font: inherit; padding: .8rem 1.2rem; min-height: 3.2rem; border-radius: .6rem; border: 2px solid #0a4c30; background: #0a4c30; color: #fbf7ee; cursor: pointer; }
-.jury button:disabled { opacity: .35; cursor: not-allowed; }
-.jury button.lien { background: transparent; color: #0a4c30; border: 0; text-decoration: underline; min-height: 2rem; padding: .2rem .4rem; }
-.jury .connexion { margin-top: 3rem; display: grid; gap: .5rem; }
-.jury .prestations { display: flex; gap: .5rem; flex-wrap: wrap; margin: .5rem 0; }
-.jury .prestations button { background: #fff; color: #1d2b2b; border-color: #bbb; display: grid; text-align: left; }
-.jury .prestations button.choisie { border-color: #0a4c30; box-shadow: 0 0 0 2px #0a4c30; }
-.jury .prestations button.active { border-left: 6px solid #c9a227; }
-.jury .prestations small { opacity: .7; }
-.jury .direct { background: #073a24; color: #fbf7ee; border-radius: .8rem; padding: 1rem; margin: .5rem 0 1rem; text-align: center; }
-.jury .direct .rang, .jury .direct .reference { margin: .2rem 0; opacity: .85; font-size: .95rem; }
-.jury .direct .verset { font-family: "Amiri Quran", "Scheherazade New", "Traditional Arabic", serif; font-size: 2rem; line-height: 1.9; margin: .4rem 0; }
-.jury .evaluation h2 { font-size: 1.2rem; display: flex; justify-content: space-between; align-items: center; gap: .5rem; }
-.jury .statut { font-size: .8rem; padding: .2rem .6rem; border-radius: 1rem; background: #ddd; }
-.jury .statut[data-statut="validee"] { background: #cfe8d6; color: #1d6b3a; }
-.jury .statut[data-statut="brouillon"] { background: #f3e2b3; }
-.jury .critere { margin-bottom: .4rem; }
-.jury .erreur { color: #a12; font-size: .9rem; }
-.jury .manquants { background: #fff4d6; border: 2px solid #c9a227; padding: .5rem .8rem; border-radius: .6rem; }
-.jury .aide, .jury .enregistrement { font-size: .9rem; opacity: .8; }
-.jury .enregistrement[data-etat="echec"] { color: #a12; opacity: 1; font-weight: 600; }
-.jury .valider { width: 100%; margin-top: .5rem; background: #c9a227; border-color: #c9a227; color: #1d2b2b; font-weight: 700; }
-.jury .validee { background: #e3f1e7; padding: .6rem .8rem; border-radius: .6rem; }
-.jury .message { background: #fde8e8; border: 2px solid #a12; padding: .6rem .8rem; border-radius: .6rem; }
-.jury .dialogue { position: fixed; inset: auto 1rem 1rem 1rem; background: #fff; border: 3px solid #0a4c30; border-radius: .8rem; padding: 1rem; box-shadow: 0 8px 30px rgba(0,0,0,.3); max-width: 40rem; margin: 0 auto; }
+/* Écran du juré (tablette) : une fiche de notation claire, des champs de saisie larges, un bouton de validation toujours à portée. */
+body:has(.jury), body:has(.commande) { background: #f3f5f3; margin: 0; }
+.jury { max-width: 46rem; margin: 0 auto; padding: 3.4rem 1rem 6rem; font-family: var(--police); color: var(--texte); background: #f3f5f3; min-height: 100vh; font-size: 1.1rem; -webkit-font-smoothing: antialiased; }
+.jury h1 { margin: 0; font-size: 1.7rem; font-weight: 700; color: var(--v800); letter-spacing: -.01em; }
+.jury > header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin: .25rem 0 1rem; padding: .6rem .2rem; }
+
+/* Voyant « en direct » : pastille colorée + texte (la couleur n'est jamais seule). */
+.jury .etat { display: inline-flex; align-items: center; gap: .5rem; margin: 0; padding: .35rem .9rem; border-radius: 999px; font-size: .95rem; font-weight: 700; background: var(--ok-fond); color: var(--ok); }
+.jury .etat::before { content: ""; width: .65rem; height: .65rem; border-radius: 50%; background: currentColor; }
+.jury .etat[data-connexion="perdue"], .jury .etat[data-connexion="connexion"] { background: var(--alerte-fond); color: var(--alerte); }
+
+.jury input[type="text"], .jury input:not([type]), .jury textarea { font: inherit; padding: .8rem 1rem; border: 2px solid #b9c5be; border-radius: .8rem; width: 100%; background: #fff; color: var(--texte); }
+.jury input:focus-visible, .jury textarea:focus-visible { outline: 3px solid var(--v600); outline-offset: 1px; border-color: var(--v800); }
+.jury input[aria-invalid="true"] { border-color: var(--danger); background: var(--danger-fond); }
+.jury input:disabled, .jury textarea:disabled { background: #eef1ef; color: var(--discret); border-color: #d6ddd9; }
+.jury label { display: block; font-weight: 600; margin: .8rem 0 .3rem; }
+.jury small { color: var(--discret); font-weight: 500; }
+
+.jury button { font: inherit; font-weight: 700; padding: .8rem 1.3rem; min-height: 3.4rem; border-radius: .9rem; border: 2px solid var(--v800); background: var(--v800); color: #fff; cursor: pointer; }
+.jury button:focus-visible { outline: 3px solid var(--or-fonce); outline-offset: 2px; }
+.jury button:disabled { opacity: .4; cursor: not-allowed; }
+.jury button.lien { background: transparent; color: var(--v800); border: 0; text-decoration: underline; min-height: 2.4rem; padding: .2rem .4rem; font-weight: 600; justify-self: start; }
+
+/* Connexion par code */
+.jury .connexion { margin: 3rem auto 0; max-width: 26rem; display: grid; gap: .6rem; background: var(--carte); padding: 2rem; border-radius: 1.4rem; border-top: .4rem solid var(--or); box-shadow: var(--ombre); }
+.jury .connexion .embleme { width: 4rem; height: 4rem; object-fit: contain; border: 1px solid var(--bord); border-radius: 1rem; padding: .3rem; justify-self: start; }
+.jury .connexion input { font-size: 1.6rem; letter-spacing: .15em; text-align: center; text-transform: uppercase; }
+.jury .connexion button { margin-top: .4rem; background: var(--or); border-color: var(--or); color: var(--encre); font-size: 1.2rem; }
+
+/* Prestations : une puce par candidat, avec l'état de MA notation. */
+.jury .prestations { display: flex; gap: .6rem; flex-wrap: wrap; margin: .5rem 0 1rem; }
+.jury .prestations button { background: var(--carte); color: var(--texte); border: 2px solid var(--bord); display: grid; text-align: left; gap: .15rem; padding: .6rem 1rem .6rem 1.2rem; position: relative; box-shadow: var(--ombre); }
+.jury .prestations button::before { content: ""; position: absolute; left: .5rem; top: .7rem; bottom: .7rem; width: .3rem; border-radius: .2rem; background: #c3cdc7; }
+.jury .prestations button[data-evaluation="brouillon"]::before { background: var(--or); }
+.jury .prestations button[data-evaluation="validee"]::before { background: var(--ok); }
+.jury .prestations button.choisie { border-color: var(--v800); background: var(--v100); }
+.jury .prestations button.active { box-shadow: 0 0 0 3px rgba(214, 176, 58, .55), var(--ombre); }
+.jury .prestations small { font-weight: 600; }
+.jury .prestations .vide { color: var(--discret); margin: .4rem 0; }
+
+/* Suivi du verset courant (§10.2) */
+.jury .direct { background: var(--v900); color: var(--papier); border-radius: 1.2rem; padding: 1.2rem 1.4rem; margin: .5rem 0 1.2rem; text-align: center; border-top: .3rem solid var(--or); box-shadow: var(--ombre); }
+.jury .direct .rang, .jury .direct .reference { margin: .3rem 0; color: var(--or-clair); font-size: .95rem; font-weight: 600; letter-spacing: .03em; }
+.jury .direct .verset { font-family: var(--police-coran); font-size: 2.2rem; line-height: 1.95; margin: .4rem 0; }
+
+/* Fiche d'évaluation */
+.jury .evaluation { background: var(--carte); border-radius: 1.4rem; padding: 1.2rem 1.4rem 1.4rem; box-shadow: var(--ombre); border: 1px solid var(--bord); }
+.jury .evaluation h2 { font-size: 1.25rem; display: flex; justify-content: space-between; align-items: center; gap: .8rem; margin: 0 0 .6rem; padding-bottom: .8rem; border-bottom: 1px solid var(--bord); }
+.jury .statut { font-size: .85rem; padding: .25rem .8rem; border-radius: 999px; background: #e8ece9; color: var(--discret); font-weight: 700; white-space: nowrap; }
+.jury .statut[data-statut="validee"] { background: var(--ok-fond); color: var(--ok); }
+.jury .statut[data-statut="brouillon"] { background: var(--alerte-fond); color: var(--alerte); }
+.jury .critere { display: grid; grid-template-columns: minmax(0, 1fr) 7.5rem; gap: .2rem 1rem; align-items: center; padding: .7rem 0; border-bottom: 1px solid var(--bord); }
+.jury .critere label { margin: 0; grid-column: 1; }
+.jury .critere input { grid-column: 2; text-align: center; font-size: 1.6rem; font-weight: 700; min-height: 3.6rem; font-variant-numeric: tabular-nums; }
+.jury .critere .erreur { grid-column: 1 / -1; }
+.jury .critere button.lien { grid-column: 1 / -1; }
+.jury .erreur { color: var(--danger); font-size: .95rem; font-weight: 600; }
+.jury .manquants { background: var(--alerte-fond); border-left: .4rem solid var(--or); padding: .7rem 1rem; border-radius: .8rem; margin: 1rem 0 .5rem; color: #5c3b00; font-weight: 600; }
+.jury .aide, .jury .enregistrement { font-size: .95rem; color: var(--discret); }
+.jury .enregistrement[data-etat="echec"] { color: var(--danger); font-weight: 700; }
+.jury .valider { width: 100%; margin-top: .8rem; background: var(--or); border-color: var(--or); color: var(--encre); font-size: 1.25rem; min-height: 4rem; position: sticky; bottom: 1rem; box-shadow: 0 10px 24px rgba(10, 40, 28, .25); }
+.jury .valider:disabled { box-shadow: none; }
+.jury .validee { background: var(--ok-fond); color: var(--ok); padding: .8rem 1rem; border-radius: .8rem; font-weight: 600; }
+.jury .message { background: var(--danger-fond); border-left: .4rem solid var(--danger); color: var(--danger); padding: .8rem 1rem; border-radius: .8rem; font-weight: 600; margin-top: 1rem; }
+
+/* Demande de correction : feuille posée en bas, avec le fond assombri. */
+.jury .dialogue { position: fixed; inset: auto 1rem 1rem 1rem; background: #fff; border-radius: 1.4rem; padding: 1.3rem 1.5rem; box-shadow: 0 0 0 100vmax rgba(5, 43, 27, .55), 0 20px 50px rgba(0, 0, 0, .4); max-width: 40rem; margin: 0 auto; border-top: .4rem solid var(--or); }
+.jury .dialogue h3 { margin: 0 0 .4rem; color: var(--v800); }
+.jury .dialogue button:not(.lien) { margin-top: .8rem; margin-right: .5rem; }
+@media (max-width: 520px) { .jury .critere { grid-template-columns: minmax(0, 1fr) 6rem; } }

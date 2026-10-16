@@ -2,6 +2,7 @@ import { createPinia } from "pinia";
 import { createApp } from "vue";
 
 import EcranJury from "./EcranJury.vue";
+import "../commun/charte.css";
 import "./style.css";
 
 // L'adresse est /jury/<session>/ : le juré se connecte avec son code, puis tout passe par son jeton.

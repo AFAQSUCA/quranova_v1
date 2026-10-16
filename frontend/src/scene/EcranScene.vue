@@ -1,4 +1,6 @@
 <script setup lang="ts">
+// Servi par Django (pas par Vite) : l'adresse est donnée en constante pour que le build ne tente pas de la résoudre.
+const EMBLEME = "/static/img/quranova-embleme.png";
 import { computed, onMounted, onUnmounted, ref } from "vue";
 
 import { usePresentationStore } from "../commun/store";
@@ -45,6 +47,7 @@ async function pleinEcran(): Promise<void> {
 
     <div class="cadre">
       <section v-if="!store.etat?.prestation" key="attente" class="attente">
+        <img class="embleme" :src="EMBLEME" alt="" aria-hidden="true" />
         <h1>En attente de la prochaine prestation</h1>
       </section>
 

@@ -82,13 +82,13 @@ const LIBELLES_PHASE: Record<string, string> = { preparee: "Préparée", afficha
     </section>
 
     <section class="boutons">
-      <button type="button" :disabled="!peut.demarrer" @click="store.commander('demarrer')">Démarrer la prestation</button>
+      <button type="button" class="demarrer" :disabled="!peut.demarrer" @click="store.commander('demarrer')">Démarrer la prestation</button>
       <button type="button" :disabled="!peut.precedente" @click="store.commander('precedente')">◀ Précédente</button>
       <button type="button" class="principal" :disabled="!peut.suivante" @click="store.commander('suivante')">Diapositive suivante ▶</button>
       <button type="button" :disabled="!peut.pause" @click="store.commander('pause')">Mettre en pause</button>
       <button type="button" :disabled="!peut.reprendre" @click="store.commander('reprendre')">Reprendre</button>
       <button type="button" :disabled="!peut.reafficher" @click="store.commander('reafficher')">Réafficher</button>
-      <button type="button" :disabled="!peut.terminer" @click="store.commander('terminer')">Terminer la prestation</button>
+      <button type="button" class="danger" :disabled="!peut.terminer" @click="store.commander('terminer')">Terminer la prestation</button>
     </section>
 
     <p v-if="store.message" class="message" role="alert">{{ store.message }}</p>
