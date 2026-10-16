@@ -99,6 +99,10 @@ def contexte_pv(concours, auteur=None):
         "historique": historique, "incidents": [h for h in historique if h["annulation"]],
         "incidents_declares": list(Incident.objects.filter(concours=concours).select_related("declare_par", "session").order_by("survenu_le")),
         "bilan_incidents": services_incidents.bilan(concours),
+        "fiches_saisies": list(
+            Evaluation.objects.filter(prestation__epreuve__categorie__concours=concours, saisie_differee=True)
+            .select_related("jure", "saisie_par", "prestation__participation", "prestation__epreuve").order_by("validee_le")
+        ),
         "audit": {
             "entrees": chaine.dernier_numero if chaine else 0,
             "empreinte": chaine.derniere_empreinte if chaine else "",

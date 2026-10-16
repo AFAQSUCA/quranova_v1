@@ -4,6 +4,7 @@ Les jurés n'ont PAS de compte Django (D4) : ils se connectent sur leur tablette
 code personnel à usage limité à la session, généré par l'opérateur. Aucune adresse
 électronique n'est exigée.
 """
+from django.conf import settings
 from django.db import models
 from django.db.models import F, Q
 
@@ -127,6 +128,11 @@ class Evaluation(ModeleDuClient):
     validee_le = models.DateTimeField(null=True, blank=True)
     # D43 : libellés des séries évaluées, figés à la validation (REC-11 : « le bon tirage »).
     series_evaluees = models.JSONField(default=list, blank=True)
+    # §13.6 : fiche de secours remplie sur papier pendant une panne, saisie ensuite par le personnel, AVEC un motif.
+    saisie_differee = models.BooleanField(default=False)
+    motif_saisie_differee = models.TextField(blank=True)
+    saisie_par = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.PROTECT, related_name="+")
+    reference_fiche = models.CharField(max_length=40, blank=True, help_text="Référence imprimée sur la fiche papier.")
 
     class Meta:
         verbose_name = "évaluation"
@@ -137,6 +143,11 @@ class Evaluation(ModeleDuClient):
             models.CheckConstraint(
                 condition=(Q(statut="brouillon", validee_le__isnull=True) | Q(statut="validee", validee_le__isnull=False)),
                 name="evaluation_validee_a_une_date",
+            ),
+            # Une saisie différée est toujours justifiée (motif) et attribuée (qui l'a saisie).
+            models.CheckConstraint(
+                condition=Q(saisie_differee=False) | (~Q(motif_saisie_differee="") & Q(saisie_par__isnull=False)),
+                name="evaluation_saisie_differee_motivee_et_attribuee",
             ),
         ]
 

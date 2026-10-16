@@ -38,6 +38,7 @@ Un chronomètre, une personne qui note l'heure de chaque étape. Écart > 20 % s
 | REC-23 | Redémarrer l'écran de scène et une tablette de juré à la 5e diapositive | 5e diapositive en < 2 s ; brouillon de notes conservé | |
 | REC-41 | Débrancher le secteur (onduleur) | Aucune interruption ; autonomie notée | |
 | REC-36 | Éteindre brutalement le serveur, basculer sur le secours (guide §5) | Reprise en < 15 min, dernière sauvegarde restaurée, `verifier_audit` propre | |
+| §13.6 | Panne des deux ordinateurs : fiches imprimées la veille (Sessions → fiches de secours), saisie différée avec motif | Évaluations validées, tracées au procès-verbal | |
 | REC-18 | Restaurer une sauvegarde sur une base vierge | Données cohérentes et exploitables | |
 
 ## 5. Bilan

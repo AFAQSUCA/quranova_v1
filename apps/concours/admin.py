@@ -191,3 +191,13 @@ class EpreuveAdmin(AdminDuClient):
 class SessionAdmin(AdminDuClient):
     list_display = ("nom", "concours", "date", "lieu")
     list_filter = ("concours",)
+    readonly_fields = ("fiches_de_secours",)
+
+    @admin.display(description="Fiches de notation de secours")
+    def fiches_de_secours(self, obj):
+        if obj is None or obj.pk is None:
+            return "—"
+        return format_html(
+            '<a href="{}" target="_blank">Imprimer (une fiche par prestation et par juré)</a> · <a href="{}">PDF</a>',
+            reverse("jury:fiches_secours", args=[obj.pk]), reverse("jury:fiches_secours_pdf", args=[obj.pk]),
+        )

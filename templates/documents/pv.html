@@ -65,6 +65,13 @@ du client et n'y figure donc pas :
 {% for t in incidents %}<tr><td>{{ t.horodatage|date:"d/m/Y H:i:s" }}</td><td>{{ t.numero }}</td><td>{{ t.serie }}</td><td>{{ t.annulation }}</td></tr>{% endfor %}</table>
 {% else %}<p>Aucun tirage annulé.</p>{% endif %}
 
+{% if fiches_saisies %}
+<h3>Évaluations saisies depuis une fiche de secours</h3>
+<p>Notées sur papier pendant une panne, puis saisies avec un motif (§13.6). Les fiches originales signées sont conservées avec ce procès-verbal.</p>
+<table><tr><th>Candidat</th><th>Épreuve</th><th>Juré</th><th>Fiche</th><th>Motif</th><th>Saisie par</th></tr>
+{% for e in fiches_saisies %}<tr><td>{{ e.prestation.participation.numero_candidat }}</td><td>{{ e.prestation.epreuve.nom }}</td><td>{{ e.jure.nom_complet }}</td><td>{{ e.reference_fiche|default:"—" }}</td><td>{{ e.motif_saisie_differee }}</td><td>{{ e.saisie_par }}</td></tr>{% endfor %}</table>
+{% endif %}
+
 <h2>4. Journal d'audit</h2>
 <p>{{ audit.entrees }} entrée(s) dans le journal de ce client. Vérification de l'intégrité de la chaîne d'empreintes :
 <strong>{% if audit.intacte %}intacte{% else %}ANOMALIE DÉTECTÉE{% endif %}</strong>.</p>

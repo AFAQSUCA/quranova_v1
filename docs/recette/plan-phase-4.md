@@ -16,7 +16,7 @@ Avant cela, tout ce que le CdC place en **V1 / « avant le pilote »** et qui n'
 
 ## C. Fonctions du pilote encore manquantes
 - C1 ✅ **Journal des incidents** : saisie par l'opérateur (heure, type selon §13.6, description, durée, résolution) ; section 3 du procès-verbal complétée ; alimente le bilan L-09.
-- C2. **Fiches de notation de secours** (§13.6, panne des deux ordinateurs) : impression la veille depuis l'application (une fiche par prestation et par juré, critères, barème) ; **saisie ultérieure avec motif** obligatoire, tracée.
+- C2 ✅ **Fiches de notation de secours** (§13.6, panne des deux ordinateurs) : impression la veille depuis l'application (une fiche par prestation et par juré, critères, barème) ; **saisie ultérieure avec motif** obligatoire, tracée.
 - C3. *(optionnel)* **Correction d'un classement par l'administration** au lieu de la seule commande `corriger_classement`.
 - C4. **Import Excel** : décision prise — **CSV seulement en V1** (écart au CdC §5.1 à acter), avec le modèle CSV fourni au client (D). Pas de dépendance `openpyxl`.
 
