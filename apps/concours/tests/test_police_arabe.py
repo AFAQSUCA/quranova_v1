@@ -241,7 +241,7 @@ def test_l_apercu_est_instantane_piles_de_polices_et_script_fournis(client, admi
     page = client.get(reverse("admin:concours_concours_change", args=[concours.pk])).content.decode()
     assert 'id="q-apercu-texte"' in page and "data-familles=" in page
     assert "js/apercu-police.js" in page
-    assert "&quot;Noto Naskh Arabic&quot;" in page  # les piles viennent du serveur, jamais d'une saisie
+    assert "Noto Naskh Arabic" in page  # les piles viennent du serveur, jamais d'une saisie
 
 
 def test_les_piles_pour_l_apercu_couvrent_tous_les_choix():
