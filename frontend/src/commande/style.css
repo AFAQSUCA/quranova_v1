@@ -1,0 +1,48 @@
+/* Écran de commande (opérateur) : une console en deux zones — à gauche ce qui est affiché, à droite le pupitre de commande. */
+.commande { max-width: 72rem; margin: 0 auto; padding: 3.6rem 1.5rem 3rem; font-family: var(--police); color: var(--texte); background: #f3f5f3; min-height: 100vh; -webkit-font-smoothing: antialiased;
+  display: grid; grid-template-columns: minmax(0, 1fr) 21rem; grid-template-areas: "entete entete" "prep prep" "courant pupitre" "message message"; gap: 1rem 1.5rem; align-content: start; }
+.commande > header { grid-area: entete; display: flex; flex-wrap: wrap; align-items: center; gap: .6rem 1.2rem; padding-bottom: .8rem; border-bottom: 1px solid var(--bord); }
+.commande h1 { margin: 0; font-size: 1.6rem; font-weight: 700; color: var(--v800); letter-spacing: -.01em; margin-right: auto; }
+.commande .etat-connexion { display: inline-flex; align-items: center; gap: .5rem; margin: 0; padding: .3rem .9rem; border-radius: 999px; font-weight: 700; font-size: .95rem; background: var(--ok-fond); color: var(--ok); }
+.commande .etat-connexion::before { content: ""; width: .6rem; height: .6rem; border-radius: 50%; background: currentColor; }
+.commande .etat-connexion[data-connexion="perdue"], .commande .etat-connexion[data-connexion="connexion"] { background: var(--alerte-fond); color: var(--alerte); }
+.commande .ecrans { list-style: none; padding: 0; margin: 0; display: flex; gap: .5rem; flex-wrap: wrap; flex-basis: 100%; }
+.commande .ecrans li { padding: .25rem .8rem; border-radius: 999px; background: var(--ok-fond); color: var(--ok); font-weight: 600; font-size: .9rem; }
+.commande .ecrans .coupe { background: var(--danger-fond); color: var(--danger); font-weight: 700; }
+
+.commande section { margin: 0; }
+.commande .preparation { grid-area: prep; display: flex; gap: .75rem; align-items: center; flex-wrap: wrap; background: var(--carte); border: 1px solid var(--bord); border-radius: 1rem; padding: 1rem 1.2rem; box-shadow: var(--ombre); }
+.commande .preparation label { font-weight: 700; }
+.commande select { font: inherit; padding: .7rem 1rem; min-height: 3.2rem; border-radius: .7rem; border: 2px solid #b9c5be; background: #fff; color: var(--texte); min-width: 16rem; flex: 1 1 16rem; }
+.commande select:focus-visible { outline: 3px solid var(--v600); outline-offset: 1px; }
+
+.commande button { font: inherit; font-weight: 700; padding: .8rem 1.1rem; min-height: 3.4rem; border-radius: .8rem; border: 2px solid var(--v800); background: var(--v800); color: #fff; cursor: pointer; }
+.commande button:focus-visible { outline: 3px solid var(--or-fonce); outline-offset: 2px; }
+.commande button:disabled { opacity: .35; cursor: not-allowed; }
+.commande button:not(:disabled):hover { background: var(--v900); }
+
+/* Ce qui est affiché en ce moment : une miniature de l'écran de scène. */
+.commande .courant { grid-area: courant; }
+.commande .courant > p { margin: 0 0 .6rem; font-size: 1.05rem; color: var(--discret); }
+.commande .courant > p strong { color: var(--v800); }
+.commande .apercu { background: var(--v900); color: var(--papier); border-radius: 1.2rem; padding: 1.4rem 1.6rem; min-height: 15rem; display: flex; flex-direction: column; justify-content: center; text-align: center; border-top: .35rem solid var(--or); box-shadow: var(--ombre); }
+.commande .apercu p { margin: .3rem 0; }
+.commande .apercu .rang { color: var(--or-clair); font-weight: 700; font-size: .95rem; letter-spacing: .04em; text-transform: uppercase; }
+.commande .apercu .texte { font-size: 1.4rem; line-height: 1.5; }
+.commande .apercu .texte[dir="rtl"] { font-size: 2.2rem; line-height: 1.95; font-family: var(--police-coran); }
+
+/* Pupitre : « suivante » en grand, le reste en grille, « terminer » à part. */
+.commande .boutons { grid-area: pupitre; align-self: start; display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; background: var(--carte); border: 1px solid var(--bord); border-radius: 1.2rem; padding: 1rem; box-shadow: var(--ombre); position: sticky; top: 1rem; }
+.commande .boutons button { background: #fff; color: var(--v800); border-color: #b9c5be; }
+.commande .boutons button:not(:disabled):hover { background: var(--v100); border-color: var(--v800); }
+.commande .boutons button.principal { grid-column: 1 / -1; grid-row: 1; background: var(--or); border-color: var(--or); color: var(--encre); font-size: 1.15rem; min-height: 5rem; white-space: nowrap; box-shadow: 0 5px 0 var(--or-fonce); }
+.commande .boutons button.principal:not(:disabled):hover { background: var(--or-clair); }
+.commande .boutons button.demarrer { grid-column: 1 / -1; background: var(--v800); color: #fff; border-color: var(--v800); }
+.commande .boutons button.danger { grid-column: 1 / -1; color: var(--danger); border-color: var(--danger); }
+.commande .boutons button.danger:not(:disabled):hover { background: var(--danger-fond); border-color: var(--danger); }
+
+.commande .message { grid-area: message; background: var(--danger-fond); border-left: .4rem solid var(--danger); color: var(--danger); padding: .8rem 1rem; border-radius: .8rem; font-weight: 600; margin: 0; }
+@media (max-width: 860px) {
+  .commande { grid-template-columns: minmax(0, 1fr); grid-template-areas: "entete" "prep" "pupitre" "courant" "message"; }
+  .commande .boutons { position: static; }
+}

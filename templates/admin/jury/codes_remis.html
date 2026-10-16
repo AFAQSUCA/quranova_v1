@@ -1,0 +1,11 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<h2>Codes d'accès — {{ session }}</h2>
+<p><strong>Ces codes ne sont affichés qu'une seule fois</strong> : ils ne sont conservés nulle part. Imprimez cette page (Ctrl + P) ou notez-les maintenant, puis remettez chaque code à son juré en main propre.</p>
+<table>
+  <thead><tr><th>Juré</th><th>Code d'accès</th></tr></thead>
+  <tbody>{% for jure, code in remis %}<tr><td>{{ jure.nom_complet }}</td><td><code style="font-size:1.4em;letter-spacing:.1em">{{ code }}</code></td></tr>{% endfor %}</tbody>
+</table>
+<p>Adresse de la tablette du juré : <code>/jury/{{ session.pk }}/</code> (sur le Wi-Fi de la salle).</p>
+<p><a href="{% url 'admin:jury_jure_changelist' %}" class="button">Terminer</a></p>
+{% endblock %}

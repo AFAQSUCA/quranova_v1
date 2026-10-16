@@ -1,0 +1,23 @@
+/* Charte graphique QURANOVA, tirée du logo : vert profond et or. Les écrans de gestion et les écrans temps réel
+   utilisent ces variables ; la couleur d'un client (--client-principal) peut la surcharger sur ses écrans. */
+:root {
+  --q-vert: #0a4c30;
+  --q-vert-fonce: #073a24;
+  --q-or: #c9a227;
+  --q-or-clair: #d7bb67;
+  --q-papier: #fbf7ee;
+  --q-texte: #1d2b2b;
+}
+body { --client-principal: var(--q-vert); --client-secondaire: var(--q-or); }
+
+/* Marque du client : en haut à gauche de l'écran, sur un cartouche clair lisible sur fond sombre. */
+.marque-client { position: fixed; top: 1.2vh; left: 1.2vw; z-index: 3; display: flex; align-items: center; gap: .6rem;
+  background: rgba(255,255,255,.94); color: var(--q-texte); padding: .3rem .7rem; border-radius: .6rem;
+  border-bottom: .25rem solid var(--client-principal); font: 600 1rem system-ui, "Segoe UI", sans-serif; }
+.marque-client img { max-height: 3.2rem; max-width: 9rem; object-fit: contain; }
+
+/* Sceau QURANOVA : discret, en bas à gauche. */
+.marque-quranova { position: fixed; left: 1vw; bottom: 1vh; z-index: 3; width: 3.4rem; height: 3.4rem; border-radius: 50%;
+  background: #fff center / 92% no-repeat; opacity: .55; box-shadow: 0 0 0 2px var(--q-or); }
+.marque-quranova:hover { opacity: 1; }
+@media print { .marque-client, .marque-quranova { display: none; } }

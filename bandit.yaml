@@ -1,0 +1,3 @@
+# Configuration de bandit (REC-28) : analyse statique de sécurité du code Python de QURANOVA.
+#   bandit -r apps config -c bandit.yaml
+exclude_dirs: [".venv", "node_modules", "tests", "migrations", "frontend", "static", "staticfiles"]

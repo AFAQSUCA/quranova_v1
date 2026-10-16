@@ -1,0 +1,61 @@
+/* Écran du tirage (tablette du candidat) : lisible à bout de bras, cibles tactiles larges, un seul geste à la fois. */
+body.page-tirage { margin: 0; min-height: 100vh; color: var(--papier); font-family: var(--police); background: var(--v900) radial-gradient(ellipse at 50% 30%, #0d5a39 0%, var(--v900) 62%);
+  -webkit-user-select: none; user-select: none; touch-action: manipulation; -webkit-font-smoothing: antialiased; }
+
+.tirage { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem 1.5rem 5rem; }
+.tirage .panneau { text-align: center; width: 100%; max-width: 42rem; }
+.tirage h1 { font-size: clamp(2.2rem, 6.5vw, 4rem); line-height: 1.1; margin: .25em 0 .15em; font-weight: 700; letter-spacing: -.01em; }
+.tirage p { margin: .4em 0; }
+.tirage .consigne { font-size: 1.25rem; opacity: .92; }
+
+/* Fiche : carte papier posée sur le fond vert, pour tout ce qui concerne UN candidat. */
+.tirage .fiche { position: relative; overflow: hidden; background: var(--papier); color: var(--texte); border-radius: 2rem; padding: clamp(1.8rem, 5vw, 3rem); padding-top: clamp(2.2rem, 5vw, 3.4rem);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .35); }
+.tirage .fiche::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: .55rem; background: var(--or); }
+.tirage .fiche h1 { color: var(--v800); font-size: clamp(2rem, 5vw, 3.2rem); }
+.tirage .fiche .consigne { color: var(--discret); }
+.tirage .etiquette { display: inline-block; margin: 0; padding: .4em 1.1em; border-radius: 999px; background: var(--v100); color: var(--v800);
+  font-weight: 700; font-size: 1.15rem; letter-spacing: .04em; text-transform: uppercase; }
+.tirage .epreuve { font-size: 1.4rem; color: var(--discret); margin: 0 0 .5rem; }
+
+.tirage .bandeau { position: fixed; top: 0; left: 0; right: 0; z-index: 5; margin: 0; padding: .7rem 1rem; text-align: center; background: var(--alerte-fond); color: var(--alerte);
+  font-weight: 600; border-bottom: 3px solid var(--or); }
+
+.tirage button { font: inherit; border: 0; cursor: pointer; border-radius: 1.2rem; }
+.tirage button:focus-visible { outline: 4px solid var(--or-clair); outline-offset: 4px; }
+.tirage .gros-bouton { display: inline-flex; align-items: center; justify-content: center; background: var(--or); color: var(--encre); font-size: clamp(1.5rem, 4vw, 2.2rem); font-weight: 800;
+  padding: 1.1rem 2.6rem; margin-top: 1.5rem; min-width: min(100%, 18rem); min-height: 5rem; box-shadow: 0 6px 0 var(--or-fonce), 0 14px 28px rgba(0, 0, 0, .25); transition: transform .08s, box-shadow .08s; }
+.tirage .gros-bouton:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--or-fonce), 0 6px 14px rgba(0, 0, 0, .25); }
+.tirage .secondaire { background: transparent; color: var(--v800); border: 3px solid var(--v800); padding: 1rem 2rem; font-size: 1.3rem; font-weight: 700; margin: 1.2rem .5rem 0; min-height: 4rem; }
+.tirage .erreur .secondaire, .tirage .panneau:not(.fiche) .secondaire { color: var(--papier); border-color: var(--papier); }
+.tirage .confirmation { margin-top: 1rem; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 1rem 1.2rem; }
+.tirage .confirmation p { flex-basis: 100%; font-size: 1.8rem; font-weight: 700; color: var(--v800); margin: .3rem 0 0; }
+.tirage .confirmation .gros-bouton, .tirage .confirmation .secondaire { margin: .4rem 0 0; }
+
+/* Attente : un anneau qui respire, sans texte superflu. */
+.tirage .attente { padding-top: 7.5rem; position: relative; }
+.tirage .attente h1 { font-size: clamp(1.9rem, 5vw, 3rem); }
+.tirage .attente p { font-size: 1.4rem; opacity: .9; }
+.tirage .attente::before { content: ""; position: absolute; top: 0; left: 50%; width: 5rem; height: 5rem; margin-left: -2.5rem; border-radius: 50%;
+  border: 4px solid var(--or); box-shadow: 0 0 0 10px rgba(214, 176, 58, .18); animation: q-respire 2.4s ease-in-out infinite; }
+.tirage .attente::after { content: ""; position: absolute; top: 1.75rem; left: 50%; width: 1.5rem; height: 1.5rem; margin-left: -.75rem; border-radius: 50%; background: var(--or); }
+
+.tirage .erreur { background: var(--danger-fond); color: var(--danger); padding: 2rem; border-radius: 1.8rem; border-left: .6rem solid var(--danger); text-align: left; }
+.tirage .erreur h1 { color: var(--danger); font-size: clamp(1.8rem, 5vw, 2.6rem); }
+.tirage .erreur p { font-size: 1.3rem; color: #5b1410; }
+.tirage .erreur .gros-bouton { background: var(--danger); color: #fff; box-shadow: 0 6px 0 #7d1c13; }
+.tirage .erreur .secondaire { color: var(--danger); border-color: var(--danger); }
+
+.tirage .chargement::after { content: ""; display: inline-block; width: 1em; height: 1em; margin-left: .6em; vertical-align: -.1em;
+  border: 4px solid var(--or); border-right-color: transparent; border-radius: 50%; animation: q-tourne 1s linear infinite; }
+.tirage[data-vue="envoi"] .panneau { font-size: 2rem; font-weight: 700; }
+
+/* Cartes retournées : décoratif seulement, le résultat est déjà enregistré par le serveur (§8.1). */
+.tirage .cartes { list-style: none; padding: 0; margin: 1.5rem 0; display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap; perspective: 900px; }
+.tirage .carte { position: relative; width: 15rem; height: 10rem; transform-style: preserve-3d; transition: transform .8s ease; }
+.tirage .carte.retournee { transform: rotateY(180deg); }
+.tirage .carte .dos, .tirage .carte .face { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; border-radius: 1.3rem; backface-visibility: hidden; font-weight: 800; }
+.tirage .carte .dos { background: var(--or); color: var(--encre); font-size: 3.4rem; box-shadow: inset 0 0 0 .5rem rgba(11, 42, 28, .12), 0 8px 20px rgba(0, 0, 0, .2); }
+.tirage .carte .face { background: #fff; color: var(--v800); font-size: 2.8rem; transform: rotateY(180deg); border: .4rem solid var(--v800); box-shadow: 0 8px 20px rgba(0, 0, 0, .2); }
+@media (prefers-reduced-motion: reduce) { .tirage .carte { transition: none; } .tirage .chargement::after, .tirage .attente::before { animation: none; } .tirage .gros-bouton { transition: none; } }
+@media (orientation: portrait) { .tirage .carte { width: 100%; max-width: 20rem; } }

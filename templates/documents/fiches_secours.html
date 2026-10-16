@@ -1,0 +1,41 @@
+{% load static %}<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Fiches de notation de secours — {{ concours.nom }}</title>
+<style>
+@page { size: A4; margin: 14mm; }
+body { font-family: "Segoe UI", "DejaVu Sans", system-ui, sans-serif; font-size: 11pt; color: #111; }
+.fiche { page-break-after: always; break-after: page; }
+.fiche:last-child { page-break-after: auto; break-after: auto; }
+.entete { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #0a4c30; padding-bottom: .4em; margin-bottom: .8em; }
+.entete img { max-height: 16mm; }
+h1 { font-size: 17pt; margin: 0 0 .2em; } .ref { font-family: monospace; font-size: 12pt; border: 2px solid #111; padding: .1em .5em; }
+table { border-collapse: collapse; width: 100%; margin: .6em 0; } th, td { border: 1px solid #555; padding: 6px 8px; text-align: left; }
+th { background: #eee; } .note { width: 28mm; height: 14mm; } .droite { text-align: right; }
+.identite td { border: 0; padding: 2px 0; }
+.lignes { border: 1px solid #555; min-height: 26mm; margin: .3em 0 .8em; background: repeating-linear-gradient(transparent, transparent 7mm, #bbb 7mm, #bbb 7.2mm); }
+.signature { display: flex; gap: 2em; margin-top: 1.2em; } .signature div { flex: 1; border-top: 1px solid #333; padding-top: .3em; min-height: 18mm; }
+.consigne { font-size: 9pt; border: 1px dashed #a12; color: #a12; padding: .4em .6em; margin-top: 1em; }
+</style>
+</head>
+<body>
+{% for f in fiches %}
+<section class="fiche">
+  <div class="entete"><div><h1>Fiche de notation de secours</h1>{{ concours.nom }} {{ concours.edition }} — {{ concours.mission.organisation.nom }}</div>
+  <div><span class="ref">{{ f.reference }}</span></div></div>
+  <table class="identite">
+    <tr><td><strong>Épreuve</strong> : {{ f.prestation.epreuve.categorie.nom }} — {{ f.prestation.epreuve.nom }}</td><td><strong>Session</strong> : {{ session.nom }}</td></tr>
+    <tr><td><strong>Candidat</strong> : {{ f.candidat }}</td><td><strong>Passage</strong> : n° {{ f.prestation.rang_passage }}</td></tr>
+    <tr><td><strong>Juré</strong> : {{ f.jure.nom_complet }}</td><td><strong>Série tirée</strong> : ______________________</td></tr>
+  </table>
+  <table><tr><th>Critère</th><th class="droite">Maximum</th><th class="droite">Coefficient</th><th>Note</th></tr>
+  {% for c in f.criteres %}<tr><td>{{ c.libelle }}</td><td class="droite">/ {{ c.maximum|floatformat:"-2" }}</td><td class="droite">coef. {{ c.coefficient|floatformat:"-2" }}</td><td class="note"></td></tr>{% endfor %}</table>
+  <p><strong>Observation</strong> (facultative)</p><div class="lignes"></div>
+  <div class="signature"><div>Date et heure :</div><div>Signature du juré :</div></div>
+  <p class="consigne">Fiche de secours : à n'utiliser qu'en cas de panne. Ne laisser <strong>aucune case vide</strong> (écrire 0 si la note est zéro). L'opérateur saisira cette fiche ensuite dans QURANOVA
+  en indiquant le <strong>motif</strong> de son utilisation ; une note manquante ne sera jamais comptée comme zéro. Conserver cette fiche jusqu'à la clôture de la mission.</p>
+</section>
+{% empty %}<p>Aucune fiche à imprimer : aucune prestation (ou aucun juré affecté) pour cette session.</p>{% endfor %}
+</body>
+</html>

@@ -1,0 +1,78 @@
+{% load static %}<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Procès-verbal de validation du corpus — version {{ version.pk }}</title>
+<style>
+@page { size: A4; margin: 16mm 14mm; @bottom-right { content: "Page " counter(page) " / " counter(pages); } }
+body { font-family: "Segoe UI", "DejaVu Sans", system-ui, sans-serif; font-size: 10.5pt; color: #111; }
+h1 { font-size: 19pt; margin-bottom: 0; } h2 { font-size: 13pt; border-bottom: 2px solid #0a4c30; margin-top: 1.5em; page-break-after: avoid; }
+h3 { font-size: 11pt; margin: 1em 0 .2em; page-break-after: avoid; }
+table { border-collapse: collapse; width: 100%; margin: .4em 0 1em; } th, td { border: 1px solid #888; padding: 3px 6px; text-align: left; vertical-align: top; font-size: 9.5pt; }
+th { background: #eee; } tr { page-break-inside: avoid; }
+.entete { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #0a4c30; padding-bottom: .5em; margin-bottom: 1em; }
+.entete img { max-height: 22mm; }
+.ok { color: #0a4c30; font-weight: bold; } .ko { color: #a12; font-weight: bold; }
+.bandeau { padding: .4em .8em; border: 2px solid #333; margin: 1em 0; } .alerte { border-color: #a12; color: #a12; font-weight: bold; }
+.empreinte { font-family: monospace; font-size: 8.5pt; word-break: break-all; }
+.verset { font-family: "Amiri Quran", "Scheherazade New", "Traditional Arabic", "Noto Naskh Arabic", "DejaVu Sans", serif; font-size: 15pt; line-height: 2; direction: rtl; text-align: right; }
+.petit { break-inside: avoid; page-break-inside: avoid; }  /* un petit tableau ne se coupe pas : jamais d'en-tête orphelin en bas de page */
+.case { width: 14mm; text-align: center; font-size: 12pt; }
+.signatures { display: flex; gap: 2.5em; margin-top: 2.5em; page-break-inside: avoid; } .signatures div { flex: 1; border-top: 1px solid #333; padding-top: .3em; min-height: 22mm; }
+@media screen { body { max-width: 190mm; margin: 1em auto; padding: 0 1em; } }
+</style>
+</head>
+<body>
+<div class="entete"><strong>Projet QURANOVA — corpus coranique de référence</strong><img src="{% static 'img/quranova-logo.png' %}" alt="QURANOVA"></div>
+<h1>Procès-verbal de validation du corpus</h1>
+<p>Version n° {{ version.pk }} — {{ version.source }} {{ version.version_source }}, riwāya {{ version.get_riwaya_display }}<br>
+Document généré le {{ genere_le|date:"d/m/Y à H:i" }}{% if auteur %} par {{ auteur }}{% endif %}.</p>
+
+{% if validation %}
+<div class="bandeau">Version <strong>validée</strong> le {{ validation.date_signature|date:"d/m/Y" }} par le référent coranique <strong>{{ validation.referent_nom }}</strong>{% if validation.referent_qualite %} ({{ validation.referent_qualite }}){% endif %} ;
+validation enregistrée le {{ validation.validee_le|date:"d/m/Y à H:i" }} par {{ validation.validee_par }}.</div>
+{% elif not tous_ok %}
+<div class="bandeau alerte">Au moins un contrôle automatique a échoué : cette version ne peut PAS être validée. Importez une nouvelle version.</div>
+{% endif %}
+
+<h2>1. Identification de la version</h2>
+<table>
+<tr><th>Source</th><td>{{ version.source }} (tanzil.net) — version {{ version.version_source }} — fichier « {{ version.nom_fichier }} »</td></tr>
+<tr><th>Empreinte SHA-256 du fichier</th><td class="empreinte">{{ version.empreinte_sha256 }}</td></tr>
+<tr><th>Date d'import</th><td>{{ version.date_import|date:"d/m/Y à H:i" }}</td></tr>
+<tr><th>Statut</th><td>{{ version.get_statut_display }}</td></tr>
+</table>
+
+<h2>2. Contrôles automatiques (§12.2, points 2 à 4)</h2>
+<p>Le texte est importé <strong>sans aucune transformation</strong> (ni normalisation Unicode, ni suppression de diacritiques).</p>
+<table><tr><th>Contrôle</th><th>Résultat</th><th>Détail</th></tr>
+{% for c in controles %}<tr><td>{{ c.libelle }}</td><td class="{% if c.ok %}ok{% else %}ko{% endif %}">{% if c.ok %}Réussi{% else %}ÉCHEC{% endif %}</td><td>{{ c.detail }}</td></tr>{% endfor %}</table>
+
+<h2>3. Relecture par le référent coranique (§12.2, point 5)</h2>
+<p>Comparer chacun des {{ nombre_echantillon }} versets ci-dessous au <strong>Mushaf de Médine</strong> et cocher « Conforme ». Les passages imposés sont suivis d'au moins 1 % de versets
+tirés de façon reproductible (empreinte de l'échantillon : <span class="empreinte">{{ empreinte_echantillon }}</span>).</p>
+{% for g in groupes %}
+<div class="groupe{% if g.lignes|length <= 3 %} petit{% endif %}">
+<h3>{{ g.motif|capfirst }}{% if g.motif == "tirage" %} (versets tirés){% endif %}</h3>
+<table><tr><th>Référence</th><th>Texte de la base</th><th class="case">Conforme</th></tr>
+{% for l in g.lignes %}<tr><td>{{ l.reference }}</td><td class="verset" lang="ar" dir="rtl">{{ l.texte }}</td><td class="case">☐</td></tr>{% endfor %}</table>
+</div>
+{% endfor %}
+
+<h2>4. Rendu typographique (§12.2, point 6)</h2>
+<p>À vérifier sur l'écran de scène et sur l'écran du jury, avec les tablettes et le projecteur utilisés en salle :</p>
+<table>
+<tr><td class="case">☐</td><td>La police affiche correctement les ligatures et les signes de récitation (waqf, tanwin, madd, sukūn…).</td></tr>
+<tr><td class="case">☐</td><td>Les versets longs (2:282) sont découpés entre deux mots, sans altération ni perte de texte.</td></tr>
+<tr><td class="case">☐</td><td>Le texte est lisible à la distance de la salle, avec la taille de verset choisie.</td></tr>
+</table>
+
+<h2>5. Décision et signatures (§12.2, point 7)</h2>
+<p>Le référent coranique atteste avoir relu l'échantillon ci-dessus et validé le rendu typographique, et autorise l'activation de cette version du corpus.</p>
+<p>Décision : ☐ version validée &nbsp;&nbsp;&nbsp; ☐ version refusée — motif : ______________________________________________</p>
+<div class="signatures">
+<div>Le référent coranique<br>Nom : <br>Date : <br>Signature :</div>
+<div>L'administrateur QURANOVA<br>Nom : <br>Date : <br>Signature :</div>
+</div>
+</body>
+</html>

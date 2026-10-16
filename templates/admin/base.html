@@ -1,0 +1,180 @@
+{% load i18n static %}<!DOCTYPE html>
+{% get_current_language as LANGUAGE_CODE %}{% get_current_language_bidi as LANGUAGE_BIDI %}
+<html lang="{{ LANGUAGE_CODE|default:"fr" }}" dir="{{ LANGUAGE_BIDI|yesno:'rtl,ltr,auto' }}">
+<head>
+<meta charset="utf-8">
+<title>{% block title %}{% endblock %}</title>
+<link rel="icon" href="{% static 'img/favicon.png' %}">
+<link rel="stylesheet" href="{% block stylesheet %}{% static "admin/css/base.css" %}{% endblock %}">
+{% block dark-mode-vars %}
+  <link rel="stylesheet" href="{% static "admin/css/dark_mode.css" %}">
+  <script src="{% static "admin/js/theme.js" %}"></script>
+{% endblock %}
+<script>
+  /* Avant le premier affichage : restaure le rail replié (évite un « saut » de la mise en page). */
+  try { if (localStorage.getItem('q-rail') === '1') document.documentElement.classList.add('q-rail'); } catch (e) {}
+</script>
+{% block extrastyle %}{% endblock %}
+{% if LANGUAGE_BIDI %}<link rel="stylesheet" href="{% block stylesheet_rtl %}{% static "admin/css/rtl.css" %}{% endblock %}">{% endif %}
+{% block extrahead %}{% endblock %}
+{% block responsive %}
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static "admin/css/responsive.css" %}">
+    {% if LANGUAGE_BIDI %}<link rel="stylesheet" href="{% static "admin/css/responsive_rtl.css" %}">{% endif %}
+{% endblock %}
+{# La charte QURANOVA vient en dernier : elle l'emporte sur les feuilles de style de Django. #}
+<link rel="stylesheet" href="{% static 'css/admin-quranova.css' %}">
+{% block blockbots %}<meta name="robots" content="NONE,NOARCHIVE">{% endblock %}
+</head>
+
+<body class="{% if is_popup %}popup {% endif %}{% block bodyclass %}{% endblock %}" data-admin-utc-offset="{% now "Z" %}">
+{% include "admin/_icones.html" %}
+<a href="#content-start" class="skip-to-content-link">Aller au contenu</a>
+
+{% if not is_popup %}
+<div class="q-app" id="q-app">
+  <div class="q-scrim" data-q-close hidden></div>
+
+  {# ───────────── Barre latérale ───────────── #}
+  {% block nav-sidebar %}
+  <aside class="q-sidebar" id="q-sidebar" aria-label="Navigation principale">
+    <div class="q-brand">
+      <a class="q-brand-link" href="{% url 'admin:index' %}" aria-label="QURANOVA — Accueil de l'administration">
+        <img class="q-brand-logo" src="{% static 'img/quranova-logo.png' %}" alt="">
+        <span class="q-brand-text">QURANOVA<small>Administration</small></span>
+      </a>
+    </div>
+
+    <nav class="q-nav" aria-label="Sections">
+      <a class="q-item{% if request.path == '/admin/' %} is-active{% endif %}" href="{% url 'admin:index' %}" data-tip="Tableau de bord"{% if request.path == '/admin/' %} aria-current="page"{% endif %}>
+        <svg class="q-i" aria-hidden="true"><use href="#i-home"/></svg><span class="q-label">Tableau de bord</span>
+      </a>
+      {% for groupe in q_groupes %}
+      <section class="q-group{% if groupe.actif %} has-active{% endif %}" data-group="{{ groupe.cle }}">
+        <button type="button" class="q-group-title" aria-expanded="true" aria-controls="q-g-{{ groupe.cle }}">
+          <span>{{ groupe.titre }}</span>
+          <svg class="q-i q-chevron" aria-hidden="true"><use href="#i-chevron"/></svg>
+        </button>
+        <ul id="q-g-{{ groupe.cle }}">
+          {% for e in groupe.entrees %}
+          <li>
+            <a class="q-item{% if e.actif %} is-active{% endif %}" href="{{ e.url }}" data-tip="{{ e.libelle }}"{% if e.actif %} aria-current="page"{% endif %}>
+              <svg class="q-i" aria-hidden="true"><use href="#i-{{ e.icone }}"/></svg>
+              <span class="q-label">{{ e.libelle }}</span>
+              {% if e.compteur is not None %}<span class="q-badge" aria-label="{{ e.compteur }} élément{{ e.compteur|pluralize }}">{{ e.compteur }}</span>{% endif %}
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+      </section>
+      {% endfor %}
+    </nav>
+
+    <div class="q-collapse">
+      <button type="button" class="q-item" id="q-rail-toggle" aria-pressed="false" data-tip="Replier le menu">
+        <svg class="q-i" aria-hidden="true"><use href="#i-chevron-left"/></svg><span class="q-label">Replier le menu</span>
+      </button>
+    </div>
+
+    <div class="q-profile">
+      <span class="q-avatar" aria-hidden="true">{{ q_profil.initiales }}</span>
+      <span class="q-profile-text"><strong>{{ q_profil.nom }}</strong><small>{{ q_profil.role }}</small></span>
+    </div>
+  </aside>
+  {% endblock %}
+
+  <div class="q-main">
+    {# ───────────── Barre supérieure ───────────── #}
+    {% block header %}
+    <header class="q-topbar">
+      <button type="button" class="q-iconbtn q-burger" id="q-burger" aria-label="Ouvrir le menu" aria-controls="q-sidebar" aria-expanded="false">
+        <svg class="q-i" aria-hidden="true"><use href="#i-menu"/></svg>
+      </button>
+
+      {% block nav-breadcrumbs %}
+      <nav class="q-crumbs" aria-label="Fil d'Ariane">
+        {% block breadcrumbs %}
+          <div class="breadcrumbs">
+            <a href="{% url 'admin:index' %}">Accueil</a>
+            {% if title %} &rsaquo; <span>{{ title }}</span>{% endif %}
+          </div>
+        {% endblock %}
+      </nav>
+      {% endblock %}
+
+      {% if has_permission %}
+      <div class="q-search" id="q-search">
+        <form action="{{ q_candidats_url|default:'#' }}" method="get" role="search">
+          <svg class="q-i" aria-hidden="true"><use href="#i-search"/></svg>
+          <input type="search" name="q" id="q-search-input" placeholder="Rechercher une page, un candidat…" autocomplete="off" aria-label="Recherche globale" aria-controls="q-search-results" role="combobox" aria-expanded="false">
+          <kbd aria-hidden="true">Ctrl K</kbd>
+        </form>
+        <ul class="q-results" id="q-search-results" role="listbox" hidden></ul>
+      </div>
+
+      <div class="q-topbar-actions">
+        <button type="button" class="q-iconbtn" id="q-theme" aria-label="Basculer entre le thème clair et le thème sombre" data-tip="Thème clair / sombre">
+          <svg class="q-i q-when-light" aria-hidden="true"><use href="#i-moon"/></svg>
+          <svg class="q-i q-when-dark" aria-hidden="true"><use href="#i-sun"/></svg>
+        </button>
+        <details class="q-user" id="q-user">
+          <summary aria-label="Menu utilisateur">
+            <span class="q-avatar" aria-hidden="true">{{ q_profil.initiales }}</span>
+            <span class="q-user-name">{{ q_profil.identifiant }}</span>
+            <svg class="q-i q-chevron" aria-hidden="true"><use href="#i-chevron"/></svg>
+          </summary>
+          <div class="q-menu" role="menu">
+            <div class="q-menu-head"><strong>{{ q_profil.nom }}</strong><small>{{ q_profil.role }}</small></div>
+            {% if user.has_usable_password %}
+            <a role="menuitem" href="{% url 'admin:password_change' %}"><svg class="q-i" aria-hidden="true"><use href="#i-key"/></svg>Modifier le mot de passe</a>
+            {% endif %}
+            <form method="post" action="{% url 'admin:logout' %}">{% csrf_token %}
+              <button type="submit" role="menuitem"><svg class="q-i" aria-hidden="true"><use href="#i-logout"/></svg>Déconnexion</button>
+            </form>
+          </div>
+        </details>
+      </div>
+      {% endif %}
+    </header>
+    {% endblock %}
+    {% block usertools %}{% endblock %}
+    {% block nav-global %}{% endblock %}
+    {% block branding %}{% endblock %}
+
+    <main id="content-start" class="q-content" tabindex="-1">
+{% else %}
+<div class="q-popup">
+    <main id="content-start" class="q-content" tabindex="-1">
+{% endif %}
+      {% block messages %}
+        {% if messages %}
+          <ul class="messagelist" id="q-messages">{% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message|capfirst }}</li>
+          {% endfor %}</ul>
+        {% endif %}
+      {% endblock messages %}
+      <div id="content" class="{% block coltype %}colM{% endblock %}">
+        {% block pretitle %}{% endblock %}
+        {% block content_title %}{% if title %}<h1>{{ title }}</h1>{% endif %}{% endblock %}
+        {% block content_subtitle %}{% if subtitle %}<h2>{{ subtitle }}</h2>{% endif %}{% endblock %}
+        {% block content %}
+          {% block object-tools %}{% endblock %}
+          {{ content }}
+        {% endblock %}
+        {% block sidebar %}{% endblock %}
+        <br class="clear">
+      </div>
+      <footer id="footer">{% block footer %}{% endblock %}</footer>
+    </main>
+{% if not is_popup %}
+  </div>
+</div>
+{% else %}
+</div>
+{% endif %}
+
+<div class="q-toasts" id="q-toasts" aria-live="polite" aria-atomic="false"></div>
+<script src="{% static 'js/admin-quranova.js' %}" defer></script>
+{% block extrabody %}{% endblock extrabody %}
+</body>
+</html>

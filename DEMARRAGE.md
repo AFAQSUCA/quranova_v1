@@ -37,9 +37,17 @@ CREATE DATABASE quranova OWNER quranova;
 ALTER USER quranova CREATEDB;   -- nécessaire pour que les tests créent leur base temporaire
 ```
 
-**WeasyPrint (PDF)** : sous Windows, il a besoin des bibliothèques Pango. Si vous l'avez déjà fait fonctionner pour un autre projet, rien à faire.
-Sinon : installer MSYS2 (https://www.msys2.org), puis dans le terminal MSYS2 : `pacman -S mingw-w64-x86_64-pango`.
-Ce point ne sera utile qu'à l'itération 4 ; Claude vous guidera à ce moment-là.
+**WeasyPrint (PDF)** : le procès-verbal et les classements en PDF utilisent WeasyPrint, qui a besoin de la bibliothèque Pango. Sous Windows :
+
+1. Installer MSYS2 (https://www.msys2.org), puis dans le terminal « MSYS2 UCRT64 » : `pacman -S mingw-w64-ucrt-x86_64-pango` (ou, pour le terminal MINGW64 : `pacman -S mingw-w64-x86_64-pango`).
+2. Dire à Python où trouver les DLL (une fois, puis rouvrir PowerShell) :
+   ```powershell
+   [Environment]::SetEnvironmentVariable("WEASYPRINT_DLL_DIRECTORIES", "C:\msys64\ucrt64\bin", "User")   # mingw64\bin si vous avez installé la variante MINGW64
+   ```
+3. Vérifier : `python -c "from weasyprint import HTML; HTML(string='<p>ok</p>').write_pdf('essai.pdf')"` doit créer `essai.pdf`.
+
+Sans Pango, rien ne casse : les tests PDF sont ignorés et les liens PDF affichent un message qui renvoie vers la version imprimable (« Imprimer → Enregistrer en PDF »).
+Dans Docker (serveur de salle), les bibliothèques sont installées par le `Dockerfile` : rien à faire.
 
 **Autoriser les scripts PowerShell** (pour activer l'environnement Python), une seule fois :
 

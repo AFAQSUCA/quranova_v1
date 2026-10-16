@@ -1,0 +1,38 @@
+/* Écran de scène (projecteur / grand écran) : tout est dimensionné en unités de fenêtre (vw/vh) pour rester lisible de loin.
+   --taille (50 % à 200 %) est réglée au clavier (+ / -). Le texte coranique est affiché tel que reçu, sans retouche (§12.2). */
+.scene { position: fixed; inset: 0; color: var(--papier); overflow: hidden; font-family: var(--police); -webkit-font-smoothing: antialiased;
+  background: var(--v950) radial-gradient(ellipse at 50% 40%, #0b4a30 0%, var(--v900) 55%, var(--v950) 100%); }
+.scene .cadre { position: absolute; inset: 0; overflow: hidden; }
+.scene .diapo, .scene .attente { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 8vh 9vw; }
+
+.scene h1 { font-size: calc(5.2vw * var(--taille)); line-height: 1.15; margin: .25em 0; font-weight: 700; letter-spacing: -.01em; max-width: 86vw; }
+.scene .etiquette { display: inline-block; margin: 0 0 1.2vh; padding: .35em 1.3em; border-radius: 999px; background: rgba(214, 176, 58, .16); color: var(--or-clair);
+  border: 2px solid rgba(230, 200, 92, .55); font-size: calc(2.1vw * var(--taille)); font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+
+/* Verset : cadre à double filet doré, texte centré. */
+.scene .diapo[data-type="verset"]::before { content: ""; position: absolute; inset: 4.5vh 3.5vw; border: 2px solid rgba(230, 200, 92, .45); border-radius: 1.6vw; pointer-events: none; }
+.scene .diapo[data-type="verset"]::after { content: ""; position: absolute; inset: calc(4.5vh + .9vw) calc(3.5vw + .9vw); border: 1px solid rgba(230, 200, 92, .22); border-radius: 1vw; pointer-events: none; }
+/* Le texte arabe se lit de droite à gauche (dir="rtl") ; cela n'a rien à voir avec le sens du balayage. */
+.scene .verset { font-family: var(--police-coran); font-size: calc(6vw * var(--taille) * var(--echelle-coran, 1)); line-height: 1.95; margin: 0; max-width: 82vw; text-wrap: balance; }
+.scene .reference { display: inline-block; margin-top: 2.5vh; padding: .25em 1.2em; border-radius: 999px; background: rgba(0, 0, 0, .28); color: var(--or-clair);
+  font-size: calc(2.1vw * var(--taille)); font-weight: 600; letter-spacing: .04em; }
+.scene .enonce { font-size: calc(4vw * var(--taille)); line-height: 1.35; max-width: 82vw; font-weight: 500; }
+.scene .attente-texte { font-size: calc(4vw * var(--taille)); opacity: .85; }
+
+/* Veille : l'embleme et un seul message. */
+.scene .attente .embleme { width: 13vw; max-width: 220px; aspect-ratio: 1; object-fit: contain; background: #fff; border-radius: 50%; padding: .3vw; margin-bottom: 4vh; box-shadow: 0 0 0 .7vw rgba(214, 176, 58, .18); }
+.scene .attente h1 { font-size: calc(3.6vw * var(--taille)); font-weight: 600; opacity: .92; }
+
+.scene .bandeau { position: fixed; top: 0; left: 0; right: 0; z-index: 5; margin: 0; padding: .6rem; text-align: center; background: var(--alerte-fond); color: var(--alerte); font-weight: 600; border-bottom: 3px solid var(--or); }
+.scene .pause { position: fixed; right: 2.5vw; top: 3vh; z-index: 4; background: var(--or); color: var(--encre); padding: .35em 1.2em; border-radius: 999px; font-size: 2vw; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; box-shadow: 0 6px 20px rgba(0, 0, 0, .3); }
+.scene .plein-ecran { position: fixed; right: 1vw; bottom: 1vh; z-index: 4; background: transparent; color: var(--papier); border: 0; font-size: 1.6rem; opacity: .25; cursor: pointer; }
+.scene .plein-ecran:hover, .scene .plein-ecran:focus-visible { opacity: 1; }
+
+/* Balayage de DROITE à GAUCHE (RM-12) : la nouvelle diapositive entre par la droite, l'ancienne sort par la gauche. */
+.balayage-enter-active, .balayage-leave-active { transition: transform .5s ease; }
+.balayage-enter-from { transform: translateX(100%); }
+.balayage-leave-to { transform: translateX(-100%); }
+.sans-enter-active, .sans-leave-active { transition: none; }
+/* §18.2 : l'écran scène CONSERVE le balayage de RM-12 même si le système demande de réduire les animations
+   (c'est un écran collectif, pas un écran individuel) : aucune règle de réduction des animations ici. */

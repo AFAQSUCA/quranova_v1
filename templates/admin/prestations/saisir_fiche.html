@@ -1,0 +1,16 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<h2>Saisir une fiche de secours</h2>
+<p>Prestation n° {{ prestation.rang_passage }} — candidat n° {{ prestation.participation.numero_candidat }}, {{ prestation.epreuve }} ({{ prestation.session }}).</p>
+<p><strong>Règles :</strong> recopier la fiche signée par le juré, case par case. <strong>Aucune case ne doit rester vide</strong> : une note manquante n'est jamais comptée comme zéro, retournez voir le juré.
+Le <strong>motif</strong> est obligatoire et tracé au procès-verbal. L'évaluation est validée à l'enregistrement.</p>
+<form method="post">
+  {% csrf_token %}
+  <input type="hidden" name="action" value="saisir_fiche_de_secours">
+  <input type="hidden" name="_selected_action" value="{{ prestation.pk }}">
+  <input type="hidden" name="appliquer" value="1">
+  {{ form.as_p }}
+  <input type="submit" class="default" value="Enregistrer la fiche">
+  <a href="{% url 'admin:prestations_prestation_changelist' %}" class="button">Annuler</a>
+</form>
+{% endblock %}

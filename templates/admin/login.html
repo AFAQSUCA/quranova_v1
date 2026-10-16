@@ -1,0 +1,59 @@
+{% load i18n static %}<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="NONE,NOARCHIVE">
+<title>{% if form.errors %}Erreur : {% endif %}Connexion | QURANOVA</title>
+<link rel="icon" href="{% static 'img/favicon.png' %}">
+<link rel="stylesheet" href="{% static 'admin/css/base.css' %}">
+<link rel="stylesheet" href="{% static 'admin/css/dark_mode.css' %}">
+<script src="{% static 'admin/js/theme.js' %}"></script>
+<link rel="stylesheet" href="{% static 'css/admin-quranova.css' %}">
+{{ form.media }}
+</head>
+<body class="q-login-page login">
+{% include "admin/_icones.html" %}
+<main class="q-login" id="content-start">
+  <div class="q-login-card">
+    <div class="q-login-brand">
+      <img src="{% static 'img/quranova-logo.png' %}" alt="">
+      <div><strong>QURANOVA</strong><small>Administration</small></div>
+    </div>
+    <h1>Connexion</h1>
+    <p class="q-login-lead">Identifiez-vous pour accéder à la gestion des concours.</p>
+
+    {% if form.errors and not form.non_field_errors %}
+      <p class="q-alert" role="alert"><svg class="q-i" aria-hidden="true"><use href="#i-alert-circle"/></svg>Veuillez corriger l'erreur ci-dessous.</p>
+    {% endif %}
+    {% for error in form.non_field_errors %}
+      <p class="q-alert" role="alert"><svg class="q-i" aria-hidden="true"><use href="#i-alert-circle"/></svg>{{ error }}</p>
+    {% endfor %}
+    {% if user.is_authenticated %}
+      <p class="q-alert" role="alert"><svg class="q-i" aria-hidden="true"><use href="#i-alert-circle"/></svg>Vous êtes connecté en tant que {{ username }}, mais vous n'avez pas accès à cette page. Voulez-vous vous connecter avec un autre compte ?</p>
+    {% endif %}
+
+    <form action="{{ app_path }}" method="post" id="login-form">{% csrf_token %}
+      <div class="q-field">
+        <label for="{{ form.username.id_for_label }}">Identifiant</label>
+        {{ form.username.errors }}
+        {{ form.username }}
+      </div>
+      <div class="q-field">
+        <label for="{{ form.password.id_for_label }}">Mot de passe</label>
+        {{ form.password.errors }}
+        {{ form.password }}
+        <input type="hidden" name="next" value="{{ next }}">
+      </div>
+      <button type="submit" class="q-btn-block">Se connecter</button>
+    </form>
+    <p class="q-login-foot">Serveur de salle · accès réservé aux opérateurs et aux responsables clients.</p>
+  </div>
+  <button type="button" class="q-iconbtn q-login-theme" id="q-theme" aria-label="Basculer entre le thème clair et le thème sombre">
+    <svg class="q-i q-when-light" aria-hidden="true"><use href="#i-moon"/></svg>
+    <svg class="q-i q-when-dark" aria-hidden="true"><use href="#i-sun"/></svg>
+  </button>
+</main>
+<script src="{% static 'js/admin-quranova.js' %}" defer></script>
+</body>
+</html>

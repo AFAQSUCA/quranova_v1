@@ -1,0 +1,9 @@
+Django>=5.2,<5.3
+channels>=4.2,<5
+daphne>=4.1,<5
+psycopg[binary,pool]>=3.2,<4
+python-dotenv>=1.0,<2
+channels-redis>=4.2,<5
+weasyprint>=68,<71
+django-otp>=1.5,<2
+qrcode>=7.4,<9

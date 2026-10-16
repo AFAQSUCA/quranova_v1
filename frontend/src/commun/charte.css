@@ -1,0 +1,32 @@
+/* Charte QURANOVA des écrans temps réel (tirage, scène, jury, commande).
+   Jetons communs ; chaque écran garde ses règles dans son propre style.css, TOUJOURS préfixées par la classe de l'écran
+   (le build regroupe tous les styles dans un seul fichier : une règle non préfixée toucherait les quatre écrans).
+   Polices du système uniquement : le serveur de salle n'a pas Internet. */
+:root {
+  --v950: #052b1b;
+  --v900: #073a24;
+  --v800: #0a4c30;
+  --v600: #12603f;
+  --v100: #e5f0e9;
+  --or: #d6b03a;
+  --or-fonce: #c79f26;
+  --or-clair: #e6c85c;
+  --encre: #0b2a1c;        /* texte sur or : 7,4:1 */
+  --papier: #fbf7ee;
+  --carte: #ffffff;
+  --texte: #16221d;        /* 16:1 sur blanc */
+  --discret: #475750;      /* 7,6:1 sur blanc */
+  --bord: #dfe6e1;
+  --danger: #a9261b;
+  --danger-fond: #fdecea;
+  --ok: #0a6a3e;
+  --ok-fond: #e4f4ea;
+  --alerte: #8a5a00;
+  --alerte-fond: #fdf3dc;
+  --police: system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --police-coran: "Amiri Quran", "Scheherazade New", "Traditional Arabic", serif;
+  --ombre: 0 1px 2px rgba(10, 40, 28, .08), 0 8px 24px rgba(10, 40, 28, .08);
+}
+*, *::before, *::after { box-sizing: border-box; }
+@keyframes q-tourne { to { transform: rotate(360deg); } }
+@keyframes q-respire { 0%, 100% { transform: scale(.92); opacity: .55; } 50% { transform: scale(1.06); opacity: 1; } }
