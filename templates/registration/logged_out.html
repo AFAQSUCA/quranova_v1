@@ -1,0 +1,12 @@
+{% extends "admin/base_site.html" %}
+{% block bodyclass %}{{ block.super }} q-nosidebar{% endblock %}
+{% block breadcrumbs %}<div class="breadcrumbs"><span>Déconnexion</span></div>{% endblock %}
+{% block nav-sidebar %}{% endblock %}
+{% block content_title %}{% endblock %}
+{% block content %}
+<div class="q-card q-empty">
+  <h2>À bientôt</h2>
+  <p>Vous êtes déconnecté.</p>
+  <a class="q-btn q-btn-primary" href="{% url 'admin:index' %}">Se reconnecter</a>
+</div>
+{% endblock %}

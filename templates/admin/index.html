@@ -1,0 +1,29 @@
+{% extends "admin/base_site.html" %}
+
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+{% block breadcrumbs %}<div class="breadcrumbs"><span>Tableau de bord</span></div>{% endblock %}
+{% block content_title %}
+<div class="q-pagehead">
+  <div><h1>Bonjour, {{ q_profil.nom }}</h1><p class="q-sub">{{ q_profil.role }} · choisissez une section pour commencer.</p></div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="q-dash">
+  {% for groupe in q_groupes %}
+  <section class="q-card q-dash-group">
+    <h2>{{ groupe.titre }}</h2>
+    <ul>
+      {% for e in groupe.entrees %}
+      <li>
+        <a href="{{ e.url }}"><svg class="q-i" aria-hidden="true"><use href="#i-{{ e.icone }}"/></svg><span>{{ e.libelle }}</span>
+          {% if e.compteur is not None %}<span class="q-badge">{{ e.compteur }}</span>{% endif %}</a>
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% empty %}
+  <section class="q-card q-empty"><p>Vous n'avez la permission de consulter ou de modifier aucune section.</p></section>
+  {% endfor %}
+</div>
+{% endblock %}

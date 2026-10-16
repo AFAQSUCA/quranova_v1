@@ -1,6 +1,6 @@
 {% extends "admin/base_site.html" %}
 {% block content %}
-<h1>Remettre les codes d'accès</h1>
+<h2>Remettre les codes d'accès</h2>
 <p>Jurés sélectionnés : {% for j in jures %}<strong>{{ j.nom_complet }}</strong>{% if not forloop.last %}, {% endif %}{% endfor %}.</p>
 <p>Un nouveau code <strong>révoque l'ancien</strong>. Les codes s'afficheront <strong>une seule fois</strong> à l'étape suivante : préparez de quoi les noter ou les imprimer.</p>
 <form method="post">

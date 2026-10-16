@@ -1,0 +1,44 @@
+{% extends "admin/change_list.html" %}
+{% load i18n admin_urls q_admin %}
+
+{# En-tête de page : titre, nombre d'éléments, bouton « + Ajouter ». Le reste est l'écran standard de Django. #}
+{% block content_title %}
+<div class="q-pagehead">
+  <div>
+    <h1>{{ cl.opts.verbose_name_plural|capfirst }}</h1>
+    <p class="q-sub"><span class="q-count">{{ cl.result_count }}</span> élément{{ cl.result_count|pluralize }}{% if cl.has_active_filters or cl.query %} · résultats filtrés{% endif %}</p>
+  </div>
+  {% if has_add_permission %}
+  <a class="q-btn q-btn-primary" href="{{ add_url }}{% if is_popup %}?_popup=1{% endif %}"><svg class="q-i" aria-hidden="true"><use href="#i-plus"/></svg>Ajouter</a>
+  {% endif %}
+</div>
+{% endblock %}
+
+{# Le bouton « Ajouter » standard est repris dans l'en-tête ; on garde les autres outils (import, etc.). #}
+{% block object-tools-items %}{% endblock %}
+
+{% block result_list %}
+  {% if cl.result_count == 0 %}
+  <div class="q-empty">
+    <svg class="q-empty-art" viewBox="0 0 120 96" aria-hidden="true">
+      <rect x="14" y="22" width="92" height="60" rx="8" class="a"/>
+      <path d="M14 52h28l6 10h24l6-10h28" class="b"/>
+      <path d="M38 22V12a4 4 0 0 1 4-4h36a4 4 0 0 1 4 4v10" class="b"/>
+      <circle cx="60" cy="40" r="3" class="c"/>
+    </svg>
+    {% if cl.has_active_filters or cl.query %}
+      <h2>Aucun résultat</h2>
+      <p>Aucun élément ne correspond à votre recherche ou à vos filtres.</p>
+      <a class="q-btn" href="?">Effacer la recherche et les filtres</a>
+    {% else %}
+      <h2>Aucun {{ cl.opts.verbose_name }} pour l'instant</h2>
+      <p>{% if has_add_permission %}Commencez par en ajouter un.{% else %}Il n'y a encore rien à afficher ici.{% endif %}</p>
+      {% if has_add_permission %}<a class="q-btn q-btn-primary" href="{{ add_url }}"><svg class="q-i" aria-hidden="true"><use href="#i-plus"/></svg>Ajouter</a>{% endif %}
+    {% endif %}
+  </div>
+  {% else %}
+  <div class="q-table-card" data-can-change="{% if has_change_permission %}1{% endif %}" data-can-delete="{% peut_supprimer cl %}">
+    {{ block.super }}
+  </div>
+  {% endif %}
+{% endblock %}

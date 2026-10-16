@@ -1,6 +1,6 @@
 {% extends "admin/base_site.html" %}
 {% block content %}
-<h1>Rapport d'import — {{ concours }}</h1>
+<h2>Rapport d'import — {{ concours }}</h2>
 {% if rapport.ok %}
 <p style="font-weight:bold;color:#0a4c30">{{ rapport.texte }}</p>
 <table><thead><tr><th>Ligne</th><th>N°</th><th>Candidat</th><th>Catégorie</th></tr></thead>
