@@ -1,8 +1,24 @@
 """Administration des jurés (§7.4)."""
-from django.contrib import admin
+from django import forms
+from django.contrib import admin, messages
+from django.template.response import TemplateResponse
 
-from apps.commun.admin import AdminDuClient, ConsultationSeule, InlineDuClient
+from apps.commun.admin import ERREURS_METIER, AdminDuClient, ConsultationSeule, InlineDuClient, organisations_visibles
+from apps.concours.models import Session
+from apps.jury import services
 from apps.jury.models import AffectationJury, CodeAccesJure, Jure
+
+
+class RemiseCodesForm(forms.Form):
+    session = forms.ModelChoiceField(queryset=Session.objects.none(), label="Session", help_text="Les codes ne valent que pour cette session.")
+
+    def __init__(self, *args, jures, utilisateur, **kwargs):
+        super().__init__(*args, **kwargs)
+        visibles = organisations_visibles(utilisateur)
+        sessions = Session.objects.filter(organisation_id__in={j.organisation_id for j in jures})
+        if visibles is not None:
+            sessions = sessions.filter(organisation_id__in=visibles)
+        self.fields["session"].queryset = sessions.select_related("concours").order_by("-date", "nom")
 
 
 class AffectationInline(InlineDuClient):
@@ -15,6 +31,24 @@ class JureAdmin(AdminDuClient):
     list_filter = ("role", "actif", "organisation")
     search_fields = ("nom", "prenom")
     inlines = [AffectationInline]
+    actions = ["remettre_les_codes"]
+
+    @admin.action(description="Remettre un code d'accès pour une session (affiché une seule fois)")
+    def remettre_les_codes(self, request, queryset):
+        jures = list(queryset.order_by("nom", "prenom"))
+        soumis = request.POST.get("appliquer")
+        formulaire = RemiseCodesForm(request.POST if soumis else None, jures=jures, utilisateur=request.user)
+        contexte = {**self.admin_site.each_context(request), "title": "Remettre les codes d'accès", "jures": jures, "form": formulaire, "opts": self.model._meta}
+        if soumis and formulaire.is_valid():
+            try:
+                remis = services.remettre_codes(request.user, jures, formulaire.cleaned_data["session"])
+            except ERREURS_METIER as erreur:
+                formulaire.add_error(None, str(erreur))
+            else:
+                reponse = TemplateResponse(request, "admin/jury/codes_remis.html", {**contexte, "remis": remis, "session": formulaire.cleaned_data["session"]})
+                reponse["Cache-Control"] = "no-store"
+                return reponse
+        return TemplateResponse(request, "admin/jury/remettre_codes.html", contexte)
 
 
 @admin.register(CodeAccesJure)

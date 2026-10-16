@@ -14,6 +14,7 @@ urlpatterns = [
     path("", include("apps.jury.urls")),
     path("", include("apps.resultats.urls")),
     path("", include("apps.coran.urls")),
+    path("", include("apps.candidats.urls")),
 ]
 
 if settings.DEBUG:

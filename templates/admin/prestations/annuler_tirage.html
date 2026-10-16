@@ -1,0 +1,16 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<h1>Annuler un tirage</h1>
+<p>Tirage « {{ tirage.serie }} » de la prestation n° {{ tirage.prestation.rang_passage }} (candidat n° {{ tirage.prestation.participation.numero_candidat }}).</p>
+<p><strong>À savoir :</strong> le tirage est <em>conservé</em> avec son motif et votre nom (RM-25) ; la prestation revient « en attente ». La série redevient tirable seulement
+si aucune de ses diapositives n'a été affichée. Impossible une fois la prestation en notation.</p>
+<form method="post">
+  {% csrf_token %}
+  <input type="hidden" name="action" value="annuler_le_tirage">
+  <input type="hidden" name="_selected_action" value="{{ tirage.pk }}">
+  <input type="hidden" name="appliquer" value="1">
+  {{ form.as_p }}
+  <input type="submit" class="default" value="Annuler le tirage">
+  <a href="{% url 'admin:prestations_tirage_changelist' %}" class="button">Retour</a>
+</form>
+{% endblock %}

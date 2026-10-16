@@ -54,9 +54,11 @@ class ConcoursAdmin(AdminDuClient):
             return "—"
         return format_html(
             '<a href="{}" target="_blank">Procès-verbal (imprimable)</a> · <a href="{}">Procès-verbal (PDF)</a> · '
-            '<a href="{}">Classements par catégorie (PDF)</a> · <a href="{}">Export des données (CSV)</a>',
+            '<a href="{}">Classements par catégorie (PDF)</a> · <a href="{}">Export des données (CSV)</a> · '
+            '<a href="{}">Modèle d\'import des candidats (CSV)</a>',
             reverse("resultats:proces_verbal", args=[obj.pk]), reverse("resultats:proces_verbal_pdf", args=[obj.pk]),
             reverse("resultats:classements_pdf", args=[obj.pk]), reverse("resultats:export", args=[obj.pk]),
+            reverse("candidats:modele_import", args=[obj.pk]),
         )
 
     def get_actions(self, request):

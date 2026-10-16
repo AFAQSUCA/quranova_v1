@@ -2,3 +2,4 @@ data/corpus/* -text
 *.sh text eol=lf
 docker/* text eol=lf
 Dockerfile text eol=lf
+docs/modeles/*.csv -text

@@ -145,3 +145,28 @@ def authentifier_par_code(saisie, session, maintenant=None):
     acces.derniere_utilisation = maintenant
     acces.save(update_fields=["derniere_utilisation", "modifie_le"])
     return acces
+
+
+def remettre_codes(auteur, jures, session):
+    """Génère un code pour chaque juré de la liste (``[(juré, code en clair)]``) ; le code n'est montré qu'à cet instant.
+
+    Réservé au personnel affecté à la mission ; chaque juré doit être affecté à une épreuve de ce concours. L'opération est journalisée
+    (qui, quels jurés, quelle session) SANS les codes.
+    """
+    from apps.audit.services import journaliser
+    from apps.utilisateurs.models import Utilisateur
+    from apps.utilisateurs.services import missions_accessibles
+
+    mission_id = session.concours.mission_id
+    if not (auteur.is_active and auteur.role in (Utilisateur.Role.OPERATEUR, Utilisateur.Role.ADMINISTRATEUR)
+            and missions_accessibles(auteur).filter(pk=mission_id).exists()):
+        raise AffectationInvalideError("Vous n'avez pas le droit de remettre des codes pour cette session : seul le personnel affecté à la mission le peut (RM-20).")
+    jures = list(jures)
+    for jure in jures:
+        if not AffectationJury.objects.filter(jure=jure, epreuve__categorie__concours=session.concours).exists():
+            raise AffectationInvalideError(f"Le juré {jure} n'est affecté à aucune épreuve de ce concours : aucun code à remettre.")
+    with transaction.atomic():
+        remis = [(jure, generer_code(jure, session)[1]) for jure in jures]
+        journaliser("jury.codes_remis", organisation=session.organisation, auteur=auteur, objet=session,
+                    details={"jures": [j.nom_complet for j in jures], "session": session.pk})
+    return remis

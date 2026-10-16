@@ -1,0 +1,15 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<h1>Remettre les codes d'accès</h1>
+<p>Jurés sélectionnés : {% for j in jures %}<strong>{{ j.nom_complet }}</strong>{% if not forloop.last %}, {% endif %}{% endfor %}.</p>
+<p>Un nouveau code <strong>révoque l'ancien</strong>. Les codes s'afficheront <strong>une seule fois</strong> à l'étape suivante : préparez de quoi les noter ou les imprimer.</p>
+<form method="post">
+  {% csrf_token %}
+  <input type="hidden" name="action" value="remettre_les_codes">
+  {% for j in jures %}<input type="hidden" name="_selected_action" value="{{ j.pk }}">{% endfor %}
+  <input type="hidden" name="appliquer" value="1">
+  {{ form.as_p }}
+  <input type="submit" class="default" value="Générer les codes">
+  <a href="{% url 'admin:jury_jure_changelist' %}" class="button">Annuler</a>
+</form>
+{% endblock %}

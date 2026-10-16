@@ -1,17 +1,22 @@
 """Administration des prestations et des tirages (§8.3, §14.2)."""
 from django import forms
 from django.contrib import admin, messages
+from django.db import transaction
 from django.http import HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 
 from apps.commun.admin import ERREURS_METIER, AdminDuClient, ConsultationSeule, appliquer_action
-from apps.jury import fiches
+from apps.jury import evaluations, fiches
 from apps.jury.exceptions import EvaluationIncompleteError, EvaluationInterditeError, NoteInvalideError
 from apps.jury.models import Jure
-from apps.prestations import terminaux
+from apps.prestations import services, terminaux
 from apps.prestations.exceptions import AppelInvalideError
 from apps.prestations.models import Prestation, Terminal, Tirage
+
+
+class AnnulationForm(forms.Form):
+    motif = forms.CharField(widget=forms.Textarea(attrs={"rows": 3}), label="Motif de l'annulation", help_text="Obligatoire : il figure au procès-verbal avec votre nom (RM-25).")
 
 
 def formulaire_fiche(prestation, donnees):
@@ -35,7 +40,11 @@ class PrestationAdmin(AdminDuClient):
     list_display = ("rang_passage", "participation", "epreuve", "session", "etat")
     list_filter = ("etat", "epreuve", "session")
     readonly_fields = ("etat",)  # l'état ne change que par les services (tirage, diaporama, notation)
-    actions = ["appeler_au_tirage", "saisir_fiche_de_secours"]
+    actions = ["appeler_au_tirage", "cloturer", "saisir_fiche_de_secours"]
+
+    @admin.action(description="Clôturer la prestation (toutes les évaluations validées)")
+    def cloturer(self, request, queryset):
+        appliquer_action(request, queryset, lambda p: evaluations.cloturer_prestation(p, request.user), "prestation clôturée")
 
     @admin.action(description="Saisir une fiche de secours (papier) d'un juré")
     def saisir_fiche_de_secours(self, request, queryset):
@@ -76,6 +85,26 @@ class TirageAdmin(ConsultationSeule):
 
     list_display = ("prestation", "serie", "rang", "statut", "terminal", "cree_le")
     list_filter = ("statut", "prestation__epreuve")
+    actions = ["annuler_le_tirage"]
+
+    @admin.action(description="Annuler le tirage (motif obligatoire)")
+    def annuler_le_tirage(self, request, queryset):
+        if queryset.count() != 1:
+            self.message_user(request, "Sélectionnez un seul tirage à annuler.", messages.ERROR)
+            return None
+        tirage = queryset.select_related("prestation__participation", "serie").get()
+        formulaire = AnnulationForm(request.POST if request.POST.get("appliquer") else None)
+        if request.POST.get("appliquer") and formulaire.is_valid():
+            try:
+                with transaction.atomic():
+                    services.annuler_tirage(tirage, request.user, formulaire.cleaned_data["motif"])
+            except ERREURS_METIER as erreur:
+                formulaire.add_error(None, str(erreur))
+            else:
+                self.message_user(request, f"Tirage annulé ({tirage.serie}) : la prestation revient en attente.", messages.SUCCESS)
+                return HttpResponseRedirect(reverse("admin:prestations_tirage_changelist"))
+        return TemplateResponse(request, "admin/prestations/annuler_tirage.html", {
+            **self.admin_site.each_context(request), "title": "Annuler un tirage", "tirage": tirage, "form": formulaire, "opts": self.model._meta})
 
 
 @admin.register(Terminal)
