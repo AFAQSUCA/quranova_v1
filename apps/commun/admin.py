@@ -28,12 +28,14 @@ from apps.prestations.exceptions import (
 )
 from apps.questions.exceptions import QuestionInvalideError, SerieInvalideError
 from apps.resultats.exceptions import ClassementInvalideError, NoteManquanteError, RegleNonPriseEnChargeError
+from apps.incidents.exceptions import IncidentInvalideError
 from apps.jury.exceptions import CorrectionInvalideError, EvaluationInterditeError
 from apps.utilisateurs.exceptions import AffectationInvalideError
 from apps.utilisateurs.models import Utilisateur
 from apps.utilisateurs.services import missions_accessibles
 
 ERREURS_METIER = (
+    IncidentInvalideError,
     IncoherenceOrganisationError,
     ParticipationInvalideError,
     TirageImpossibleError,

@@ -75,6 +75,7 @@ Les noms du domaine sont en **français sans accents** ; le code purement techni
 | Série / Lot / Tirage | `Serie` / `Lot` / `Tirage` |
 | Version du corpus / Sourate / Verset | `VersionCorpus` / `Sourate` / `Verset` |
 | Responsable client / Opérateur | rôles `responsable_client` / `operateur` |
+| Incident (en salle, §13.6) | `Incident` (app `incidents`) |
 
 N'utilise **jamais** « passage » seul (dis `PassageCoranique` ou `Prestation`), ni « choix » pour une série.
 

@@ -24,6 +24,8 @@ from apps.audit.services import journaliser, verifier_chaine
 from apps.candidats.models import Consentement, Participation
 from apps.candidats.services import est_mineur
 from apps.concours.models import Epreuve
+from apps.incidents import services as services_incidents
+from apps.incidents.models import Incident
 from apps.jury.models import Evaluation
 from apps.clients.marque import marque_du_client
 from apps.prestations.models import Prestation, Tirage
@@ -95,6 +97,8 @@ def contexte_pv(concours, auteur=None):
         "concours": concours, "auteur": auteur, "genere_le": timezone.now(), "sections": sections,
         "non_valides": non_valides, "definitif": not non_valides and bool(sections),
         "historique": historique, "incidents": [h for h in historique if h["annulation"]],
+        "incidents_declares": list(Incident.objects.filter(concours=concours).select_related("declare_par", "session").order_by("survenu_le")),
+        "bilan_incidents": services_incidents.bilan(concours),
         "audit": {
             "entrees": chaine.dernier_numero if chaine else 0,
             "empreinte": chaine.derniere_empreinte if chaine else "",
@@ -174,6 +178,7 @@ DOCUMENTATION = {
     "prestations.csv": ("Passage d'un candidat à une épreuve", ["prestation_id", "numero_candidat", "epreuve", "session", "rang_passage", "etat"]),
     "tirages.csv": ("Historique des tirages, annulations comprises", ["horodatage (UTC)", "numero_candidat", "epreuve", "serie", "rang", "terminal", "statut", "motif_annulation"]),
     "notes.csv": ("Notes des évaluations VALIDÉES, une ligne par note", ["numero_candidat", "epreuve", "juré", "critere", "valeur"]),
+    "incidents.csv": ("Incidents déclarés en salle (§13.6)", ["survenu_le (UTC)", "type", "gravite", "session", "description", "resolu_le (UTC)", "resolution", "declare_par"]),
     "classements.csv": ("Classements DÉFINITIFS validés (toutes versions)", ["epreuve", "version", "correction (oui/non)", "rang", "ex_aequo (oui/non)", "numero_candidat", "score", "valide_le (UTC)"]),
 }
 
@@ -211,6 +216,11 @@ def exporter_donnees(concours, auteur=None):
         "tirages.csv": [(t.cree_le.astimezone(fuseau_utc.utc).isoformat(), t.prestation.participation.numero_candidat,
                          t.prestation.epreuve.nom, t.serie.libelle, t.rang, t.terminal, t.statut, t.motif_annulation) for t in tirages],
         "notes.csv": notes,
+        "incidents.csv": [
+            (i.survenu_le.astimezone(fuseau_utc.utc).isoformat(), i.get_type_display(), i.get_gravite_display(), i.session.nom if i.session else "",
+             i.description, i.resolu_le.astimezone(fuseau_utc.utc).isoformat() if i.resolu_le else "", i.resolution, str(i.declare_par))
+            for i in Incident.objects.filter(concours=concours).select_related("session", "declare_par").order_by("survenu_le")
+        ],
         "classements.csv": classements,
     }
     tampon = io.BytesIO()

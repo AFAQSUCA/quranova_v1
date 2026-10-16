@@ -55,9 +55,15 @@ du client et n'y figure donc pas :
 {% for t in historique %}<tr><td>{{ t.horodatage|date:"d/m/Y H:i:s" }}</td><td>{{ t.numero }}</td><td>{{ t.nom }}</td><td>{{ t.epreuve }}</td><td>{{ t.serie }}{% if t.rang > 1 %} (tirage {{ t.rang }}){% endif %}</td><td>{{ t.terminal }}</td><td>{{ t.statut }}</td></tr>{% empty %}<tr><td colspan="7">Aucun tirage.</td></tr>{% endfor %}</table>
 
 <h2>3. Incidents</h2>
+{% if incidents_declares %}
+<p>{{ bilan_incidents.total }} incident{{ bilan_incidents.total|pluralize }} déclaré{{ bilan_incidents.total|pluralize }}{% if bilan_incidents.bloquants %}, dont {{ bilan_incidents.bloquants }} bloquant{{ bilan_incidents.bloquants|pluralize }}{% endif %}{% if bilan_incidents.non_resolus %} ({{ bilan_incidents.non_resolus }} non résolu{{ bilan_incidents.non_resolus|pluralize }}){% endif %}.</p>
+<table><tr><th>Heure</th><th>Type</th><th>Gravité</th><th>Description</th><th>Résolution</th><th class="droite">Durée</th></tr>
+{% for i in incidents_declares %}<tr><td>{{ i.survenu_le|date:"d/m/Y H:i" }}</td><td>{{ i.get_type_display }}</td><td>{{ i.get_gravite_display }}</td><td>{{ i.description }}</td><td>{% if i.resolu_le %}{{ i.resolution }}{% else %}<em>non résolu</em>{% endif %}</td><td class="droite">{% if i.duree %}{{ i.duree }}{% else %}—{% endif %}</td></tr>{% endfor %}</table>
+{% else %}<p>Aucun incident déclaré.</p>{% endif %}
+<h3>Tirages annulés</h3>
 {% if incidents %}<table><tr><th>Horodatage</th><th>N°</th><th>Série</th><th>Tirage annulé : motif et auteur</th></tr>
 {% for t in incidents %}<tr><td>{{ t.horodatage|date:"d/m/Y H:i:s" }}</td><td>{{ t.numero }}</td><td>{{ t.serie }}</td><td>{{ t.annulation }}</td></tr>{% endfor %}</table>
-{% else %}<p>Aucun incident enregistré (aucun tirage annulé).</p>{% endif %}
+{% else %}<p>Aucun tirage annulé.</p>{% endif %}
 
 <h2>4. Journal d'audit</h2>
 <p>{{ audit.entrees }} entrée(s) dans le journal de ce client. Vérification de l'intégrité de la chaîne d'empreintes :

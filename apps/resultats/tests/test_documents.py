@@ -159,7 +159,7 @@ def test_l_export_contient_un_fichier_par_entite_avec_des_en_tetes_documentes():
 
     fichiers = lire_zip(documents.exporter_donnees(epreuve.categorie.concours))
 
-    assert set(fichiers) == {"candidats.csv", "participations.csv", "prestations.csv", "tirages.csv", "notes.csv", "classements.csv", "LISEZMOI.txt"}
+    assert set(fichiers) == {"candidats.csv", "participations.csv", "prestations.csv", "tirages.csv", "notes.csv", "incidents.csv", "classements.csv", "LISEZMOI.txt"}
     for nom, (_, en_tetes) in documents.DOCUMENTATION.items():
         assert lignes_csv(fichiers[nom])[0] == en_tetes
         assert f"{nom} —" in fichiers["LISEZMOI.txt"]

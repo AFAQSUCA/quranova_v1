@@ -41,6 +41,7 @@ Un chronomètre, une personne qui note l'heure de chaque étape. Écart > 20 % s
 | REC-18 | Restaurer une sauvegarde sur une base vierge | Données cohérentes et exploitables | |
 
 ## 5. Bilan
+- Chaque anomalie ou panne du jour (provoquée ou non) est consignée dans **/admin/ → Incidents** (type, gravité, heure, description, puis résolution) : le procès-verbal et le bilan en sont tirés.
 - Durée d'installation réelle : ______ min ; anomalies bloquantes : ______ ; non bloquantes (à corriger avant la V1) : ______
 - Décision : ☐ prêt pour le concours pilote ☐ corrections puis nouvelle répétition
 - Signatures : opérateur ______ référent coranique ______ responsable client ______
