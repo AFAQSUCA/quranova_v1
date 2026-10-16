@@ -10,10 +10,12 @@ from django.template.response import TemplateResponse
 from apps.candidats.importation import importer_candidats
 from apps.commun.admin import ERREURS_METIER, AdminDuClient, InlineDuClient, appliquer_action, role_admin
 from django.db import transaction
-from apps.concours import services
+from apps.concours import polices, services
 from apps.concours.models import Categorie, Concours, CritereNotation, Epreuve, Session
+from apps.coran.models import Verset
 from django.urls import reverse
 from django.utils.html import format_html, format_html_join
+from django.utils.safestring import mark_safe
 
 from apps.prestations.services import ouvrir_epreuve
 from apps.resultats import services as services_resultats
@@ -65,10 +67,42 @@ class ConcoursAdmin(AdminDuClient):
 
     def get_readonly_fields(self, request, obj=None):
         # L'état et la validation ne changent que par les services (RM-27, RM-31, D14).
-        lecture = ["etat", "configuration_validee_par", "configuration_validee_le", "configuration_empreinte", "documents"]
+        lecture = ["etat", "configuration_validee_par", "configuration_validee_le", "configuration_empreinte", "documents", "apercu_police"]
         if obj is not None and obj.etat != Concours.Etat.BROUILLON:
             lecture.append("version_corpus")  # figée à l'ouverture (RM-27)
         return lecture
+
+    def get_fieldsets(self, request, obj=None):
+        """Les réglages d'affichage du texte arabe forment une section à part, avec un aperçu."""
+        champs_police = ("police_arabe", "police_arabe_fichier", "taille_texte_arabe", "apercu_police")
+        sections = []
+        for titre, options in super().get_fieldsets(request, obj):
+            reste = tuple(c for c in options["fields"] if c not in champs_police)
+            sections.append((titre, {**options, "fields": reste}))
+        sections.append(("Affichage du texte arabe (scène, jury, commande)", {
+            "fields": champs_police,
+            "description": "Réglage visuel seulement : le texte des versets reste exactement celui du corpus importé.",
+        }))
+        return sections
+
+    @admin.display(description="Aperçu")
+    def apercu_police(self, obj):
+        """Premier verset du corpus du concours, rendu avec les réglages ENREGISTRÉS (le texte vient du corpus, jamais saisi)."""
+        if obj is None or obj.pk is None:
+            return "Enregistrez le concours pour voir l'aperçu."
+        if not obj.version_corpus_id:
+            return "Choisissez d'abord la version du corpus : l'aperçu utilise son premier verset."
+        verset = Verset.objects.filter(sourate__version_id=obj.version_corpus_id).order_by("sourate__numero", "numero").first()
+        if verset is None:
+            return "Cette version du corpus ne contient aucun verset."
+        t = polices.typographie(obj)
+        # Le CSS ne contient que des constantes, un nombre borné et une adresse vérifiée (voir apps/concours/polices.py).
+        css_sur = mark_safe(polices.css(obj))  # nosec B703 B308
+        return format_html(
+            '<style>{}</style><p lang="ar" dir="rtl" style="font-family: var(--police-coran); font-size: {}px; line-height: 1.95; margin: 0;">{}</p>'
+            '<p class="help">Verset {}:{} — tel qu\'il sera affiché (taille de la scène à {} %).</p>',
+            css_sur, round(32 * t["echelle"]), verset.texte, verset.sourate.numero, verset.numero, round(t["echelle"] * 100),
+        )
 
     @admin.display(description="Documents à remettre")
     def documents(self, obj):

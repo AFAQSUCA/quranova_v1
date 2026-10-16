@@ -69,6 +69,7 @@ Essayez d'abord seul, en vous aidant des tests. Si vous manquez de temps, la sol
 | [37](37-livrables-d-exploitation.md) | Livrables d'exploitation et gestes du jour J (guide, fiches, modèles) | D (phase 4) |
 | [38](38-interface-d-administration.md) | Interface d'administration : sidebar, barre supérieure, charte vert et or, thème sombre | Habillage |
 | [39](39-ecrans-tirage-scene-jury-commande.md) | Design des écrans temps réel : tirage, scène, jury, commande | Habillage |
+| [40](40-police-du-texte-arabe.md) | Police du texte arabe réglable par concours | Affichage |
 
 ## Si vous êtes bloqué
 

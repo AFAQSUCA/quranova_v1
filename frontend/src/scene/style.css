@@ -14,7 +14,7 @@
 .scene .diapo[data-type="verset"]::before { content: ""; position: absolute; inset: 4.5vh 3.5vw; border: 2px solid rgba(230, 200, 92, .45); border-radius: 1.6vw; pointer-events: none; }
 .scene .diapo[data-type="verset"]::after { content: ""; position: absolute; inset: calc(4.5vh + .9vw) calc(3.5vw + .9vw); border: 1px solid rgba(230, 200, 92, .22); border-radius: 1vw; pointer-events: none; }
 /* Le texte arabe se lit de droite à gauche (dir="rtl") ; cela n'a rien à voir avec le sens du balayage. */
-.scene .verset { font-family: var(--police-coran); font-size: calc(6vw * var(--taille)); line-height: 1.95; margin: 0; max-width: 82vw; text-wrap: balance; }
+.scene .verset { font-family: var(--police-coran); font-size: calc(6vw * var(--taille) * var(--echelle-coran, 1)); line-height: 1.95; margin: 0; max-width: 82vw; text-wrap: balance; }
 .scene .reference { display: inline-block; margin-top: 2.5vh; padding: .25em 1.2em; border-radius: 999px; background: rgba(0, 0, 0, .28); color: var(--or-clair);
   font-size: calc(2.1vw * var(--taille)); font-weight: 600; letter-spacing: .04em; }
 .scene .enonce { font-size: calc(4vw * var(--taille)); line-height: 1.35; max-width: 82vw; font-weight: 500; }

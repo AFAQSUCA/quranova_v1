@@ -8,6 +8,7 @@
   <link rel="icon" href="{% static 'img/favicon.png' %}">
   <link rel="stylesheet" href="{% static 'css/charte.css' %}">
   <link rel="stylesheet" href="{% static 'frontend/frontend.css' %}">
+  {% include "_police_arabe.html" %}
 </head>
 <body{% if marque.couleur_principale %} style="--client-principal: {{ marque.couleur_principale }};{% if marque.couleur_secondaire %} --client-secondaire: {{ marque.couleur_secondaire }};{% endif %}"{% endif %}>
   {% include "_marque.html" %}

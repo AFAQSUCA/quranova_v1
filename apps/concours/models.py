@@ -1,10 +1,13 @@
 """Concours, catégories, épreuves, barème et sessions (§7.2, §8.2, §14.1)."""
 from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import F, Q
 
 from apps.commun.models import ModeleDuClient
 from apps.concours.exceptions import ConfigurationInvalideError
+from apps.concours.polices import TAILLE_DEFAUT, TAILLE_MAX, TAILLE_MIN, PoliceArabe, valider_fichier_police
 
 
 class Concours(ModeleDuClient):
@@ -55,6 +58,20 @@ class Concours(ModeleDuClient):
         default="",
         help_text="Empreinte SHA-256 de la configuration au moment de sa validation.",
     )
+    # Affichage du texte arabe (scène, jury, commande) : réglage VISUEL seulement, le verset n'est jamais modifié.
+    police_arabe = models.CharField(
+        "police du texte arabe", max_length=20, choices=PoliceArabe.choices, default=PoliceArabe.DEFAUT
+    )
+    police_arabe_fichier = models.FileField(
+        "fichier de police", upload_to="polices/", blank=True, validators=[valider_fichier_police],
+        help_text="Utilisé si la police choisie est « Fichier de police téléversé » (.woff2, .woff, .ttf ou .otf, 3 Mo au plus). "
+        "Vérifiez la licence de la police avant de l'utiliser.",
+    )
+    taille_texte_arabe = models.PositiveSmallIntegerField(
+        "taille du texte arabe (%)", default=TAILLE_DEFAUT,
+        validators=[MinValueValidator(TAILLE_MIN), MaxValueValidator(TAILLE_MAX)],
+        help_text="100 % = taille de référence de la scène. Entre 50 % et 200 %.",
+    )
 
     class Meta:
         verbose_name = "concours"
@@ -92,6 +109,11 @@ class Concours(ModeleDuClient):
                 name="concours_ouvert_exige_corpus_et_validation",
             ),
         ]
+
+    def clean(self):
+        super().clean()
+        if self.police_arabe == PoliceArabe.PERSONNALISEE and not self.police_arabe_fichier:
+            raise ValidationError({"police_arabe_fichier": "Téléversez le fichier de police, ou choisissez une police de la liste."})
 
     def __str__(self):
         return f"{self.nom} {self.edition}".strip()

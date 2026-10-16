@@ -266,7 +266,8 @@ def dupliquer_concours(source, *, auteur, nom, edition, date_debut, date_fin, mi
     with transaction.atomic():
         copie = Concours.objects.create(
             mission=mission, nom=nom, edition=edition, format=source.format, date_debut=date_debut, date_fin=date_fin,
-            version_corpus=version,
+            version_corpus=version, police_arabe=source.police_arabe, police_arabe_fichier=source.police_arabe_fichier,
+            taille_texte_arabe=source.taille_texte_arabe,  # l'affichage du texte arabe suit l'édition précédente
         )
         resultat = ResultatDuplication(concours=copie)
         correspondance_questions = {}
