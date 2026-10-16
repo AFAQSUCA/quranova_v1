@@ -21,7 +21,7 @@
 .scene .attente-texte { font-size: calc(4vw * var(--taille)); opacity: .85; }
 
 /* Veille : l'embleme et un seul message. */
-.scene .attente .embleme { width: 13vw; max-width: 220px; aspect-ratio: 1; object-fit: contain; background: #fff; border-radius: 22%; padding: 1.2vw; margin-bottom: 4vh; box-shadow: 0 0 0 .7vw rgba(214, 176, 58, .18); }
+.scene .attente .embleme { width: 13vw; max-width: 220px; aspect-ratio: 1; object-fit: contain; background: #fff; border-radius: 50%; padding: .3vw; margin-bottom: 4vh; box-shadow: 0 0 0 .7vw rgba(214, 176, 58, .18); }
 .scene .attente h1 { font-size: calc(3.6vw * var(--taille)); font-weight: 600; opacity: .92; }
 
 .scene .bandeau { position: fixed; top: 0; left: 0; right: 0; z-index: 5; margin: 0; padding: .6rem; text-align: center; background: var(--alerte-fond); color: var(--alerte); font-weight: 600; border-bottom: 3px solid var(--or); }

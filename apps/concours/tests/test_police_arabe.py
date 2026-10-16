@@ -231,3 +231,18 @@ def test_la_duplication_reprend_les_reglages_d_affichage():
         source, auteur=admin, nom="Copie", edition="2028", date_debut=date(2028, 1, 1), date_fin=date(2028, 1, 2),
     ).concours
     assert (copie.police_arabe, copie.taille_texte_arabe) == (PoliceArabe.NASKH, 140)
+
+
+@pytest.mark.django_db
+def test_l_apercu_est_instantane_piles_de_polices_et_script_fournis(client, administrateur):
+    version = creer_version()
+    creer_verset(creer_sourate(version, numero=1), numero=1, texte="texte-neutre-du-corpus")
+    concours = creer_concours(version_corpus=version)
+    page = client.get(reverse("admin:concours_concours_change", args=[concours.pk])).content.decode()
+    assert 'id="q-apercu-texte"' in page and "data-familles=" in page
+    assert "js/apercu-police.js" in page
+    assert "&quot;Noto Naskh Arabic&quot;" in page  # les piles viennent du serveur, jamais d'une saisie
+
+
+def test_les_piles_pour_l_apercu_couvrent_tous_les_choix():
+    assert set(polices.familles_pour_apercu()) == set(PoliceArabe.values)

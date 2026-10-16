@@ -23,7 +23,7 @@ body:has(.jury), body:has(.commande) { background: #f3f5f3; margin: 0; }
 
 /* Connexion par code */
 .jury .connexion { margin: 3rem auto 0; max-width: 26rem; display: grid; gap: .6rem; background: var(--carte); padding: 2rem; border-radius: 1.4rem; border-top: .4rem solid var(--or); box-shadow: var(--ombre); }
-.jury .connexion .embleme { width: 4rem; height: 4rem; object-fit: contain; border: 1px solid var(--bord); border-radius: 1rem; padding: .3rem; justify-self: start; }
+.jury .connexion .embleme { width: 5rem; height: 5rem; object-fit: contain; border: 1px solid var(--bord); border-radius: 50%; padding: .1rem; justify-self: start; }
 .jury .connexion input { font-size: 1.6rem; letter-spacing: .15em; text-align: center; text-transform: uppercase; }
 .jury .connexion button { margin-top: .4rem; background: var(--or); border-color: var(--or); color: var(--encre); font-size: 1.2rem; }
 

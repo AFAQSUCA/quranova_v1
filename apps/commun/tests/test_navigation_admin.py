@@ -128,3 +128,9 @@ def test_les_messages_sont_rendus_pour_devenir_des_toasts(client):
     html = reponse.content.decode()
     assert 'id="q-messages"' in html and 'class="success"' in html
     assert 'id="q-toasts"' in html
+
+
+@pytest.mark.django_db
+def test_le_logo_complet_est_utilise_et_non_l_embleme_rogne(client):
+    html = client.get(reverse("admin:login")).content.decode()
+    assert "quranova-logo.png" in html and "quranova-embleme.png" not in html

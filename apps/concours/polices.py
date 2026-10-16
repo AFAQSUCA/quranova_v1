@@ -97,3 +97,10 @@ def css(concours) -> str:
         )
     regles.append(f':root {{ --police-coran: {t["famille"]}; --echelle-coran: {t["echelle"]:.2f}; }}')
     return "\n".join(regles)
+
+
+def familles_pour_apercu() -> dict:
+    """Pile de polices de chaque choix, pour l'aperçu instantané de l'administration (constantes, jamais une saisie)."""
+    familles = {str(choix): pile for choix, pile in _FAMILLES.items()}
+    familles[str(PoliceArabe.PERSONNALISEE)] = f'"QuranovaArabe", {_SECOURS}'
+    return familles

@@ -1,4 +1,5 @@
 """Administration de la configuration d'un concours (§7.2, RM-27, RM-31)."""
+import json
 import os
 import tempfile
 
@@ -65,6 +66,9 @@ class ConcoursAdmin(AdminDuClient):
     search_fields = ("nom", "edition")
     actions = ["valider_la_configuration", "ouvrir", "demarrer", "dupliquer", "importer_les_candidats"]
 
+    class Media:
+        js = ("js/apercu-police.js",)  # aperçu instantané de la police du texte arabe
+
     def get_readonly_fields(self, request, obj=None):
         # L'état et la validation ne changent que par les services (RM-27, RM-31, D14).
         lecture = ["etat", "configuration_validee_par", "configuration_validee_le", "configuration_empreinte", "documents", "apercu_police"]
@@ -99,9 +103,12 @@ class ConcoursAdmin(AdminDuClient):
         # Le CSS ne contient que des constantes, un nombre borné et une adresse vérifiée (voir apps/concours/polices.py).
         css_sur = mark_safe(polices.css(obj))  # nosec B703 B308
         return format_html(
-            '<style>{}</style><p lang="ar" dir="rtl" style="font-family: var(--police-coran); font-size: {}px; line-height: 1.95; margin: 0;">{}</p>'
-            '<p class="help">Verset {}:{} — tel qu\'il sera affiché (taille de la scène à {} %).</p>',
-            css_sur, round(32 * t["echelle"]), verset.texte, verset.sourate.numero, verset.numero, round(t["echelle"] * 100),
+            '<style>{}</style><div id="q-apercu-police" data-familles="{}">'
+            '<p id="q-apercu-texte" lang="ar" dir="rtl" style="font-family: var(--police-coran); font-size: {}px; line-height: 1.95; margin: 0;">{}</p>'
+            '<p class="help">Verset {}:{} — aperçu instantané : il change dès que vous modifiez la police, la taille ou le fichier, '
+            'sans enregistrer (la scène est à {} % de sa taille de référence).</p></div>',
+            css_sur, json.dumps(polices.familles_pour_apercu()), round(32 * t["echelle"]), verset.texte,
+            verset.sourate.numero, verset.numero, round(t["echelle"] * 100),
         )
 
     @admin.display(description="Documents à remettre")

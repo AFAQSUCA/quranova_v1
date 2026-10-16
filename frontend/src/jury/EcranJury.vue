@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // Servi par Django (pas par Vite) : l'adresse est donnée en constante pour que le build ne tente pas de la résoudre.
-const EMBLEME = "/static/img/quranova-embleme.png";
+const EMBLEME = "/static/img/quranova-logo.png";
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
 import { usePresentationStore } from "../commun/store";

@@ -16,6 +16,7 @@ Permettre à l'administration de choisir, **concours par concours**, la police e
 | `apps/concours/polices.py` | Liste des polices (constantes), validation du fichier, production du CSS. |
 | `apps/concours/admin.py` | Section « Affichage du texte arabe » avec **aperçu** : le premier verset **du corpus du concours** (jamais un texte saisi). |
 | `apps/presentation/views.py`, `apps/jury/views.py` | Passent le CSS aux pages de scène, de commande et de jury. |
+| `static/js/apercu-police.js` | **Aperçu instantané** : au changement de police, de taille ou de fichier, le verset d'aperçu se met à jour sans enregistrer (la police téléversée est lue localement avec l'API `FontFace`). Les piles de polices viennent du serveur (`data-familles`). Le script est chargé dans l'en-tête de l'admin : il attend `DOMContentLoaded`. |
 | `templates/_police_arabe.html` | Insère `<style>` après la feuille de style des écrans. |
 | `frontend/src/scene/style.css` | `font-size: calc(6vw × --taille × --echelle-coran)`. Les polices passent par `--police-coran` (déjà utilisée). |
 | `apps/concours/tests/test_police_arabe.py` | 22 tests. |
