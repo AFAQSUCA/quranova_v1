@@ -20,7 +20,7 @@ Avant cela, tout ce que le CdC place en **V1 / « avant le pilote »** et qui n'
 - C3. *(optionnel)* **Correction d'un classement par l'administration** au lieu de la seule commande `corriger_classement`.
 - C4. **Import Excel** : décision prise — **CSV seulement en V1** (écart au CdC §5.1 à acter), avec le modèle CSV fourni au client (D). Pas de dépendance `openpyxl`.
 
-## D. Livrables « avant le concours pilote » (L-03, L-04, L-05)
+## D. ✅ Livrables « avant le concours pilote » (L-03, L-04, L-05)
 | Livrable | Ce que je prépare | Ce qui reste à toi / au juridique |
 |---|---|---|
 | L-03 Guide de l'opérateur | procédure d'une mission (§22.1), listes J-1 et jour J, procédures d'incident (§13.6) | relecture sur le terrain |
@@ -51,3 +51,8 @@ Chaque étape : tests d'abord, petite étape, chapitre du tutoriel, une question
 
 ## Décisions encore attendues
 1. **2FA** : valider `django-otp` (+ `qrcode`) ?  2. **Excel** : ajouter `openpyxl` ou acter « CSV seulement » ?  3. **C3** : dans le pilote ou après ?  4. Ordre : commencer par A1 ?
+
+## Ajouts décidés en cours de route (lacunes trouvées en écrivant le guide de l'opérateur)
+Le guide a montré des gestes indispensables au jour J qui n'avaient **pas d'écran** (services seuls) ; ils ont été ajoutés à l'administration, avec tests :
+modèle CSV d'import (téléchargeable) et **import par téléversement** (simulation par défaut) · **admission en masse** des candidats · **remise des codes de jurés** (affichés une fois) · **clôture de prestation** ·
+**annulation de tirage** (motif) · **traitement des corrections de notes** par le responsable du client.

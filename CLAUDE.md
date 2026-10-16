@@ -9,10 +9,9 @@ fait tourner l'application sur un Wi-Fi dédié, sans Internet ; tablettes de ti
 - Cahier des charges : `docs/cdc/00-index.md` (une section par fichier). **Avant toute tâche, lis la ou les sections concernées.**
 - Planning et itérations : `docs/cdc/24-planning-et-phasage.md` ; prompts de travail : `docs/prompts-iterations.md`.
 - Tutoriel pas à pas : `docs/tutoriel/` (un chapitre par étape terminée). **Claude : à la fin de chaque étape, ajoute ou met à jour le chapitre correspondant** (fichiers complets, commandes PowerShell, résultat attendu, solutions des `TODO(human)` en blocs repliés).
-- Phase en cours : **Phase 3 — Autorecette et empaquetage du serveur de salle : développement terminé** (tableau REC : `docs/recette/autorecette.md` ; Docker Compose ; réglages de production ;
-  charge : `docs/recette/charge.md` ; accessibilité : `docs/recette/accessibilite.md`). **Reste à faire hors code** : mesurer REC-19/20 sur le portable de salle, jouer la répétition générale
-  (`docs/recette/repetition-generale.md`, REC-40/41/21/36), clôturer le jalon J0 (corpus validé par le référent coranique),
-  puis phase 4 (concours pilote). Mettre à jour cette ligne à chaque changement de phase.
+- Phase en cours : **Phase 4 — Concours pilote : préparation terminée côté code** (plan : `docs/recette/plan-phase-4.md` ; comptes A1–A3, corpus B, incidents C1, fiches de secours C2, livrables D : `docs/exploitation/`, `docs/modeles/`).
+  **Reste à faire hors code** : désigner le référent coranique et **valider le corpus** (J0 : `docs/recette/validation-du-corpus.md`), faire relire par un juriste le consentement, le contrat et le dossier ARTCI (`docs/modeles/`),
+  mesurer REC-19/20 sur le portable de salle, jouer la **répétition générale** (`docs/recette/repetition-generale.md`), geler le code (`v1.0-pilote`), puis conduire le pilote (11–22 janvier 2027) et écrire le bilan L-09. Mettre à jour cette ligne à chaque changement de phase.
   Les règles `TODO(human)` (corpus, RM-21 et suffisance du lot, segmentation, transitions, calcul des résultats) ont été **écrites par Claude à la demande expresse du développeur** :
   à relire et à expliquer avec tes mots dans `docs/journal-apprentissage.md`.
 

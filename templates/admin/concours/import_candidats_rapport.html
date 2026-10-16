@@ -1,0 +1,13 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<h1>Rapport d'import — {{ concours }}</h1>
+{% if rapport.ok %}
+<p style="font-weight:bold;color:#0a4c30">{{ rapport.texte }}</p>
+<table><thead><tr><th>Ligne</th><th>N°</th><th>Candidat</th><th>Catégorie</th></tr></thead>
+<tbody>{% for i in rapport.inscriptions %}<tr><td>{{ i.ligne }}</td><td>{{ i.numero_candidat }}</td><td>{{ i.nom_complet }}</td><td>{{ i.categorie }}</td></tr>{% endfor %}</tbody></table>
+{% else %}
+<p style="font-weight:bold;color:#a12">Import refusé : rien n'a été enregistré. Corrigez le fichier puis recommencez.</p>
+<ul>{% for e in rapport.erreurs %}<li>{% if e.ligne %}Ligne {{ e.ligne }} : {% endif %}{{ e.message }}</li>{% endfor %}</ul>
+{% endif %}
+<p><a href="{% url 'admin:concours_concours_changelist' %}" class="button">Retour</a></p>
+{% endblock %}

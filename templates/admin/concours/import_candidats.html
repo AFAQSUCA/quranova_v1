@@ -1,0 +1,16 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<h1>Importer des candidats — {{ concours }}</h1>
+<p>Fichier CSV au format du <a href="{% url 'candidats:modele_import' concours.pk %}">modèle d'import</a> (colonnes : nom, prenom, date_naissance, sexe, ville, structure, categorie).
+Les catégories doivent <strong>déjà exister</strong> dans le concours. L'import est <strong>tout ou rien</strong> : à la moindre erreur, rien n'est enregistré et le rapport les liste toutes.</p>
+<p>Conseil : <strong>simulez d'abord</strong>, corrigez, puis importez pour de bon.</p>
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  <input type="hidden" name="action" value="importer_les_candidats">
+  <input type="hidden" name="_selected_action" value="{{ concours.pk }}">
+  <input type="hidden" name="appliquer" value="1">
+  {{ form.as_p }}
+  <input type="submit" class="default" value="Lancer">
+  <a href="{% url 'admin:concours_concours_changelist' %}" class="button">Annuler</a>
+</form>
+{% endblock %}

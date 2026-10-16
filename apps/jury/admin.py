@@ -3,10 +3,10 @@ from django import forms
 from django.contrib import admin, messages
 from django.template.response import TemplateResponse
 
-from apps.commun.admin import ERREURS_METIER, AdminDuClient, ConsultationSeule, InlineDuClient, organisations_visibles
+from apps.commun.admin import ERREURS_METIER, AdminDuClient, ConsultationSeule, InlineDuClient, appliquer_action, organisations_visibles
 from apps.concours.models import Session
-from apps.jury import services
-from apps.jury.models import AffectationJury, CodeAccesJure, Jure
+from apps.jury import evaluations, services
+from apps.jury.models import AffectationJury, CodeAccesJure, CorrectionNote, Jure
 
 
 class RemiseCodesForm(forms.Form):
@@ -58,3 +58,20 @@ class CodeAccesJureAdmin(ConsultationSeule):
     list_display = ("jure", "session", "valide_du", "valide_jusqu_au", "revoque_le", "derniere_utilisation")
     list_filter = ("session",)
     exclude = ("empreinte",)
+
+
+@admin.register(CorrectionNote)
+class CorrectionNoteAdmin(ConsultationSeule):
+    """Demandes de correction d'une note validée (REC-17) : le responsable du client approuve ou refuse ; l'opérateur et le juré n'y touchent pas (RM-18)."""
+
+    list_display = ("evaluation", "critere", "ancienne_valeur", "nouvelle_valeur", "motif", "statut", "demandee_le", "traitee_par")
+    list_filter = ("statut",)
+    actions = ["approuver", "refuser"]
+
+    @admin.action(description="Approuver la correction (responsable du client)")
+    def approuver(self, request, queryset):
+        appliquer_action(request, queryset, lambda c: evaluations.traiter_correction(c, request.user, True), "correction approuvée, la note est modifiée")
+
+    @admin.action(description="Refuser la correction (responsable du client)")
+    def refuser(self, request, queryset):
+        appliquer_action(request, queryset, lambda c: evaluations.traiter_correction(c, request.user, False), "correction refusée, la note est inchangée")

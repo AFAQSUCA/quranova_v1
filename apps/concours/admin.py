@@ -1,9 +1,13 @@
 """Administration de la configuration d'un concours (§7.2, RM-27, RM-31)."""
+import os
+import tempfile
+
 from django import forms
 from django.contrib import admin, messages
 from django.http import HttpResponseRedirect
 from django.template.response import TemplateResponse
 
+from apps.candidats.importation import importer_candidats
 from apps.commun.admin import ERREURS_METIER, AdminDuClient, InlineDuClient, appliquer_action, role_admin
 from django.db import transaction
 from apps.concours import services
@@ -16,6 +20,24 @@ from apps.resultats import services as services_resultats
 from apps.resultats import validation
 from apps.utilisateurs.models import Utilisateur
 from apps.utilisateurs.services import missions_accessibles
+
+
+TAILLE_MAXIMALE_IMPORT = 5 * 1024 * 1024  # 5 Mo : très au-dessus d'un fichier de 500 candidats
+
+
+class ImportCandidatsForm(forms.Form):
+    """Téléversement d'un fichier CSV de candidats (§7.3) ; la simulation est cochée par défaut."""
+
+    fichier = forms.FileField(label="Fichier CSV des candidats", help_text="Séparateur « ; », UTF-8 ou Windows-1252. Utilisez le modèle fourni au client.")
+    simuler = forms.BooleanField(required=False, initial=True, label="Simuler seulement (contrôler le fichier sans rien enregistrer)")
+
+    def clean_fichier(self):
+        fichier = self.cleaned_data["fichier"]
+        if fichier.size == 0:
+            raise forms.ValidationError("Le fichier est vide.")
+        if fichier.size > TAILLE_MAXIMALE_IMPORT:
+            raise forms.ValidationError("Le fichier est trop volumineux (5 Mo au plus).")
+        return fichier
 
 
 class DuplicationForm(forms.Form):
@@ -39,7 +61,7 @@ class ConcoursAdmin(AdminDuClient):
     list_display = ("nom", "edition", "mission", "etat", "version_corpus", "configuration_validee_le")
     list_filter = ("etat", "organisation")
     search_fields = ("nom", "edition")
-    actions = ["valider_la_configuration", "ouvrir", "demarrer", "dupliquer"]
+    actions = ["valider_la_configuration", "ouvrir", "demarrer", "dupliquer", "importer_les_candidats"]
 
     def get_readonly_fields(self, request, obj=None):
         # L'état et la validation ne changent que par les services (RM-27, RM-31, D14).
@@ -67,6 +89,29 @@ class ConcoursAdmin(AdminDuClient):
             return {"valider_la_configuration": actions["valider_la_configuration"]}
         actions.pop("valider_la_configuration", None)  # le client valide, le prestataire exécute
         return actions
+
+    @admin.action(description="Importer des candidats (fichier CSV)")
+    def importer_les_candidats(self, request, queryset):
+        if queryset.count() != 1:
+            self.message_user(request, "Sélectionnez un seul concours.", messages.ERROR)
+            return None
+        concours = queryset.get()
+        if role_admin(request.user) not in (Utilisateur.Role.ADMINISTRATEUR, Utilisateur.Role.OPERATEUR):
+            self.message_user(request, "Seul le personnel du prestataire importe des candidats.", messages.ERROR)
+            return None
+        soumis = request.POST.get("appliquer")
+        formulaire = ImportCandidatsForm(request.POST if soumis else None, request.FILES if soumis else None)
+        contexte = {**self.admin_site.each_context(request), "title": "Importer des candidats", "concours": concours, "form": formulaire, "opts": self.model._meta}
+        if soumis and formulaire.is_valid():
+            with tempfile.NamedTemporaryFile(suffix=".csv", delete=False) as temporaire:
+                for morceau in formulaire.cleaned_data["fichier"].chunks():
+                    temporaire.write(morceau)
+            try:
+                rapport = importer_candidats(concours, temporaire.name, simuler=formulaire.cleaned_data["simuler"], auteur=request.user)
+            finally:
+                os.unlink(temporaire.name)
+            return TemplateResponse(request, "admin/concours/import_candidats_rapport.html", {**contexte, "rapport": rapport})
+        return TemplateResponse(request, "admin/concours/import_candidats.html", contexte)
 
     @admin.action(description="Dupliquer vers une nouvelle édition")
     def dupliquer(self, request, queryset):

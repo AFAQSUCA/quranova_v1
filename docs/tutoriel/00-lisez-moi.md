@@ -66,6 +66,7 @@ Essayez d'abord seul, en vous aidant des tests. Si vous manquez de temps, la sol
 | [34](34-validation-du-corpus.md) | Validation du corpus par le référent (J0, L-07) | B (phase 4) |
 | [35](35-journal-des-incidents.md) | Journal des incidents en salle (§13.6) | C1 (phase 4) |
 | [36](36-fiches-de-secours.md) | Fiches de notation de secours (§13.6) | C2 (phase 4) |
+| [37](37-livrables-d-exploitation.md) | Livrables d'exploitation et gestes du jour J (guide, fiches, modèles) | D (phase 4) |
 
 ## Si vous êtes bloqué
 
